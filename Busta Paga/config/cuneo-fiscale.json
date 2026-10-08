@@ -1,0 +1,17 @@
+{
+  "anno": 2026,
+  "fonte": "L. 207/2024 (Legge di Bilancio 2025), art. 1 c. 4-9",
+  "sommaEsente": {
+    "fasce": [
+      { "da": 0, "a": 8500, "percentuale": 0.071 },
+      { "da": 8500, "a": 15000, "percentuale": 0.053 },
+      { "da": 15000, "a": 20000, "percentuale": 0.048 }
+    ]
+  },
+  "ulterioreDetrazione": {
+    "fasce": [
+      { "da": 20000, "a": 32000, "base": 1000, "variabile": 0 },
+      { "da": 32000, "a": 40000, "base": 0, "variabile": 1000 }
+    ]
+  }
+}
