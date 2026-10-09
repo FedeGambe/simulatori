@@ -1,10 +1,10 @@
 // Prepara per il browser le funzioni di utils/ e le config: node scripts/build-dashboard.js
-// Genera docs/busta-paga/script.js (calcoli) e docs/busta-paga/comuni.js (addizionali comunali).
+// Genera docs/script.js (calcoli) e docs/comuni.js (addizionali comunali).
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const radice = join(import.meta.dirname, "..");
-const uscita = join(radice, "docs/busta-paga");
+const uscita = join(radice, "docs");
 const leggi = (p) => readFileSync(join(radice, p), "utf-8").replace(/\r\n/g, "\n");
 const json = (nome) => JSON.stringify(JSON.parse(leggi(`config/${nome}`)));
 
