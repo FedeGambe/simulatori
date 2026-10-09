@@ -1,0 +1,8 @@
+{
+  "anno": 2026,
+  "fonte": "Imposta sostitutiva 26% sugli interessi; bollo conto corrente 34,20 € fisso oltre 5.000 €; bollo conto deposito 0,2%",
+  "impostaRendimento": 26,
+  "impostaGiacenza": 34.2,
+  "limiteGiacenza": 5000,
+  "impostaBollo": 0.2
+}
