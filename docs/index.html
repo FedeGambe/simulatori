@@ -84,9 +84,9 @@ footer a:hover{color:var(--acc)}
 /* Cover a due livelli (docs/img/cover_sfondo.svg come fondo della card, cover_soggetto.svg come soggetto).
    Desktop: testi in alto, il soggetto occupa la metà bassa della card. */
 @media(min-width:701px){
-  .card .soggetto{display:block;position:absolute;left:0;right:0;top:50%;bottom:0;width:100%;height:50%;box-sizing:border-box;padding:0 20px;
-    object-fit:contain;object-position:50% 100%;transition:transform .6s}
-  .card .soggetto.largo{object-fit:cover;padding:0}
+  .card .soggetto{display:block;position:absolute;left:0;right:0;top:50%;bottom:0;width:100%;height:50%;box-sizing:border-box;padding:0 20px 64px;
+    object-fit:contain;object-position:50% 0;transition:transform .6s}  /* parte da metà card, con margine in basso (sopra i tag) */
+  .card .soggetto.largo{object-fit:cover;object-position:50% 100%;padding:0}
   .card:hover .soggetto{transform:scale(1.04)}
 }
 /* Telefono: card orizzontali; titolo, poi il soggetto, con descrizione e tag sopra la sua parte bassa su una sfumatura;
@@ -99,8 +99,8 @@ footer a:hover{color:var(--acc)}
   .card .body{display:contents}
   .card .meta{grid-row:1;position:relative;z-index:1;padding:16px 16px 0}
   .card h2{grid-row:2;position:relative;z-index:1;padding:8px 16px 0;font-size:1.35rem}
-  .card .soggetto{grid-row:3;display:block;width:100%;height:150px;margin-top:12px;object-fit:contain;object-position:50% 100%}
-  .card .soggetto.largo{object-fit:cover}
+  .card .soggetto{grid-row:3;display:block;width:100%;height:160px;box-sizing:border-box;margin-top:12px;padding-bottom:18px;object-fit:contain;object-position:50% 0}
+  .card .soggetto.largo{object-fit:cover;object-position:50% 100%;padding-bottom:0}
   .card p{grid-row:4;position:relative;z-index:1;margin-top:-56px;padding:40px 16px 0;font-size:.88rem;line-height:1.45;
     background:linear-gradient(transparent,var(--velo) 40px);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .card:not(:has(.soggetto)) p{margin-top:0;padding-top:12px;background:none}
