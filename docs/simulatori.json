@@ -8,5 +8,14 @@
         "url": "cd-cc/cd-cc.html",
         "img": "cd-cc/img/cover_verticale.svg",
         "chiara": true
+    },
+    {
+        "id": "busta-paga",
+        "t": "Busta paga: dalla RAL al netto",
+        "d": "Calcola netto annuo e mensile da RAL: contributi INPS, IRPEF, detrazioni, cuneo fiscale L. 207/2024 e addizionali del tuo comune.",
+        "tags": ["Lavoro", "Imposte"],
+        "y": 2026,
+        "url": "busta-paga/busta-paga.html",
+        "img": "busta-paga/img/cover_verticale.svg"
     }
 ]
