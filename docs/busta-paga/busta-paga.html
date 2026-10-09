@@ -217,6 +217,12 @@ footer .firma{margin-top:14px}
 .banner .soggetto{position:absolute; z-index:0; top:calc(var(--barra) + 10px); bottom:18px; right:max(16px, calc(50vw - 600px)); left:auto;
   width:min(46%, 560px); height:calc(100% - var(--barra) - 28px); max-width:none; opacity:1; -webkit-mask-image:none; mask-image:none; object-fit:contain; object-position:100% 0}
 .banner .dentro{position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
+.banner picture{display:contents}
+/* strisce a tutta larghezza (classe "largo"): su desktop il soggetto è ruotato di 90° (banner_soggetto_ruotato.svg, base a destra)
+   e occupa tutta l'altezza del banner, allineato al bordo destro; su telefono resta orizzontale sotto il titolo */
+@media (min-width:701px){
+  .banner .soggetto.largo{top:0; bottom:0; right:0; width:auto; height:100%; object-fit:contain; object-position:100% 50%}
+}
 .banner h1{margin:0; padding:0; border:0; color:var(--banner-testo); font-size:clamp(1.9rem,4.6vw,3.2rem); font-weight:800; line-height:1.05; max-width:16ch; text-wrap:balance}
 .banner p{margin:10px 0 0; color:var(--banner-testo); font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase; max-width:52ch}
 @media (max-width:700px){
@@ -227,6 +233,7 @@ footer .firma{margin-top:14px}
     padding:0 16px 18px; object-position:50% 0}
   .banner p{grid-row:3; grid-column:1; position:relative; z-index:2; margin:-48px 0 0; padding:34px 16px 18px; max-width:none;
     background:linear-gradient(to bottom, transparent, color-mix(in srgb, var(--banner-fondo) 86%, transparent) 34px)}
+  .banner .soggetto.largo{object-fit:cover; object-position:50% 100%; padding:0}  /* strisce a tutta larghezza */
   .banner::after{display:none}
 }
 /* /BANNER A DUE LIVELLI */
