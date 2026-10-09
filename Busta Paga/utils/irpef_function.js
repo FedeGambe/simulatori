@@ -71,18 +71,51 @@ export function calcolaUlterioreDetrazione(reddito, cuneo = irpef.cuneoFiscale) 
     return fascia ? importoFascia(reddito, fascia) : 0;
 }
 
+// art. 12 TUIR. familiari: { coniuge, figli21, figliDisabili21, altri, quota }
+// quota: parte spettante a chi calcola (1 = tutta, 0.5 = ripartita al 50% tra i genitori)
+export function calcolaDetrazioniFamiliari(reddito, { coniuge = false, figli21 = 0, figliDisabili21 = 0, altri = 0, quota = 1 } = {}, config = irpef.detrazioniFamiliari) {
+    let totale = 0;
+
+    if (coniuge) {
+        const fascia = trovaFascia(reddito, config.coniuge.fasce);
+        const { oltre } = config.coniuge;
+        if (fascia?.fisso !== undefined) {
+            totale += fascia.fisso;
+        } else if (fascia) {
+            totale += fascia.base + fascia.variabile * reddito / fascia.divisore;
+        } else if (reddito > oltre.da && reddito <= oltre.a) {
+            totale += oltre.importo * (oltre.a - reddito) / (oltre.a - oltre.da);
+        }
+    }
+
+    const figli = figli21 + figliDisabili21;
+    if (figli > 0) {
+        const f = config.figlio21;
+        const massimo = f.redditoMax + f.incrementoPerFiglio * (figli - 1);
+        const fattore = Math.max(0, (massimo - reddito) / massimo);
+        totale += (figli21 * f.importo + figliDisabili21 * f.importoDisabile) * fattore;
+    }
+
+    const a = config.altriFamiliari;
+    totale += altri * a.importo * Math.max(0, (a.redditoMax - reddito) / a.redditoMax);
+
+    return totale * quota;
+}
+
 export function calcolaIrpef(reddito, opzioni = {}) {
     const lorda = calcolaIrpefLorda(reddito);
     const detrazioni = calcolaDetrazioni(reddito, opzioni);
     const ulterioreDetrazione = calcolaUlterioreDetrazione(reddito);
+    const detrazioniFamiliari = calcolaDetrazioniFamiliari(reddito, opzioni.familiari);
     // le detrazioni non possono portare l'imposta sotto zero
-    const netta = Math.max(0, lorda - detrazioni - ulterioreDetrazione);
+    const netta = Math.max(0, lorda - detrazioni - ulterioreDetrazione - detrazioniFamiliari);
 
     return {
         reddito,
         lorda: arrotonda(lorda),
         detrazioni: arrotonda(detrazioni),
         ulterioreDetrazione: arrotonda(ulterioreDetrazione),
+        detrazioniFamiliari: arrotonda(detrazioniFamiliari),
         netta: arrotonda(netta),
         sommaEsente: arrotonda(calcolaSommaEsente(reddito)),
         aliquotaMedia: reddito > 0 ? arrotonda((netta / reddito) * 100) : 0,

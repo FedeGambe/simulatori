@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulatore CD vs CC</title>
+
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<meta name="description" content="Rendimento netto di conto deposito e conto corrente, con imposta sugli interessi e bollo.">
+<style>
+/* Identità del sito FedeGambe: teal = effetto positivo/principale, arancio = negativo/accento. Variabili --* , niente colori fissi. */
+:root{
+  --barra:60px; --g1:#f6efd9; --g2:#f0dd9a; --g3:#efe6cc; --bg:#f6efd9; --surface:#fbf6e6; --surface-2:#efe5c6; --ink:#14110a; --ink-2:#4a4332; --ink-3:#6e6650; --line:#e0d4ae; --track:#eadfb8;
+  --teal:#c98a12; --teal-ink:#7a5200; --teal-soft:#f6e7b3; --rosso:#a8301a; --rosso-ink:#a8301a; --rosso-soft:#f3d9d0; --sabbia:#d9c98f;
+  --scelto-bg:#14110a; --scelto-ink:#f6efd9; --giallo:#e8b923; --arancio:#c98a12; --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#dcebd5;
+  --ombra:0 1px 2px rgba(20,17,10,.04), 0 8px 24px -12px rgba(20,17,10,.14);
+  --f-display:Georgia,"Times New Roman",serif;
+  --f-body:"Inter",system-ui,sans-serif;
+  --f-data:ui-monospace,Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --g1:#2a2210; --g2:#1c160a; --g3:#0f0c06; --bg:#14110a; --surface:#1d1910; --surface-2:#292317; --ink:#f6efd9; --ink-2:#cfc6a8; --ink-3:#a39b80; --line:#383020; --track:#332c1c;
+  --teal:#e8b923; --teal-ink:#f0c94a; --teal-soft:#2e2610; --rosso:#d9533a; --rosso-ink:#ee7a62; --rosso-soft:#3a1f18; --sabbia:#6b5f3a;
+  --scelto-bg:#e8b923; --scelto-ink:#14110a; --ombra:none; --arancio:#e8a02a; --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#1d2b1c;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{margin:0; color:var(--ink); font:16px/1.55 var(--f-body); min-height:100vh; -webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 600px at 10% 0%,var(--g1),transparent 70%),radial-gradient(900px 700px at 100% 100%,var(--g2),transparent 70%),var(--g3); background-attachment:fixed}
+body::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pagina{max-width:1200px; margin:0 auto; padding:24px 16px 96px}
+h1,h2,legend{font-family:var(--f-display); letter-spacing:-.03em}
+h1{font-size:clamp(2rem,5vw,3.4rem); font-weight:800; line-height:1.05; margin:10px 0 0; padding-bottom:14px; border-bottom:3px solid var(--ink); text-wrap:balance}
+h1 em{color:var(--rosso-ink); font-style:italic}
+h2{font-size:1.05rem; font-weight:800; margin:0; line-height:1.2}
+.num{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+a{color:var(--teal-ink)}
+:focus-visible{outline:2px solid var(--teal); outline-offset:2px}
+button{font:inherit; color:inherit; cursor:pointer}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+
+/* Testata */
+.barra{position:fixed; z-index:20; inset:0 0 auto; height:calc(var(--barra) + env(safe-area-inset-top,0px)); padding:env(safe-area-inset-top,0px) 20px 0;
+  display:flex; align-items:center; justify-content:flex-end; background:transparent; gap:16px; --colore-parte:var(--arancio); transition:background .35s, box-shadow .35s}
+.barra.compatta{background:color-mix(in srgb, var(--bg) 60%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 1px 0 var(--line)}
+.dove{flex:1; min-width:0; opacity:0; transform:translateY(-6px); transition:opacity .25s, transform .25s; pointer-events:none}
+.barra.compatta .dove{opacity:1; transform:none; pointer-events:auto}
+.dove .progetto{display:block; width:max-content; max-width:100%; font:600 .68rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.dove .progetto:hover{color:var(--ink)}
+.posizione{font:700 1rem/1.3 var(--f-display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; position:relative; padding-left:16px; min-height:1.3em}
+.posizione::before{content:""; position:absolute; left:0; top:.4em; width:.55em; height:.55em; border-radius:50%; background:var(--colore-parte)}
+.azioni{display:flex; gap:8px; flex:none; margin-left:auto}
+.avanzamento{position:absolute; left:0; bottom:0; width:100%; height:3px; background:var(--colore-parte);
+  transform-origin:left; transform:scaleX(var(--avanzamento,0)); opacity:0; transition:opacity .25s}
+.barra.compatta .avanzamento{opacity:1}
+@media (prefers-reduced-motion: reduce){ .barra,.dove,.avanzamento{transition:none} }
+.barra:not(.compatta) .bottone-barra{color:#14110a; border-color:#14110a}
+.barra:not(.compatta) .bottone-barra:hover{background:#14110a; color:#d2a720}
+.barra:not(.compatta) .bottone-barra svg path{fill:#14110a}
+.bottone-barra{font:600 .8rem/1 var(--f-data); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:none; border:1px solid var(--ink); border-radius:999px;
+  padding:8px 12px; cursor:pointer; text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
+.bottone-barra:hover{background:var(--ink); color:var(--bg)}
+@media (max-width:560px){ .solo-largo{display:none} }
+.firma{display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font:600 .9rem/1 var(--f-data); letter-spacing:.06em}
+.firma:hover{color:var(--arancio)}
+.intro{color:var(--ink-2); max-width:none; margin:12px 0 14px; font-size:1.02rem}
+.dati-modello{display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none}
+.dati-modello li{font-size:.82rem; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:4px 12px}
+.dati-modello b{font-family:var(--f-data); font-weight:600; color:var(--ink)}
+
+/* Barra degli esempi */
+.esempi{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:26px 0 18px}
+.esempi .titolo{font-size:.88rem; font-weight:600; color:var(--ink-2); margin-right:4px}
+.pulsante{min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:var(--surface);
+  font-size:.9rem; font-weight:600; display:inline-flex; align-items:center; gap:8px; transition:border-color .15s, background .15s}
+.pulsante:hover{border-color:var(--ink-3)}
+.pulsante .punto{width:8px; height:8px; border-radius:50%}
+.pulsante.leggero{border-color:transparent; background:transparent; color:var(--ink-2)}
+.pulsante.leggero:hover{background:var(--surface-2)}
+.esempi .spinta{margin-left:auto; display:flex; gap:4px}
+@media (max-width:640px){ .esempi .spinta{margin-left:0} }
+
+/* Griglia */
+.griglia{display:grid; grid-template-columns:minmax(0,1fr); gap:20px; align-items:start}
+@media (min-width:980px){
+  .griglia{grid-template-columns:minmax(0,1fr) minmax(0,480px)}
+  .esiti{position:sticky; top:16px; max-height:calc(100vh - 32px); overflow:auto; scrollbar-width:thin}
+}
+.scheda{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px; box-shadow:var(--ombra)}
+
+/* Form */
+form{display:grid; gap:20px}
+fieldset{border:0; margin:0; padding:0; min-width:0}
+.sezione > legend{display:flex; align-items:center; gap:10px; font-size:1.1rem; font-weight:800; padding:0; margin-bottom:18px; float:left; width:100%}
+.sezione > legend + *{clear:both}
+.sezione > legend .passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%;
+  background:var(--rosso-soft); color:var(--rosso-ink); font:700 .82rem var(--f-data)}
+.campi{display:grid; grid-template-columns:minmax(0,1fr); gap:20px 22px}
+@media (min-width:600px){ .campi{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.largo{grid-column:1/-1}
+.etichetta,.campo > legend{display:block; font:600 .88rem var(--f-body); letter-spacing:0; color:var(--ink-2); margin:0 0 7px; padding:0}
+.aiuto{font-size:.8rem; color:var(--ink-3); margin:6px 0 0; min-height:1.2em}
+.aiuto:empty{display:none}
+.errore-campo{font-size:.8rem; color:var(--rosso-ink); font-weight:600; margin:6px 0 0}
+
+/* Controlli segmentati (radio) */
+.segmenti{display:flex; flex-wrap:wrap; gap:6px}
+.segmenti.colonne{display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
+.segmento{position:relative; flex:1 1 auto}
+.segmento input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer}
+.segmento span{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:44px; height:100%; padding:6px 12px;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg); font-size:.9rem; line-height:1.2;
+  transition:background .15s, border-color .15s, color .15s}
+.segmento small{font:500 .7rem var(--f-data); color:var(--ink-3); margin-top:2px}
+.segmento:hover span{border-color:var(--ink-3)}
+.segmento input:checked + span{background:var(--scelto-bg); border-color:var(--scelto-bg); color:var(--scelto-ink); font-weight:600}
+.segmento input:checked + span small{color:inherit; opacity:.8}
+.segmento input:focus-visible + span{outline:2px solid var(--teal); outline-offset:2px}
+
+select,input[type=number]{width:100%; font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line);
+  border-radius:8px; padding:0 12px; min-height:44px}
+select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size:5px 5px; background-repeat:no-repeat; padding-right:36px}
+input[type=number]{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+input[aria-invalid=true]{border-color:var(--rosso); background:var(--rosso-soft)}
+.con-unita{position:relative}
+.con-unita input{padding-right:76px}
+.con-unita .unita{position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:.82rem; color:var(--ink-3); pointer-events:none}
+.contatore{display:grid; grid-template-columns:44px minmax(0,1fr) 44px; gap:6px}
+.contatore input{text-align:center; padding:0 4px; -moz-appearance:textfield}
+.contatore input::-webkit-inner-spin-button,.contatore input::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
+.contatore button{border:1px solid var(--line); background:var(--surface-2); border-radius:8px; font-size:1.2rem; line-height:1}
+.contatore button:hover:not(:disabled){border-color:var(--ink-3)}
+.contatore button:disabled{opacity:.4; cursor:not-allowed}
+
+.cursore{display:flex; align-items:center; gap:14px}
+input[type=range]{flex:1; accent-color:var(--teal); min-height:44px; margin:0}
+.cursore output{font:600 1rem var(--f-data); min-width:3.6em; text-align:right}
+.estremi-cursore{display:flex; justify-content:space-between; font-size:.78rem; color:var(--ink-3); margin-right:calc(3.6em + 14px)}
+
+/* Risultato */
+.esiti{display:grid; gap:16px}
+.risultato{text-align:center}
+.risultato h2{text-align:left}
+.indicatore{display:block; width:100%; max-width:250px; margin:4px auto 0}
+.indicatore .traccia{stroke:var(--track)}
+.indicatore .valore{stroke:var(--teal); transition:stroke-dasharray .35s cubic-bezier(.2,.7,.2,1)}
+.indicatore .valore.basso{stroke:var(--rosso)}
+.indicatore .media{stroke:var(--ink); stroke-width:2.5}
+.indicatore .grande{fill:var(--ink); font:800 38px var(--f-display); font-variant-numeric:tabular-nums}
+.indicatore .estremi{fill:var(--ink-3); font:12px var(--f-data)}
+.delta{font:600 .85rem var(--f-data); min-height:1.4em; margin:2px 0 10px; color:var(--ink-3)}
+.delta.su{color:var(--verde-ink)} .delta.giu{color:var(--rosso-ink)}
+.verdetto{display:inline-flex; align-items:center; gap:8px; padding:8px 16px; border-radius:999px; font-weight:700; font-size:.95rem}
+.verdetto svg{width:18px; height:18px; flex:none}
+.verdetto.bev{background:var(--teal-soft); color:var(--teal-ink)}
+.verdetto.altro{background:var(--rosso-soft); color:var(--rosso-ink)}
+.confronto{font-size:.84rem; color:var(--ink-3); margin:12px 0 0}
+.confronto .tacca{display:inline-block; width:3px; height:12px; background:var(--ink); vertical-align:-1px; margin-right:6px}
+.inattivo{opacity:.4; transition:opacity .2s}
+.avviso{background:var(--rosso-soft); color:var(--rosso-ink); border-radius:8px; padding:10px 14px; font-size:.88rem; font-weight:600; text-align:left; margin:12px 0 0}
+
+/* Cascata */
+.sottotitolo{font-size:.86rem; color:var(--ink-3); margin:4px 0 12px}
+.cascata{display:grid; gap:4px}
+.riga{display:grid; grid-template-columns:minmax(0,10em) minmax(0,1fr) 4.2em; gap:10px; align-items:center; min-height:31px}
+.riga .nome{font-size:.86rem; line-height:1.2; min-width:0}
+.riga .nome b{display:block; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .nome span{display:block; font-size:.76rem; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .pista{position:relative; height:18px}
+.riga .pista::before{content:""; position:absolute; inset:50% 0 auto; height:1px; background:var(--line)}
+.riga .seg{position:absolute; top:0; bottom:0; border-radius:3px; min-width:2px; transition:left .3s, width .3s}
+.riga .seg.su{background:var(--verde)} .riga .seg.giu{background:var(--rosso)}
+.riga .segno{position:absolute; top:-3px; bottom:-3px; width:3px; margin-left:-1.5px; border-radius:2px; background:var(--ink-3)}
+.riga .val{font:500 .8rem var(--f-data); text-align:right; white-space:nowrap}
+.riga .val.su{color:var(--verde-ink)} .riga .val.giu{color:var(--rosso-ink)}
+.riga.estremo{border-top:1px dashed var(--line); padding-top:4px}
+.riga.estremo:first-child{border-top:0; border-bottom:1px dashed var(--line); padding:0 0 4px}
+.riga.estremo .val{font-weight:600; color:var(--ink)}
+.riga.finale .segno{background:var(--ink); width:4px; margin-left:-2px}
+.asse-x{display:grid; grid-template-columns:minmax(0,10em) minmax(0,1fr) 4.2em; gap:10px; margin-top:2px}
+.asse-x .tacche{position:relative; height:16px; font:11px var(--f-data); color:var(--ink-3)}
+.asse-x .tacche span{position:absolute; transform:translateX(-50%)}
+.legenda{display:flex; flex-wrap:wrap; gap:14px; font-size:.8rem; color:var(--ink-2); margin:14px 0 0}
+.legenda i{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:6px}
+details.metodo{margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:.84rem; color:var(--ink-2)}
+details.metodo summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
+details.metodo p{margin:6px 0}
+
+/* Barra fissa su mobile */
+.barra-mobile{position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); z-index:10;
+  display:flex; align-items:center; gap:12px; padding:10px 10px 10px 16px; border-radius:14px;
+  background:var(--ink); color:var(--bg); box-shadow:0 10px 30px -10px rgba(0,0,0,.4);
+  transform:translateY(160%); transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+.barra-mobile.visibile{transform:none}
+.barra-mobile .etic{font-size:.8rem; opacity:.8}
+.barra-mobile strong{font:800 1.3rem var(--f-display); font-variant-numeric:tabular-nums}
+.barra-mobile .mdelta{font:500 .8rem var(--f-data); opacity:.85}
+.barra-mobile a{margin-left:auto; color:var(--bg); background:color-mix(in srgb, var(--bg) 16%, transparent); border-radius:10px; padding:0 14px;
+  min-height:44px; display:inline-flex; align-items:center; text-decoration:none; font-weight:600; font-size:.88rem}
+@media (min-width:980px){ .barra-mobile{display:none} }
+
+footer{margin-top:48px; padding-top:18px; border-top:3px solid var(--ink); color:var(--ink-3); font:600 .78rem/1.6 var(--f-data); text-transform:uppercase; letter-spacing:.06em}
+footer a{color:inherit} footer a:hover{color:var(--arancio)}
+footer .firma{margin-top:14px}
+.solo-lettori{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.opzioni{list-style:none; padding:0; margin:14px 0 0; display:grid; gap:6px; text-align:left}
+.opzioni li{display:flex; justify-content:space-between; gap:10px; padding:8px 12px; border-radius:8px; background:var(--surface-2); font-size:.9rem}
+.opzioni li.best{background:var(--verde-soft); color:var(--verde-ink); font-weight:700}
+.opzioni b{font-family:var(--f-data); font-weight:600}
+
+[hidden]{display:none !important}
+/* Banner */
+.banner{position:relative; background:#d2a720; padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0; overflow:hidden; border-bottom:3px solid #14110a}
+.banner img{position:absolute; right:0; top:var(--barra); height:calc(100% - var(--barra)); width:auto; max-width:none; -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%); mask-image:linear-gradient(90deg,transparent,#000 22%)}
+.banner .dentro{position:relative; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
+.banner h1{margin:0; padding:0; border:0; color:#14110a; font-size:clamp(1.9rem,4.6vw,3.2rem); max-width:16ch}
+.banner h1 em{color:#8f2412}
+.banner p{margin:10px 0 0; color:#14110a; font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase}
+@media (max-width:640px){ .banner img{opacity:.55} }
+
+/* Righe */
+.controlli{display:grid; gap:16px; grid-template-columns:minmax(0,1fr); align-items:stretch}
+@media (min-width:900px){ .controlli{grid-template-columns:repeat(3,minmax(0,1fr))} .controlli.due{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.controlli .campi{grid-template-columns:minmax(0,1fr); gap:16px; flex:1}
+.sezione > legend{font-size:1.02rem}
+.riga-sotto{margin-top:16px}
+.rendimenti .vinc{display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 16px}
+.rendimenti #vincitore{margin:0}
+.rendimenti .opzioni{grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px}
+.opzioni li{flex-direction:column; gap:4px; padding:14px 16px; border-radius:10px}
+.opzioni li b{font-size:1.4rem; font-family:var(--f-display); font-weight:800}
+.opzioni li span{font-size:.85rem}
+.gtitolo{display:flex; align-items:center; gap:10px; font-size:1.02rem; margin:0 0 16px}
+.passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font:700 .82rem var(--f-data); flex:none; background:var(--arancio); color:#14110a}
+.gruppo{display:flex; flex-direction:column; min-width:0}
+.gruppo > .campi{flex:1}
+.interruttore{align-self:flex-start; margin-top:20px; min-height:40px; padding:0 16px; border-radius:999px; font:600 .88rem/1 var(--f-body);
+  color:var(--ink); background:transparent; border:1px solid var(--ink-3); display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+  transition:background .15s, color .15s, border-color .15s, transform .05s}
+.interruttore::before{content:""; width:14px; height:14px; border-radius:4px; border:2px solid currentColor; box-sizing:border-box; flex:none}
+.interruttore:hover{background:var(--surface-2); border-color:var(--ink)}
+.interruttore:active{background:var(--line); transform:translateY(1px)}
+.interruttore[aria-pressed=true]{background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.interruttore[aria-pressed=true]::before{background:currentColor; box-shadow:inset 0 0 0 2px var(--scelto-bg)}
+.interruttore[aria-pressed=true]:hover{background:color-mix(in srgb, var(--scelto-bg) 86%, var(--bg)); border-color:var(--scelto-bg)}
+.interruttore[aria-pressed=true]:active{background:color-mix(in srgb, var(--scelto-bg) 72%, var(--bg))}
+.testo{margin-top:8px; padding:6px 0; background:none; border:0; color:var(--ink); font:600 .84rem var(--f-body); text-decoration:underline; text-underline-offset:3px; cursor:pointer}
+.testo:hover{color:var(--arancio)}
+.coppia{display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
+.coppia.due{grid-template-columns:repeat(2,minmax(0,1fr))}
+.con-unita.corto input{padding-right:34px}
+.scheda.unica{padding:24px; min-width:0}
+@media (min-width:900px){ .unica .gruppo + .gruppo{border-left:1px solid var(--line); padding-left:24px} }
+@media (max-width:899px){ .unica .gruppo + .gruppo{border-top:1px solid var(--line); padding-top:20px} }
+.tre{display:grid; gap:20px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){ .tre{grid-template-columns:repeat(var(--n,3),minmax(0,1fr))} }
+.tre .riga,.tre .asse-x{grid-template-columns:minmax(0,6.6em) minmax(0,1fr) 4.6em}
+.tre h3{margin:0 0 8px !important; padding-bottom:6px; border-bottom:2px solid var(--ink)}
+.scheda:hover{border-color:var(--ink-3)}
+.sezione > legend .passo{background:var(--rosso); color:#fff}
+#vincitore{color:var(--verde-ink)}
+.opzioni li{border:1px solid transparent} .opzioni li.best{border-color:var(--verde)}
+.layout{display:grid; gap:16px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){ .layout{grid-template-columns:minmax(0,2fr) minmax(0,1fr); align-items:stretch} }
+.unica .controlli{grid-template-columns:minmax(0,1fr); gap:20px 24px}
+@media (min-width:640px){ .unica .controlli{grid-template-columns:repeat(2,minmax(0,1fr))} .unica .controlli .gruppo:nth-child(3){grid-column:1/-1} }
+.unica .controlli .gruppo + .gruppo{border:0; padding:0}
+@media (min-width:640px){ .unica .controlli .gruppo:nth-child(2){border-left:1px solid var(--line); padding-left:24px} }
+@media (max-width:639px){ .unica .controlli .gruppo:nth-child(2){border-top:1px solid var(--line); padding-top:20px} }
+.unica .controlli .gruppo:nth-child(3){border-top:1px solid var(--line); padding-top:20px}
+.g3{display:grid; gap:20px; grid-template-columns:minmax(0,1fr); flex:1}
+@media (min-width:640px){ .g3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+.g3-testo{display:flex; flex-direction:column; min-width:0}
+.g3-testo .campi{flex:1}
+.torta{margin:0; display:flex; align-items:center; justify-content:center; gap:18px; flex-wrap:wrap}
+.ciambella{width:150px; height:150px; flex:none}
+.ciambella circle{fill:none; stroke-width:6}
+.ciambella .pista{stroke:var(--track)} .ciambella .cd{stroke:var(--ink-2)} .ciambella .cc{stroke:var(--arancio); transition:stroke-dasharray .35s}
+.ciambella text{fill:var(--ink); font:800 5.4px var(--f-display); text-anchor:middle}
+.ciambella .sub{fill:var(--ink-3); font:500 2.6px var(--f-data)}
+.leg-torta{list-style:none; margin:0; padding:0; display:grid; gap:8px; font-size:.86rem; color:var(--ink-2)}
+.leg-torta li{display:flex; align-items:center; gap:8px}
+.leg-torta i{width:12px; height:12px; border-radius:3px; flex:none}
+.leg-torta b{font-family:var(--f-data); font-weight:600; color:var(--ink)}
+.rendimenti .vinc{flex-direction:column; align-items:flex-start}
+.rendimenti{text-align:left; display:flex; flex-direction:column}
+.layout > form{display:flex} .layout > form > fieldset{flex:1}
+.rendimenti h2{font-size:.98rem}
+.rendimenti .delta{font-size:.74rem; line-height:1.4}
+.rendimenti #vincitore{font-size:1.05rem !important; line-height:1.3; margin:4px 0 10px !important}
+.rendimenti .opzioni{gap:8px; margin-top:0; flex:1; grid-template-columns:minmax(0,1fr); grid-auto-rows:1fr}
+.rendimenti .opzioni li{justify-content:center}
+.rendimenti .opzioni li{padding:10px 14px; gap:2px}
+.rendimenti .opzioni li span{font-size:.78rem; line-height:1.3}
+.rendimenti .opzioni li b{font-size:1.05rem}
+.rendimenti .confronto{font-size:.76rem; margin-top:auto; padding-top:12px}
+.rendimenti #blocco-risultato{flex:1; display:flex; flex-direction:column}
+.rendimenti .delta{margin:0 0 6px}
+.rendimenti #vincitore{color:var(--ink)}
+.rendimenti .delta,.rendimenti .delta.su{color:var(--ink-2)}
+.opzioni li.best{background:var(--verde-soft); color:var(--ink)}
+.opzioni li.best > span{color:var(--verde-ink); font-weight:700}
+.opzioni li.best b{color:var(--ink)}
+.opzioni li small{font:.72rem/1.4 var(--f-body); color:var(--ink-3); font-weight:400}
+.opzioni li.best small{color:var(--ink-2)}
+.rendimenti h2{font-weight:600; font-size:.95rem}
+.rendimenti #vincitore{font-weight:600 !important; font-size:.98rem !important}
+.rendimenti .delta{font:400 .78rem/1.4 var(--f-body)}
+.g3.senza{grid-template-columns:minmax(0,1fr); flex:none}
+.g3.senza .g3-testo .campi{flex:none}
+.g3.senza .aiuto{max-width:60ch}
+.rendimenti h2{font-family:var(--f-body); font-weight:600; font-size:.92rem; letter-spacing:0}
+.rendimenti #vincitore{font-family:var(--f-body) !important; font-weight:500 !important; font-size:1rem !important}
+.rendimenti h2{font-family:var(--f-display); font-weight:800; font-size:1.02rem; letter-spacing:-.03em; line-height:1.2}
+.rendimenti #vincitore{color:var(--teal-ink)}
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
+</head>
+<body>
+<header class="barra" id="barra">
+  <div class="dove">
+    <a class="progetto" href="#">Simulatore CD vs CC</a>
+    <div class="posizione" id="barra-capitolo" aria-live="polite"></div>
+  </div>
+  <nav class="azioni" aria-label="Navigazione">
+    <a class="bottone-barra" href="../">← Simulatori</a>  <a class="bottone-barra" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="16" height="16" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>← Progetti</span></a>
+  
+  <button class="bottone-barra" id="tema" type="button" aria-label="Cambia tema chiaro/scuro">Tema</button>
+  </nav>
+  <div class="avanzamento"></div>
+</header>
+<section class="banner">
+  <img src="img/banner.svg" alt="" width="1200" height="400">
+  <div class="dentro">
+    <h1>Conto deposito o <em>conto corrente</em>?</h1>
+    <p>Rendimento netto dopo imposta e bollo</p>
+  </div>
+</section>
+<div class="pagina">
+  <p class="intro">Confronta il rendimento netto dopo imposta sugli interessi e bollo. Il conto corrente paga il bollo fisso solo se la giacenza supera 5.000 €; il conto deposito lo paga sempre, in percentuale.</p>
+  <ul class="dati-modello" id="dati-modello"></ul>
+
+  <div class="esempi" role="group" aria-label="Preset">
+    <span class="titolo">Giacenza:</span>
+    <button type="button" class="pulsante" data-esempio="a"><i class="punto" style="background:var(--teal)"></i>3.000 €</button>
+    <button type="button" class="pulsante" data-esempio="b"><i class="punto" style="background:var(--arancio)"></i>10.000 €</button>
+    <button type="button" class="pulsante" data-esempio="c"><i class="punto" style="background:var(--sabbia)"></i>50.000 €</button>
+    <span class="spinta">
+      <button type="button" class="pulsante leggero" id="ripristina">Ripristina</button>
+    </span>
+  </div>
+
+  <div class="layout capitolo" data-titolo="Dati e rendimento">
+  <form id="profilo" novalidate>
+    <fieldset class="scheda sezione unica" aria-label="Dati">
+    <div class="controlli" id="controlli">
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">1</span>Capitale e durata</h2><div class="campi">
+<div class="campo"><label class="etichetta" for="giacenza">Giacenza media</label>
+<div class="con-unita"><input type="number" id="giacenza" name="giacenza" inputmode="decimal" step="100" value="10000" aria-describedby="giacenza-e"><span class="unita">€</span></div>
+<p class="aiuto">Importo costante nel periodo.</p><p class="errore-campo" id="giacenza-e" role="alert" hidden></p></div>
+<div class="campo"><label class="etichetta" for="anni">Durata</label>
+<div class="con-unita"><input type="number" id="anni" name="anni" inputmode="decimal" step="0.5" value="1" aria-describedby="anni-e"><span class="unita">anni</span></div>
+<p class="aiuto">Interesse semplice, senza capitalizzazione.</p><p class="errore-campo" id="anni-e" role="alert" hidden></p></div>
+</div></div>
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">2</span>Tassi annui</h2><div class="campi">
+<div class="coppia" id="coppia-tassi">
+<div class="campo"><label class="etichetta" for="tassoCC" id="et-tassoCC">Conto corrente e conto deposito</label>
+<div class="con-unita corto"><input type="number" id="tassoCC" name="tassoCC" inputmode="decimal" step="0.05" value="3" aria-describedby="tassoCC-e"><span class="unita">%</span></div>
+<p class="errore-campo" id="tassoCC-e" role="alert" hidden></p></div>
+<div class="campo" id="campo-tassoCD"><label class="etichetta" for="tassoCD">Conto deposito</label>
+<div class="con-unita corto"><input type="number" id="tassoCD" name="tassoCD" inputmode="decimal" step="0.05" value="3" aria-describedby="tassoCD-e"><span class="unita">%</span></div>
+<p class="errore-campo" id="tassoCD-e" role="alert" hidden></p></div>
+</div>
+<p class="aiuto">Tasso lordo annuo.</p>
+</div>
+<button type="button" class="interruttore" id="diversi" aria-pressed="false">Tassi diversi per CC e CD</button></div>
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">3</span>Suddivisione</h2>
+        <div class="g3">
+          <div class="g3-testo">
+            <div class="campi">
+              <p class="aiuto">Dividi il capitale tra conto corrente e conto deposito: parti dalla suddivisione migliore e puoi modificarla.</p>
+              <div class="campo" id="dividi-on" hidden>
+<label class="etichetta" for="quotaCC">Parte della giacenza nel conto corrente</label>
+<div class="con-unita"><input type="number" id="quotaCC" name="quotaCC" inputmode="decimal" step="100" value="5000" aria-describedby="quotaCC-e"><span class="unita">€</span></div>
+<p class="aiuto" id="aiuto-quota">Il resto va nel conto deposito.</p><p class="errore-campo" id="quotaCC-e" role="alert" hidden></p>
+<button type="button" class="testo" id="usa-migliore">Usa la suddivisione migliore</button></div>
+            </div>
+            <button type="button" class="interruttore" id="dividi" aria-pressed="false">Suddividi il capitale</button>
+          </div>
+          <figure class="torta" id="torta" aria-live="polite"></figure>
+        </div>
+      </div>
+    </div>
+    </fieldset>
+  </form>
+
+  <section class="scheda risultato rendimenti" id="risultato">
+    <div class="vinc"><h2>Rendimento netto</h2><p class="delta" id="delta"></p></div>
+    <div id="avviso"></div>
+    <div id="blocco-risultato"><p id="vincitore" style="font:800 1.5rem var(--f-display);margin:8px 0 4px;text-align:left" aria-live="polite">–</p>
+<ul class="opzioni" id="opzioni"></ul>
+<p class="confronto" id="rend"></p></div>
+  </section>
+
+  </div>
+
+  <section class="scheda riga-sotto capitolo" id="spiegazione" data-titolo="Dal lordo al netto">
+    <h2>Dal lordo al netto</h2>
+    <p class="sottotitolo" id="sottotitolo-cascata"></p>
+    <div class="tre" id="cascate"></div><p class="legenda"><span><i style="background:var(--verde)"></i>Interessi / netto</span><span><i style="background:var(--rosso)"></i>Imposte e bollo</span></p>
+    <details class="metodo"><summary>Come leggere il grafico</summary><p>Ogni barra parte da zero e usa la stessa scala per i blocchi. Interessi lordi = giacenza × tasso × anni. Dai lordi si toglie l'imposta sugli interessi (26%), poi il bollo.</p>
+<p><b>CC:</b> bollo fisso di 34,20 € all'anno, solo se la giacenza supera 5.000 €. <b>CD:</b> bollo dello 0,2% all'anno sulla giacenza, sempre.</p>
+<p><b>Suddivisione migliore:</b> il netto è una retta con un salto a 5.000 € (bollo fisso), quindi il massimo è sempre in uno di tre punti: tutto nel CD, 5.000 € nel CC (ultimo euro senza bollo) e il resto nel CD, oppure tutto nel CC.</p>
+<p>Il bollo del CD supera quello fisso del CC oltre circa 17.100 € (34,20 / 0,2%).</p></details>
+  </section>
+
+  <footer><span id="piede">Stima indicativa: interesse semplice, tassi e giacenza costanti. Non è consulenza fiscale. Nessun dato lascia il browser.</span><p><a class="firma" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="28" height="28" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>Federico Gamberini</span></a></p></footer>
+</div>
+
+<!-- Barra fissa mobile: compare quando il KPI esce dallo schermo -->
+<div class="barra-mobile" id="barra-mobile">
+  <div><div class="etic">Conviene</div><strong id="mob-p">–</strong> <span class="mdelta" id="mob-delta"></span></div>
+  <a href="#risultato">Vedi perché</a>
+</div>
+
+<script src="script.js"></script>
+<script src="dashboard.js"></script>
+<script>
+(function () {
+  var barra = document.getElementById("barra"), banner = document.querySelector(".banner");
+  var capitoli = [].slice.call(document.querySelectorAll(".capitolo")), inCoda = false;
+  function aggiornaBarra() {
+    inCoda = false;
+    var y = scrollY, hb = barra.offsetHeight, max = document.documentElement.scrollHeight - innerHeight, cap = null;
+    barra.classList.toggle("compatta", y > banner.offsetHeight - hb * 2);
+    capitoli.forEach(function (c) { if (c.getBoundingClientRect().top <= hb + 40) cap = c; });
+    if (y >= max - 2) cap = capitoli[capitoli.length - 1];   // in fondo l'ultimo non arriva in cima
+    document.getElementById("barra-capitolo").textContent = cap ? cap.dataset.titolo : "";
+    barra.style.setProperty("--avanzamento", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
+  }
+  addEventListener("scroll", function () { if (!inCoda) { inCoda = true; requestAnimationFrame(aggiornaBarra); } }, {passive: true});
+  addEventListener("resize", aggiornaBarra);
+  aggiornaBarra();
+})();
+document.getElementById("tema").addEventListener("click", () => {
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.theme = r.dataset.theme } catch {}
+});
+</script>
+</body>
+</html>

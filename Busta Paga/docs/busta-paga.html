@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulatore busta paga</title>
+
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<meta name="description" content="Dalla RAL al netto annuo e mensile: contributi INPS, IRPEF, detrazioni, cuneo fiscale L. 207/2024 e addizionali regionali e comunali.">
+<style>
+/* Identità del sito FedeGambe: blu = principale, rosso = trattenute. Variabili --* , niente colori fissi. */
+:root{
+  --barra:60px; --g1:#f0e6d2; --g2:#cfe3ef; --g3:#e8e0cc; --bg:#f0e6d2; --surface:#f7f0df; --surface-2:#e4d9bd; --ink:#0d1a2b; --ink-2:#34475c; --ink-3:#5a6b7c; --line:#d6caa8; --track:#dcd2b3;
+  --teal:#2b79b0; --teal-ink:#144a74; --teal-soft:#d3e6f3; --rosso:#d6452a; --rosso-ink:#b3321b; --rosso-soft:#f6ddd5; --sabbia:#9fc3dc;
+  --scelto-bg:#0d1a2b; --scelto-ink:#f0e6d2; --arancio:#2b79b0; --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#dcebd5;
+  --ombra:0 1px 2px rgba(13,26,43,.04), 0 8px 24px -12px rgba(13,26,43,.14);
+  --f-display:Georgia,"Times New Roman",serif;
+  --f-body:"Inter",system-ui,sans-serif;
+  --f-data:ui-monospace,Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --g1:#16304b; --g2:#0b1422; --g3:#070d17; --bg:#0d1a2b; --surface:#132338; --surface-2:#1b3250; --ink:#f0e6d2; --ink-2:#c5cdd6; --ink-3:#93a3b3; --line:#26405e; --track:#20384f;
+  --teal:#6cb4e0; --teal-ink:#8fc8ec; --teal-soft:#16324b; --rosso:#e8694d; --rosso-ink:#f08d76; --rosso-soft:#3a2019; --sabbia:#4a6f8c;
+  --scelto-bg:#6cb4e0; --scelto-ink:#0d1a2b; --ombra:none; --arancio:#6cb4e0; --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#1d2b1c;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{margin:0; color:var(--ink); font:16px/1.55 var(--f-body); min-height:100vh; -webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 600px at 10% 0%,var(--g1),transparent 70%),radial-gradient(900px 700px at 100% 100%,var(--g2),transparent 70%),var(--g3); background-attachment:fixed}
+body::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pagina{max-width:1200px; margin:0 auto; padding:24px 16px 96px}
+h1,h2,h3,legend{font-family:var(--f-display); letter-spacing:-.03em}
+h2{font-size:1.05rem; font-weight:800; margin:0; line-height:1.2}
+.num{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+a{color:var(--teal-ink)}
+:focus-visible{outline:2px solid var(--teal); outline-offset:2px}
+button{font:inherit; color:inherit; cursor:pointer}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+
+/* Barra */
+.barra{position:fixed; z-index:20; inset:0 0 auto; height:calc(var(--barra) + env(safe-area-inset-top,0px)); padding:env(safe-area-inset-top,0px) 20px 0;
+  display:flex; align-items:center; justify-content:flex-end; background:transparent; gap:16px; --colore-parte:var(--arancio); transition:background .35s, box-shadow .35s}
+.barra.compatta{background:color-mix(in srgb, var(--bg) 60%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 1px 0 var(--line)}
+.dove{flex:1; min-width:0; opacity:0; transform:translateY(-6px); transition:opacity .25s, transform .25s; pointer-events:none}
+.barra.compatta .dove{opacity:1; transform:none; pointer-events:auto}
+.dove .progetto{display:block; width:max-content; max-width:100%; font:600 .68rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.dove .progetto:hover{color:var(--ink)}
+.posizione{font:700 1rem/1.3 var(--f-display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; position:relative; padding-left:16px; min-height:1.3em}
+.posizione::before{content:""; position:absolute; left:0; top:.4em; width:.55em; height:.55em; border-radius:50%; background:var(--colore-parte)}
+.azioni{display:flex; gap:8px; flex:none; margin-left:auto}
+.avanzamento{position:absolute; left:0; bottom:0; width:100%; height:3px; background:var(--colore-parte);
+  transform-origin:left; transform:scaleX(var(--avanzamento,0)); opacity:0; transition:opacity .25s}
+.barra.compatta .avanzamento{opacity:1}
+.barra:not(.compatta) .bottone-barra{color:#0d1a2b; border-color:#0d1a2b}
+.barra:not(.compatta) .bottone-barra:hover{background:#0d1a2b; color:#f0e6d2}
+.barra:not(.compatta) .bottone-barra svg path{fill:#0d1a2b}
+.bottone-barra{font:600 .8rem/1 var(--f-data); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:none; border:1px solid var(--ink); border-radius:999px;
+  padding:8px 12px; cursor:pointer; text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
+.bottone-barra:hover{background:var(--ink); color:var(--bg)}
+.firma{display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font:600 .9rem/1 var(--f-data); letter-spacing:.06em}
+.firma:hover{color:var(--arancio)}
+
+/* Banner */
+.banner{position:relative; background:#3d8fc4; padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0; overflow:hidden; border-bottom:3px solid #0d1a2b}
+.banner img{position:absolute; right:0; top:var(--barra); height:calc(100% - var(--barra)); width:auto; max-width:none; -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%); mask-image:linear-gradient(90deg,transparent,#000 22%)}
+.banner .dentro{position:relative; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
+.banner h1{margin:0; padding:0; color:#0d1a2b; font-size:clamp(1.9rem,4.6vw,3.2rem); font-weight:800; line-height:1.05; max-width:16ch; text-wrap:balance}
+.banner h1 em{color:#fff4dc; font-style:italic}
+.banner p{margin:10px 0 0; color:#0d1a2b; font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase}
+@media (max-width:640px){ .banner img{opacity:.55} }
+
+.intro{color:var(--ink-2); margin:12px 0 14px; font-size:1.02rem}
+.dati-modello{display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none}
+.dati-modello li{font-size:.82rem; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:4px 12px}
+.dati-modello b{font-family:var(--f-data); font-weight:600; color:var(--ink)}
+
+/* Preset */
+.esempi{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:26px 0 18px}
+.esempi .titolo{font-size:.88rem; font-weight:600; color:var(--ink-2); margin-right:4px}
+.pulsante{min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:var(--surface);
+  font-size:.9rem; font-weight:600; display:inline-flex; align-items:center; gap:8px; transition:border-color .15s, background .15s}
+.pulsante:hover{border-color:var(--ink-3)}
+.pulsante .punto{width:8px; height:8px; border-radius:50%}
+.pulsante.leggero{border-color:transparent; background:transparent; color:var(--ink-2)}
+.pulsante.leggero:hover{background:var(--surface-2)}
+.esempi .spinta{margin-left:auto; display:flex; gap:4px}
+@media (max-width:640px){ .esempi .spinta{margin-left:0} }
+
+.scheda{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px; box-shadow:var(--ombra)}
+.scheda:hover{border-color:var(--ink-3)}
+.layout{display:grid; gap:16px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:1000px){ .layout{grid-template-columns:minmax(0,2fr) minmax(0,1fr); align-items:start} .layout > .risultato{position:sticky; top:76px} }
+
+/* Form */
+form{display:grid; gap:20px}
+fieldset{border:0; margin:0; padding:0; min-width:0}
+.scheda.unica{padding:24px; min-width:0}
+.controlli{display:grid; gap:24px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:640px){
+  .controlli{grid-template-columns:repeat(2,minmax(0,1fr)); gap:28px 24px}
+  .controlli .gruppo:nth-child(even){border-left:1px solid var(--line); padding-left:24px}
+  .controlli .gruppo:nth-child(n+3){border-top:1px solid var(--line); padding-top:24px}
+}
+@media (max-width:639px){ .controlli .gruppo + .gruppo{border-top:1px solid var(--line); padding-top:20px} }
+.gruppo{display:flex; flex-direction:column; min-width:0}
+.gtitolo{display:flex; align-items:center; gap:10px; font-size:1.02rem; margin:0 0 16px}
+.passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font:700 .82rem var(--f-data); flex:none; background:var(--arancio); color:#0d1a2b}
+.campi{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; flex:1; align-content:start}
+.etichetta,.campo > legend{display:block; font:600 .88rem var(--f-body); letter-spacing:0; color:var(--ink-2); margin:0 0 7px; padding:0}
+.aiuto{font-size:.8rem; color:var(--ink-3); margin:6px 0 0}
+.aiuto:empty{display:none}
+.errore-campo{font-size:.8rem; color:var(--rosso-ink); font-weight:600; margin:6px 0 0}
+.coppia{display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
+@media (min-width:400px){ .coppia{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+.segmenti{display:flex; flex-wrap:wrap; gap:6px}
+.segmento{position:relative; flex:1 1 auto}
+.segmento input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer}
+.segmento span{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:44px; height:100%; padding:6px 12px;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg); font-size:.9rem; line-height:1.2; transition:background .15s, border-color .15s, color .15s}
+.segmento:hover span{border-color:var(--ink-3)}
+.segmento input:checked + span{background:var(--scelto-bg); border-color:var(--scelto-bg); color:var(--scelto-ink); font-weight:600}
+.segmento input:focus-visible + span{outline:2px solid var(--teal); outline-offset:2px}
+
+select,input[type=number],input[type=text]{width:100%; font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:0 12px; min-height:44px}
+select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size:5px 5px; background-repeat:no-repeat; padding-right:36px}
+input[type=number]{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+input[aria-invalid=true]{border-color:var(--rosso); background:var(--rosso-soft)}
+.con-unita{position:relative}
+.con-unita input{padding-right:76px}
+.con-unita .unita{position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:.82rem; color:var(--ink-3); pointer-events:none}
+.con-unita.corto input{padding-right:58px}
+.contatore{display:grid; grid-template-columns:44px minmax(0,1fr) 44px; gap:6px}
+.contatore input{text-align:center; padding:0 4px; -moz-appearance:textfield; appearance:textfield}
+.contatore input::-webkit-inner-spin-button,.contatore input::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
+.contatore button{border:1px solid var(--line); background:var(--surface-2); border-radius:8px; font-size:1.2rem; line-height:1}
+.contatore button:hover:not(:disabled){border-color:var(--ink-3)}
+.interruttore{align-self:flex-start; min-height:40px; padding:0 16px; border-radius:999px; font:600 .88rem/1 var(--f-body);
+  color:var(--ink); background:transparent; border:1px solid var(--ink-3); display:inline-flex; align-items:center; gap:8px; text-align:left;
+  transition:background .15s, color .15s, border-color .15s, transform .05s}
+.interruttore::before{content:""; width:14px; height:14px; border-radius:4px; border:2px solid currentColor; box-sizing:border-box; flex:none}
+.interruttore:hover{background:var(--surface-2); border-color:var(--ink)}
+.interruttore:active{transform:translateY(1px)}
+.interruttore[aria-pressed=true]{background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.interruttore[aria-pressed=true]::before{background:currentColor; box-shadow:inset 0 0 0 2px var(--scelto-bg)}
+
+/* Risultato */
+.risultato{display:flex; flex-direction:column; min-width:0}
+.risultato .delta{font:400 .78rem/1.4 var(--f-body); color:var(--ink-2); margin:4px 0 0}
+.kpi{font:800 clamp(2.2rem,5vw,2.9rem)/1.05 var(--f-display); letter-spacing:-.03em; color:var(--teal-ink); margin:10px 0 2px; font-variant-numeric:tabular-nums}
+.kpi-sub{font:600 .88rem var(--f-data); color:var(--ink-2); margin:0}
+.opzioni{list-style:none; padding:0; margin:16px 0 0; display:grid; gap:8px}
+.opzioni li{display:flex; flex-direction:column; gap:2px; padding:10px 14px; border-radius:10px; background:var(--surface-2); font-size:.85rem; border:1px solid transparent}
+.opzioni li b{font:800 1.1rem var(--f-display); font-variant-numeric:tabular-nums}
+.opzioni li small{font:.72rem/1.4 var(--f-body); color:var(--ink-3)}
+.opzioni li.best{background:var(--verde-soft); border-color:var(--verde)}
+.opzioni li.best > span{color:var(--verde-ink); font-weight:700}
+.confronto{font-size:.76rem; color:var(--ink-3); margin:auto 0 0; padding-top:12px}
+.inattivo{opacity:.4; transition:opacity .2s}
+.avviso{background:var(--rosso-soft); color:var(--rosso-ink); border-radius:8px; padding:10px 14px; font-size:.88rem; font-weight:600; margin:12px 0 0}
+.avviso.lieve{background:var(--surface-2); color:var(--ink-2); font-weight:500; font-size:.8rem}
+
+/* Cascata */
+.riga-sotto{margin-top:16px}
+.sottotitolo{font-size:.86rem; color:var(--ink-3); margin:4px 0 12px}
+.cascata{display:grid; gap:4px; max-width:820px}
+.riga{display:grid; grid-template-columns:minmax(0,12em) minmax(0,1fr) 6.2em; gap:10px; align-items:center; min-height:31px}
+.riga .nome{font-size:.86rem; line-height:1.2; min-width:0}
+.riga .nome b{display:block; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .nome span{display:block; font-size:.76rem; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .pista{position:relative; height:18px}
+.riga .pista::before{content:""; position:absolute; inset:50% 0 auto; height:1px; background:var(--line)}
+.riga .seg{position:absolute; top:0; bottom:0; border-radius:3px; min-width:2px; transition:left .3s, width .3s}
+.riga .seg.su{background:var(--verde)} .riga .seg.giu{background:var(--rosso)} .riga .seg.tot{background:var(--teal)}
+.riga .val{font:500 .8rem var(--f-data); text-align:right; white-space:nowrap}
+.riga .val.su{color:var(--verde-ink)} .riga .val.giu{color:var(--rosso-ink)}
+.riga.estremo{border-top:1px dashed var(--line); padding-top:4px}
+.riga.estremo .val{font-weight:600; color:var(--ink)}
+.legenda{display:flex; flex-wrap:wrap; gap:14px; font-size:.8rem; color:var(--ink-2); margin:14px 0 0}
+.legenda i{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:6px}
+details.metodo{margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:.84rem; color:var(--ink-2)}
+details.metodo summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
+details.metodo p{margin:6px 0}
+.tabella{width:100%; max-width:820px; border-collapse:collapse; margin:8px 0; font-size:.84rem}
+.tabella th,.tabella td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:right}
+.tabella th:first-child,.tabella td:first-child{text-align:left; font-weight:500}
+.tabella thead th{font:600 .72rem var(--f-data); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+.tabella td{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+
+/* Barra mobile */
+.barra-mobile{position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); z-index:10;
+  display:flex; align-items:center; gap:12px; padding:10px 10px 10px 16px; border-radius:14px;
+  background:var(--ink); color:var(--bg); box-shadow:0 10px 30px -10px rgba(0,0,0,.4);
+  transform:translateY(160%); transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+.barra-mobile.visibile{transform:none}
+.barra-mobile .etic{font-size:.8rem; opacity:.8}
+.barra-mobile strong{font:800 1.3rem var(--f-display); font-variant-numeric:tabular-nums}
+.barra-mobile .mdelta{font:500 .8rem var(--f-data); opacity:.85}
+.barra-mobile a{margin-left:auto; color:var(--bg); background:color-mix(in srgb, var(--bg) 16%, transparent); border-radius:10px; padding:0 14px;
+  min-height:44px; display:inline-flex; align-items:center; text-decoration:none; font-weight:600; font-size:.88rem}
+@media (min-width:1000px){ .barra-mobile{display:none} }
+
+footer{margin-top:48px; padding-top:18px; border-top:3px solid var(--ink); color:var(--ink-3); font:600 .78rem/1.6 var(--f-data); text-transform:uppercase; letter-spacing:.06em}
+footer a{color:inherit} footer a:hover{color:var(--arancio)}
+footer .firma{margin-top:14px}
+@media (max-width:560px){ .solo-largo{display:none} }
+[hidden]{display:none !important}
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
+</head>
+<body>
+<header class="barra" id="barra">
+  <div class="dove">
+    <a class="progetto" href="#">Simulatore busta paga</a>
+    <div class="posizione" id="barra-capitolo" aria-live="polite"></div>
+  </div>
+  <nav class="azioni" aria-label="Navigazione">
+    <a class="bottone-barra" href="../">← Simulatori</a>  <a class="bottone-barra" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="16" height="16" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>← Progetti</span></a>
+    <button class="bottone-barra" id="tema" type="button" aria-label="Cambia tema chiaro/scuro">Tema</button>
+  </nav>
+  <div class="avanzamento"></div>
+</header>
+<section class="banner">
+  <img src="img/banner.svg" alt="" width="1200" height="400">
+  <div class="dentro">
+    <h1>Dalla RAL al <em>netto</em></h1>
+    <p>Netto annuo e mensile, 2026</p>
+  </div>
+</section>
+<div class="pagina">
+  <p class="intro">Inserisci la tua retribuzione annua lorda: il simulatore toglie contributi INPS, IRPEF e addizionali, applica detrazioni e cuneo fiscale (L. 207/2024) e ti dice quanto resta in tasca.</p>
+  <ul class="dati-modello" id="dati-modello"></ul>
+
+  <div class="esempi" role="group" aria-label="Preset">
+    <span class="titolo">RAL:</span>
+    <button type="button" class="pulsante" data-esempio="20000"><i class="punto" style="background:var(--teal)"></i>20.000 €</button>
+    <button type="button" class="pulsante" data-esempio="30000"><i class="punto" style="background:var(--rosso)"></i>30.000 €</button>
+    <button type="button" class="pulsante" data-esempio="50000"><i class="punto" style="background:var(--sabbia)"></i>50.000 €</button>
+    <span class="spinta">
+      <button type="button" class="pulsante leggero" id="ripristina">Ripristina</button>
+      <button type="button" class="pulsante leggero" id="copia">Copia link</button>
+    </span>
+  </div>
+
+  <div class="layout capitolo" data-titolo="Dati e risultato">
+  <form id="profilo" novalidate>
+    <fieldset class="scheda sezione unica" aria-label="Dati">
+    <div class="controlli">
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">1</span>Retribuzione</h2><div class="campi">
+        <div class="campo"><label class="etichetta" for="ral">Retribuzione annua lorda (RAL)</label>
+          <div class="con-unita"><input type="number" id="ral" name="ral" inputmode="decimal" step="500" value="30000" aria-describedby="ral-e"><span class="unita">€</span></div>
+          <p class="errore-campo" id="ral-e" role="alert" hidden></p></div>
+        <fieldset class="campo"><legend>Mensilità</legend>
+          <div class="segmenti" id="mensilita">
+            <label class="segmento"><input type="radio" name="mensilita" value="12"><span>12</span></label>
+            <label class="segmento"><input type="radio" name="mensilita" value="13"><span>13</span></label>
+            <label class="segmento"><input type="radio" name="mensilita" value="14" checked><span>14</span></label>
+          </div></fieldset>
+        <button type="button" class="interruttore" id="td" aria-pressed="false">Contratto a tempo determinato</button>
+      </div></div>
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">2</span>Contributi e trattenute</h2><div class="campi">
+        <div class="campo"><label class="etichetta" for="fondo">Fondo di integrazione salariale</label>
+          <select id="fondo" name="fondo">
+            <option value="nessuno">Nessun fondo</option>
+            <option value="fsba">FSBA, artigianato fino a 15 dipendenti</option>
+            <option value="fsbaOltre15">FSBA, artigianato oltre 15 dipendenti</option>
+            <option value="fisFino5">FIS, fino a 5 dipendenti</option>
+            <option value="fisOltre5">FIS, oltre 5 dipendenti</option>
+            <option value="cigs">CIGS, industria oltre 15 dipendenti</option>
+          </select></div>
+        <div class="coppia">
+          <div class="campo"><label class="etichetta" for="pl">Previdenza compl. (tua)</label>
+            <div class="con-unita corto"><input type="number" id="pl" name="pl" inputmode="decimal" step="5" value="0" aria-describedby="pl-e"><span class="unita">€/mese</span></div>
+            <p class="errore-campo" id="pl-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="pd">Previdenza compl. (ditta)</label>
+            <div class="con-unita corto"><input type="number" id="pd" name="pd" inputmode="decimal" step="5" value="0" aria-describedby="pd-e"><span class="unita">€/mese</span></div>
+            <p class="errore-campo" id="pd-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="ps">Assistenza sanitaria</label>
+            <div class="con-unita corto"><input type="number" id="ps" name="ps" inputmode="decimal" step="1" value="0" aria-describedby="ps-e"><span class="unita">€/mese</span></div>
+            <p class="errore-campo" id="ps-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="at">Altre trattenute</label>
+            <div class="con-unita corto"><input type="number" id="at" name="at" inputmode="decimal" step="1" value="0" aria-describedby="at-e"><span class="unita">€/mese</span></div>
+            <p class="errore-campo" id="at-e" role="alert" hidden></p></div>
+        </div>
+        <p class="aiuto">Previdenza e sanità: versamenti dedotti dall'imponibile (limiti annui 5.164,57 € e 3.615,20 €; la quota ditta consuma il limite). Altre trattenute: quote sindacali, bilaterali, prestiti.</p>
+        <button type="button" class="interruttore" id="app" aria-pressed="false">Apprendista</button>
+        <button type="button" class="interruttore" id="mass" aria-pressed="false">Massimale contributivo INPS (contributi dopo il 1996)</button>
+      </div></div>
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">3</span>Dove vivi</h2><div class="campi">
+        <div class="campo"><label class="etichetta" for="comune">Comune di domicilio fiscale</label>
+          <input type="text" id="comune" name="comune" list="elenco-comuni" autocomplete="off" value="MODENA (MO)" aria-describedby="comune-e">
+          <datalist id="elenco-comuni"></datalist>
+          <p class="aiuto">Scrivi le prime lettere e scegli dall'elenco. Da qui si ricavano addizionale comunale e regionale.</p>
+          <p class="errore-campo" id="comune-e" role="alert" hidden></p></div>
+      </div></div>
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">4</span>Famiglia a carico</h2><div class="campi">
+        <button type="button" class="interruttore" id="coniuge" aria-pressed="false">Coniuge a carico</button>
+        <div class="coppia">
+          <div class="campo"><label class="etichetta" for="f21">Figli a carico (21+)</label>
+            <div class="contatore" data-contatore><button type="button" data-passo="-1" aria-label="Meno figli a carico">−</button><input type="number" id="f21" name="f21" inputmode="numeric" step="1" value="0" aria-describedby="f21-e"><button type="button" data-passo="1" aria-label="Più figli a carico">+</button></div>
+            <p class="errore-campo" id="f21-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="fd">Di cui disabili</label>
+            <div class="contatore" data-contatore><button type="button" data-passo="-1" aria-label="Meno figli disabili">−</button><input type="number" id="fd" name="fd" inputmode="numeric" step="1" value="0" aria-describedby="fd-e"><button type="button" data-passo="1" aria-label="Più figli disabili">+</button></div>
+            <p class="errore-campo" id="fd-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="alt">Altri familiari</label>
+            <div class="contatore" data-contatore><button type="button" data-passo="-1" aria-label="Meno altri familiari">−</button><input type="number" id="alt" name="alt" inputmode="numeric" step="1" value="0" aria-describedby="alt-e"><button type="button" data-passo="1" aria-label="Più altri familiari">+</button></div>
+            <p class="errore-campo" id="alt-e" role="alert" hidden></p></div>
+        </div>
+        <fieldset class="campo"><legend>Ripartizione tra genitori</legend>
+          <div class="segmenti" id="quota">
+            <label class="segmento"><input type="radio" name="quota" value="1" checked><span>100% a me</span></label>
+            <label class="segmento"><input type="radio" name="quota" value="0.5"><span>50%</span></label>
+          </div></fieldset>
+        <p class="aiuto">Per i figli sotto i 21 anni non c'è detrazione: li copre l'assegno unico, pagato da INPS e non incluso qui.</p>
+      </div></div>
+
+    </div>
+    </fieldset>
+  </form>
+
+  <section class="scheda risultato" id="risultato">
+    <h2>Quanto ti resta</h2>
+    <p class="delta" id="delta"></p>
+    <div id="avviso"></div>
+    <div id="blocco-risultato" aria-live="polite">
+      <p class="kpi num" id="kpi">–</p>
+      <p class="kpi-sub" id="kpi-sub"></p>
+      <ul class="opzioni" id="opzioni"></ul>
+    </div>
+    <p class="confronto" id="rend"></p>
+  </section>
+  </div>
+
+  <section class="scheda riga-sotto capitolo" id="spiegazione" data-titolo="Dalla RAL al netto">
+    <h2>Dalla RAL al netto</h2>
+    <p class="sottotitolo" id="sottotitolo-cascata"></p>
+    <div class="cascata" id="cascata"></div>
+    <p class="legenda"><span><i style="background:var(--verde)"></i>Entrate</span><span><i style="background:var(--rosso)"></i>Trattenute</span><span><i style="background:var(--teal)"></i>Netto</span></p>
+    <details class="metodo" id="dettaglio"><summary>Dettaglio del calcolo</summary><div id="tabella"></div></details>
+    <details class="metodo"><summary>Come funziona il calcolo</summary>
+      <p><b>Contributi INPS:</b> IVS a carico del lavoratore (9,19%, 5,84% per gli apprendisti), fondo di integrazione scelto e, sopra la prima fascia pensionabile, 1% aggiuntivo.</p>
+      <p><b>Imponibile fiscale:</b> RAL − contributi − previdenza complementare e sanità (entro i limiti) − altre voci deducibili.</p>
+      <p><b>IRPEF:</b> scaglioni 23% fino a 28.000 €, 33% fino a 50.000 €, 43% oltre. Dall'imposta lorda si tolgono detrazioni da lavoro dipendente, ulteriore detrazione L. 207/2024 (redditi 20.000–40.000 €) e detrazioni per familiari.</p>
+      <p><b>Cuneo fiscale L. 207/2024:</b> fino a 20.000 € di reddito una somma esente (7,1% / 5,3% / 4,8%) si aggiunge al netto senza tasse.</p>
+      <p><b>Addizionali:</b> regionale e comunale sull'imponibile, con le aliquote del tuo comune (dati MEF). Qui sono spalmate su tutte le mensilità; in busta si trattengono in 11 rate.</p>
+      <p><b>Limiti:</b> TFR, assegno unico, buoni pasto, welfare, premi di risultato e straordinari non sono inclusi. In busta le detrazioni mensili possono differire di qualche euro per la convenzione dei giorni del software paghe; il totale annuo si riallinea a conguaglio.</p></details>
+  </section>
+
+  <footer><span id="piede">Stima indicativa 2026 su dati normativi pubblici. Non è consulenza fiscale né sostituisce la busta paga. Nessun dato lascia il browser.</span><p><a class="firma" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="28" height="28" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>Federico Gamberini</span></a></p></footer>
+</div>
+
+<!-- Barra fissa mobile: compare quando il KPI esce dallo schermo -->
+<div class="barra-mobile" id="barra-mobile">
+  <div><div class="etic">Netto mensile</div><strong id="mob-p">–</strong> <span class="mdelta" id="mob-delta"></span></div>
+  <a href="#risultato">Vedi perché</a>
+</div>
+
+<script src="comuni.js"></script>
+<script src="script.js"></script>
+<script src="dashboard.js"></script>
+<script>
+(function () {
+  var barra = document.getElementById("barra"), banner = document.querySelector(".banner");
+  var capitoli = [].slice.call(document.querySelectorAll(".capitolo")), inCoda = false;
+  function aggiornaBarra() {
+    inCoda = false;
+    var y = scrollY, hb = barra.offsetHeight, max = document.documentElement.scrollHeight - innerHeight, cap = null;
+    barra.classList.toggle("compatta", y > banner.offsetHeight - hb * 2);
+    capitoli.forEach(function (c) { if (c.getBoundingClientRect().top <= hb + 40) cap = c; });
+    if (y >= max - 2) cap = capitoli[capitoli.length - 1];   // in fondo l'ultimo non arriva in cima
+    document.getElementById("barra-capitolo").textContent = cap ? cap.dataset.titolo : "";
+    barra.style.setProperty("--avanzamento", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
+  }
+  addEventListener("scroll", function () { if (!inCoda) { inCoda = true; requestAnimationFrame(aggiornaBarra); } }, {passive: true});
+  addEventListener("resize", aggiornaBarra);
+  aggiornaBarra();
+})();
+document.getElementById("tema").addEventListener("click", () => {
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.theme = r.dataset.theme } catch {}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<title>Simulatori · Federico Gamberini</title>
+<meta name="description" content="Simulatori interattivi: scegli, imposta i parametri e vedi il risultato.">
+<style>
+:root{
+  --barra:60px; --g1:#fff3dc;--g2:#e9c9a0;--g3:#e2d6bf;--bg:#f4efe6;--ink:#1c1b19;--mute:#6b665c;--card:#fbf8f2;--line:#d9d1c0;--acc:#d9482b;
+  --banner:#9f221b; --sulbanner:#f0e6d2;
+}
+:root[data-theme=dark]{
+  --g1:#241009;--g2:#071c23;--g3:#050504;--bg:#14130f;--ink:#efe9dc;--mute:#9a9486;--card:#1c1a15;--line:#33302a;--acc:#ff6a45;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font:16px/1.55 "Inter",system-ui,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 600px at 10% 0%,var(--g1),transparent 70%),radial-gradient(900px 700px at 100% 100%,var(--g2),transparent 70%),var(--g3);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* Barra: trasparente in cima, compatta con il nome della pagina quando scorri */
+.barra{position:fixed;z-index:20;inset:0 0 auto;height:calc(var(--barra) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) 20px 0;
+  display:flex;align-items:center;gap:16px;transition:background .35s,box-shadow .35s}
+.barra.compatta{background:color-mix(in srgb,var(--bg) 60%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--line)}
+.dove{flex:1;min-width:0;opacity:0;transform:translateY(-6px);transition:opacity .25s,transform .25s;pointer-events:none}
+.barra.compatta .dove{opacity:1;transform:none;pointer-events:auto}
+.dove .progetto{display:block;width:max-content;max-width:100%;font:600 .68rem/1.3 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.posizione{font:700 1rem/1.3 Georgia,serif;position:relative;padding-left:16px}
+.posizione::before{content:"";position:absolute;left:0;top:.4em;width:.55em;height:.55em;border-radius:50%;background:var(--acc)}
+.azioni{display:flex;gap:8px;flex:none;margin-left:auto}
+.bottone-barra{font:600 .8rem/1 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid var(--ink);border-radius:999px;
+  padding:8px 12px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
+.bottone-barra:hover{background:var(--ink);color:var(--bg)}
+.barra:not(.compatta) .bottone-barra{color:var(--sulbanner);border-color:var(--sulbanner)}
+.barra:not(.compatta) .bottone-barra:hover{background:var(--sulbanner);color:var(--banner)}
+@media (prefers-reduced-motion:reduce){.barra,.dove{transition:none}}
+
+/* Banner piccolo con la cover dei simulatori */
+.banner{position:relative;background:var(--banner);padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0;overflow:hidden;border-bottom:3px solid #14110a}
+.banner img{position:absolute;right:0;top:0;height:100%;width:auto;max-width:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
+.banner .dentro{position:relative;padding-top:28px;padding-bottom:30px}
+.banner h1{margin:0;color:var(--sulbanner);font:800 clamp(1.9rem,4.6vw,3.2rem)/1.05 Georgia,"Times New Roman",serif;letter-spacing:-.03em}
+.banner h1 em{font-style:italic;color:#e8b923}
+.banner p{margin:10px 0 0;color:var(--sulbanner);font:600 .8rem/1.3 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}
+
+/* Card, come nel sito dei progetti */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;padding:32px 0 64px}
+.card{position:relative;aspect-ratio:5/7;min-width:0;color:#fff;background:#14161f;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 40px -22px #000a;
+  transition:transform .25s;opacity:0;transform:translateY(16px);animation:in .6s forwards}
+.card:hover{transform:translateY(-6px)}
+@keyframes in{to{opacity:1;transform:none}}
+.cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom;transition:transform .6s}
+.card:hover .cover{transform:scale(1.04)}
+.body{position:relative;z-index:1;padding:20px 20px 0;display:flex;flex-direction:column;gap:10px}
+.meta{display:flex;justify-content:space-between;font:600 .72rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.07em;color:#ffffffbb}
+.card.light .body,.card.light .meta,.card.light p{color:#111;transition:color .3s}
+.card.light:hover .body,.card.light:hover .meta,.card.light:hover p,.card.light:focus-within .body,.card.light:focus-within .meta,.card.light:focus-within p{color:#fff}
+.card h2{font:700 1.6rem/1.1 Georgia,serif;margin:0;letter-spacing:-.01em}
+.card p{margin:0;color:#ffffffd9;font-size:.92rem}
+.foot{z-index:1;position:absolute;left:0;right:0;bottom:0;padding:48px 20px 18px;background:linear-gradient(transparent,#000d)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{font:600 .7rem/1 ui-monospace,Consolas,monospace;border:1px solid #ffffff55;padding:5px 8px;border-radius:999px;color:#fffd}
+.card::after{content:"";position:absolute;inset:0;background:#000;opacity:0;transition:opacity .3s;pointer-events:none}
+.links{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:opacity .3s}
+.card:hover::after,.card:focus-within::after{opacity:.72}
+.card:hover .links,.card:focus-within .links{opacity:1}
+.links a{min-width:110px;text-align:center;padding:12px 18px;border:1.5px solid #fff;font:700 .8rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em;border-radius:4px}
+.links a.main{background:#fff;color:#14161f}
+.links a:hover{background:var(--acc);border-color:var(--acc);color:#fff}
+@media(hover:none){.links{opacity:1;inset:auto 0 70px 0}.card::after{display:none}}
+.empty{padding:40px 0;text-align:center;color:var(--mute)}
+footer{border-top:3px solid var(--ink);padding:28px 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font:600 .8rem/1 ui-monospace,Consolas,monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+footer a:hover{color:var(--acc)}
+@media(prefers-reduced-motion:reduce){.card{animation:none;opacity:1;transform:none}html{scroll-behavior:auto}}
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
+</head>
+<body>
+<header class="barra" id="barra">
+  <div class="dove">
+    <a class="progetto" href="https://progetti.federicogamberini.it/">Federico Gamberini</a>
+    <div class="posizione">Simulatori</div>
+  </div>
+  <nav class="azioni" aria-label="Navigazione">
+    <a class="bottone-barra" href="https://progetti.federicogamberini.it/">← Progetti</a>
+    <button class="bottone-barra" id="tema" type="button" aria-label="Cambia tema chiaro/scuro">Tema</button>
+  </nav>
+</header>
+
+<section class="banner" id="banner">
+  <img src="img/banner.svg" alt="" width="1200" height="400">
+  <div class="wrap dentro">
+    <h1>Simulatori, <em>per decidere meglio</em></h1>
+    <p>Scegli un simulatore, imposta i parametri e vedi il risultato</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <main class="grid" id="grid"></main>
+  <p class="empty" id="vuoto" hidden>Nessun simulatore disponibile.</p>
+  <footer>
+    <span>© <span id="anno"></span> Federico Gamberini</span>
+    <a href="https://github.com/FedeGambe/simulatori">GitHub →</a>
+  </footer>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+// simulatori.json: una voce per simulatore; ogni simulatore sta nella sua cartella (url relativo)
+fetch("simulatori.json").then(r => r.json()).then(S => {
+  $("#grid").innerHTML = S.map((s, i) => `
+ <article class="card${s.chiara ? " light" : ""}" style="animation-delay:${i * 80}ms">
+  <img class="cover" src="${s.img}" alt="" loading="lazy">
+  <div class="body">
+   <div class="meta"><span>N° ${String(i + 1).padStart(2, "0")}</span><span>${s.y}</span></div>
+   <h2>${s.t}</h2><p>${s.d}</p>
+  </div>
+  <div class="foot"><div class="tags">${s.tags.map(t => `<span>${t}</span>`).join("")}</div></div>
+  <div class="links"><a class="main" href="${s.url}">Apri →</a><a href="https://github.com/FedeGambe/simulatori/tree/main/docs/${s.id}">Codice</a></div>
+ </article>`).join("");
+  $("#vuoto").hidden = S.length > 0;
+}).catch(() => { $("#vuoto").textContent = "Impossibile caricare i simulatori."; $("#vuoto").hidden = false; });
+
+$("#anno").textContent = new Date().getFullYear();
+
+const barra = $("#barra"), banner = $("#banner");
+function aggiornaBarra() { barra.classList.toggle("compatta", scrollY > banner.offsetHeight - barra.offsetHeight * 2); }
+addEventListener("scroll", aggiornaBarra, {passive: true}); addEventListener("resize", aggiornaBarra); aggiornaBarra();
+
+$("#tema").onclick = () => {
+  const r = document.documentElement, d = r.dataset.theme === "dark" ? "light" : "dark";
+  r.dataset.theme = d; try { localStorage.theme = d } catch {}
+};
+</script>
+</body>
+</html>

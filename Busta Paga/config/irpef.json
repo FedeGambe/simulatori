@@ -33,5 +33,26 @@
         { "da": 32000, "a": 40000, "base": 0, "variabile": 1000 }
       ]
     }
+  },
+  "detrazioniFamiliari": {
+    "fonte": "Art. 12 TUIR. Figli under 21: assegno unico (fuori busta), nessuna detrazione",
+    "coniuge": {
+      "fasce": [
+        { "da": 0, "a": 15000, "base": 800, "variabile": -110, "divisore": 15000 },
+        { "da": 15000, "a": 15200, "fisso": 710 },
+        { "da": 15200, "a": 15400, "fisso": 720 },
+        { "da": 15400, "a": 15600, "fisso": 730 },
+        { "da": 15600, "a": 29000, "fisso": 690 },
+        { "da": 29000, "a": 29200, "fisso": 700 },
+        { "da": 29200, "a": 34700, "fisso": 710 },
+        { "da": 34700, "a": 35000, "fisso": 720 },
+        { "da": 35000, "a": 35100, "fisso": 710 },
+        { "da": 35100, "a": 35200, "fisso": 705 },
+        { "da": 35200, "a": 40000, "fisso": 690 }
+      ],
+      "oltre": { "da": 40000, "a": 80000, "importo": 690 }
+    },
+    "figlio21": { "importo": 950, "importoDisabile": 1350, "redditoMax": 95000, "incrementoPerFiglio": 15000 },
+    "altriFamiliari": { "importo": 750, "redditoMax": 80000 }
   }
 }

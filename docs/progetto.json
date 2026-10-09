@@ -1,0 +1,13 @@
+{
+    "repo": "simulatori",
+    "t": "Simulatori",
+    "d": "Raccolta di simulatori interattivi: imposta i parametri e confronta subito i risultati.",
+    "tags": [
+        "Finanza",
+        "Simulazione",
+        "Dashboard"
+    ],
+    "y": 2026,
+    "live": "/simulatori/",
+    "img": "img/cover_verticale.svg"
+}

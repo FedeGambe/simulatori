@@ -47,8 +47,11 @@ export function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista
 }
 
 // i limiti delle deduzioni sono annui: nel mese si applica 1/12
-export function calcolaDeduzioni({ previdenzaComplementare = 0, assistenzaSanitaria = 0 } = {}, deduzioni = config.deduzioni) {
-    return Math.min(previdenzaComplementare, deduzioni.previdenzaComplementare.limite / 12)
+// il limite della previdenza complementare è unico per quota lavoratore e quota ditta:
+// la quota ditta non entra nel lordo, ma consuma parte del limite
+export function calcolaDeduzioni({ previdenzaComplementare = 0, previdenzaComplementareDitta = 0, assistenzaSanitaria = 0 } = {}, deduzioni = config.deduzioni) {
+    const limitePrevidenza = deduzioni.previdenzaComplementare.limite / 12;
+    return Math.min(previdenzaComplementare, Math.max(0, limitePrevidenza - previdenzaComplementareDitta))
         + Math.min(assistenzaSanitaria, deduzioni.assistenzaSanitaria.limite / 12);
 }
 
@@ -76,6 +79,9 @@ export function calcolaImponibileFiscale(lordoMensile, opzioni = {}) {
 
 // prove: si eseguono solo lanciando direttamente `node utils/contributi_function.js`
 if (import.meta.main) {
+    // limite 430,38/mese: 60 lavoratore + 139,22 ditta tutti deducibili; con ditta 400 resta spazio per 30,38
+    console.assert(calcolaDeduzioni({ previdenzaComplementare: 60, previdenzaComplementareDitta: 139.22 }) === 60, "sotto limite");
+    console.assert(Math.abs(calcolaDeduzioni({ previdenzaComplementare: 60, previdenzaComplementareDitta: 400 }) - 30.38) < 0.01, "oltre limite");
     console.log(calcolaContributi(2000, { fondo: "fsba" })); // ivs 183.8, fondo 3, totale 186.8
     console.log(calcolaContributi(5000)); // aggiuntivo 3.15
     console.log(calcolaContributi(15000, { massimale: true }).imponibile); // 10191

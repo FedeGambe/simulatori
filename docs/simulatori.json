@@ -1,0 +1,12 @@
+[
+    {
+        "id": "cd-cc",
+        "t": "Conto deposito o conto corrente",
+        "d": "Confronta il rendimento netto dopo imposta sugli interessi e bollo, anche dividendo la giacenza tra i due conti.",
+        "tags": ["Finanza", "Conti"],
+        "y": 2026,
+        "url": "cd-cc/cd-cc.html",
+        "img": "cd-cc/img/cover_verticale.svg",
+        "chiara": true
+    }
+]
