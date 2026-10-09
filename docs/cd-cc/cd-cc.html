@@ -316,6 +316,26 @@ footer .firma{margin-top:14px}
 .rendimenti #vincitore{font-family:var(--f-body) !important; font-weight:500 !important; font-size:1rem !important}
 .rendimenti h2{font-family:var(--f-display); font-weight:800; font-size:1.02rem; letter-spacing:-.03em; line-height:1.2}
 .rendimenti #vincitore{color:var(--teal-ink)}
+/* BANNER MOBILE (telefono, fino a 700px): titolo sul fondo pieno, poi il banner a tutta larghezza con il sottotitolo sopra, su una sfumatura del fondo */
+@media (max-width:700px){
+  .banner{display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto 20vw auto}
+  .banner .dentro{display:contents}
+  .banner h1{grid-row:1; grid-column:1; position:relative; z-index:2; margin:0; padding:22px 16px 18px; max-width:none}
+  .banner img{grid-row:2 / 4; grid-column:1; position:relative; inset:auto; width:100%; height:auto; max-width:100%; opacity:1; -webkit-mask-image:none; mask-image:none; align-self:start}
+  .banner p{grid-row:3; grid-column:1; position:relative; z-index:2; margin:0; padding:0 16px 16px; align-self:end}
+  .banner::after{content:""; grid-row:3; grid-column:1; position:absolute; inset:-28px 0 0; z-index:1; pointer-events:none;
+    background:linear-gradient(transparent, color-mix(in srgb, #d2a720 88%, transparent) 28px)}
+}
+/* /BANNER MOBILE */
+/* FONT MOBILE (telefono, fino a 700px): gerarchia titolo > titoli di sezione > testo > etichette > note */
+@media (max-width:700px){
+  h1, .banner h1{font-size:clamp(1.9rem,8.5vw,2.25rem)}
+  h2, .sezione > legend, .gtitolo, .risultati h2{font-size:1.25rem}
+  h3{font-size:1.05rem}
+  .intro{font-size:1rem}
+  .etichetta, .campo > legend{font-size:.9rem}
+}
+/* /FONT MOBILE */
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
 </head>

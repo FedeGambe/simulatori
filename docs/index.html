@@ -77,7 +77,49 @@ a{color:inherit;text-decoration:none}
 .empty{padding:40px 0;text-align:center;color:var(--mute)}
 footer{border-top:3px solid var(--ink);padding:28px 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font:600 .8rem/1 ui-monospace,Consolas,monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
 footer a:hover{color:var(--acc)}
+picture{display:contents}
+.vai{display:none}
+/* Telefono: card orizzontali con la cover orizzontale, come nel sito dei progetti; tutta la card apre il simulatore */
+@media(max-width:700px){
+  .grid{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:20px}
+  .card{display:grid;grid-template-rows:auto auto 1fr auto auto;aspect-ratio:4/3;height:auto}
+  .card:hover{transform:none}
+  .card:hover .cover{transform:none}
+  .card .body{display:contents}
+  .card .meta{grid-row:1;position:relative;z-index:1;padding:16px 16px 0}
+  .card h2{grid-row:2;position:relative;z-index:1;padding:8px 16px 0;font-size:1.35rem}
+  .card p{grid-row:4;position:relative;z-index:2;padding:0 16px;font-size:.88rem;line-height:1.45;color:#ffffffe6;text-shadow:0 1px 8px #0009;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card.light p,.card.light:hover p,.card.light:focus-within p{color:#ffffffe6}
+  .foot{grid-row:5;position:relative;z-index:2;padding:10px 16px 14px;background:none}
+  .foot .tags{flex-wrap:nowrap;overflow:hidden;mask-image:linear-gradient(90deg,#000 85%,transparent)}
+  .foot .tags span{flex:none;white-space:nowrap}
+  .card::before{content:"";grid-row:4/6;grid-column:1;position:absolute;inset:-40px 0 0;z-index:1;pointer-events:none;
+    background:linear-gradient(transparent,#0008 40px,#000c)}
+  .card::after,.links{display:none}
+  .vai{display:block;position:absolute;inset:0;z-index:3}
+}
 @media(prefers-reduced-motion:reduce){.card{animation:none;opacity:1;transform:none}html{scroll-behavior:auto}}
+/* BANNER MOBILE (telefono, fino a 700px): titolo sul fondo pieno, poi il banner a tutta larghezza con il sottotitolo sopra, su una sfumatura del fondo */
+@media (max-width:700px){
+  .banner{display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto 20vw auto}
+  .banner .dentro{display:contents}
+  .banner h1{grid-row:1; grid-column:1; position:relative; z-index:2; margin:0; padding:22px 16px 18px; max-width:none}
+  .banner img{grid-row:2 / 4; grid-column:1; position:relative; inset:auto; width:100%; height:auto; max-width:100%; opacity:1; -webkit-mask-image:none; mask-image:none; align-self:start}
+  .banner p{grid-row:3; grid-column:1; position:relative; z-index:2; margin:0; padding:0 16px 16px; align-self:end}
+  .banner::after{content:""; grid-row:3; grid-column:1; position:absolute; inset:-28px 0 0; z-index:1; pointer-events:none;
+    background:linear-gradient(transparent, color-mix(in srgb, var(--banner) 88%, transparent) 28px)}
+}
+/* /BANNER MOBILE */
+/* FONT MOBILE (telefono, fino a 700px): gerarchia titolo > titoli di sezione > testo > etichette > note */
+@media (max-width:700px){
+  h1, .banner h1{font-size:clamp(1.9rem,8.5vw,2.25rem)}
+  h2, .sezione > legend, .gtitolo, .risultati h2{font-size:1.25rem}
+  h3{font-size:1.05rem}
+  .intro{font-size:1rem}
+  .etichetta, .campo > legend{font-size:.9rem}
+}
+/* /FONT MOBILE */
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
 </head>
@@ -116,7 +158,8 @@ const $ = s => document.querySelector(s);
 fetch("simulatori.json").then(r => r.json()).then(S => {
   $("#grid").innerHTML = S.map((s, i) => `
  <article class="card${s.chiara ? " light" : ""}" style="animation-delay:${i * 80}ms">
-  <img class="cover" src="${s.img}" alt="" loading="lazy">
+  <picture>${s.img.includes("cover_verticale")?`<source media="(max-width:700px)" srcset="${s.img.replace("cover_verticale","cover_orizzontale")}">`:""}<img class="cover" src="${s.img}" alt="" loading="lazy"></picture>
+  <a class="vai" href="${s.url}" aria-label="${s.t}"></a>
   <div class="body">
    <div class="meta"><span>N° ${String(i + 1).padStart(2, "0")}</span><span>${s.y}</span></div>
    <h2>${s.t}</h2><p>${s.d}</p>
