@@ -1,0 +1,29 @@
+{
+  "anno": 2026,
+  "contributi": {
+    "fonte": "Circolare INPS n. 6 del 30/01/2026 - quote a carico del lavoratore",
+    "ivs": {
+      "ordinario": 0.0919,
+      "apprendista": 0.0584
+    },
+    "fondiIntegrazione": {
+      "cigs": { "aliquota": 0.003, "ambito": "industria oltre 15 dipendenti" },
+      "fisOltre5": { "aliquota": 0.002667, "ambito": "FIS oltre 5 dipendenti (1/3 di 0,80%)" },
+      "fisFino5": { "aliquota": 0.001667, "ambito": "FIS fino a 5 dipendenti (1/3 di 0,50%)" },
+      "fsba": { "aliquota": 0.0015, "ambito": "artigianato fino a 15 dipendenti (1/4 di 0,60%)" },
+      "fsbaOltre15": { "aliquota": 0.0025, "ambito": "artigianato oltre 15 dipendenti (1/4 di 1,00%)" },
+      "nessuno":{ "aliquota": 0, "ambito": "nessun fondo" }
+    },
+    "contributoAggiuntivo": {
+      "aliquota": 0.01,
+      "soglia": 56224,
+      "sogliaMensile": 4685
+    },
+    "massimale": 122295
+  },
+  "deduzioni": {
+    "fonte": "Art. 10 c. 1 lett. e-bis e art. 51 c. 2 lett. a TUIR",
+    "previdenzaComplementare": { "limite": 5164.57 },
+    "assistenzaSanitaria": { "limite": 3615.2 }
+  }
+}

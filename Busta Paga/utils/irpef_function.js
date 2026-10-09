@@ -1,13 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-function leggiConfig(nomeFile) {
+export function leggiConfig(nomeFile) {
     return JSON.parse(readFileSync(join(import.meta.dirname, "../config", nomeFile), "utf-8"));
 }
 
-const scaglioniIrpef = leggiConfig("scaglioni-irpef.json");
-const detrazioniIrpef = leggiConfig("detrazioni-irpef.json");
-const cuneoFiscale = leggiConfig("cuneo-fiscale.json");
+const irpef = leggiConfig("irpef.json");
 
 export function arrotonda(valore) {
     return Math.round(valore * 100) / 100;
@@ -23,7 +21,7 @@ function importoFascia(reddito, fascia) {
     return fascia.base + fascia.variabile * (fascia.a - reddito) / (fascia.a - fascia.da);
 }
 
-export function calcolaIrpefLorda(reddito, scaglioni = scaglioniIrpef.scaglioni) {
+export function calcolaIrpefLorda(reddito, scaglioni = irpef.scaglioni.fasce) {
     let imposta = 0;
     for (const scaglione of scaglioni) {
         if (reddito <= scaglione.da) {
@@ -38,7 +36,7 @@ export function calcolaIrpefLorda(reddito, scaglioni = scaglioniIrpef.scaglioni)
 
 // giorni: giorni lavorati nell'anno, la detrazione si riduce in proporzione
 // tempoDeterminato: cambia il minimo garantito per redditi fino a 15.000
-export function calcolaDetrazioni(reddito, { giorni = 365, tempoDeterminato = false } = {}, detrazioni = detrazioniIrpef) {
+export function calcolaDetrazioni(reddito, { giorni = 365, tempoDeterminato = false } = {}, detrazioni = irpef.detrazioni) {
     const fascia = trovaFascia(reddito, detrazioni.fasce);
     if (!fascia) {
         return 0;
@@ -62,13 +60,13 @@ export function calcolaDetrazioni(reddito, { giorni = 365, tempoDeterminato = fa
 }
 
 // cuneo fiscale, redditi fino a 20.000: somma non tassata pagata in busta paga
-export function calcolaSommaEsente(reddito, cuneo = cuneoFiscale) {
+export function calcolaSommaEsente(reddito, cuneo = irpef.cuneoFiscale) {
     const fascia = trovaFascia(reddito, cuneo.sommaEsente.fasce);
     return fascia ? reddito * fascia.percentuale : 0;
 }
 
 // cuneo fiscale, redditi tra 20.000 e 40.000: detrazione aggiuntiva fino a 1.000
-export function calcolaUlterioreDetrazione(reddito, cuneo = cuneoFiscale) {
+export function calcolaUlterioreDetrazione(reddito, cuneo = irpef.cuneoFiscale) {
     const fascia = trovaFascia(reddito, cuneo.ulterioreDetrazione.fasce);
     return fascia ? importoFascia(reddito, fascia) : 0;
 }
@@ -102,11 +100,11 @@ export function calcolaIrpefMensile(imponibileMensile, mensilita = 14, opzioni =
     };
 }
 
-// prove: si eseguono solo lanciando direttamente `node utils/function.js`
+// prove: si eseguono solo lanciando direttamente `node utils/irpef_function.js`
 if (import.meta.main) {
-    console.log(calcolaIrpefLorda(23947.31)); // 4600
+    console.log(calcolaIrpefLorda(23947.31)); // 5507.88
 
-    console.log(arrotonda(calcolaDetrazioni(23947.31))); // 1955
+    console.log(arrotonda(calcolaDetrazioni(23947.31))); // 2280.98
     console.log(arrotonda(calcolaDetrazioni(20000))); // 2642.31
     console.log(arrotonda(calcolaDetrazioni(30000))); // 1801.36
     console.log(arrotonda(calcolaDetrazioni(60000))); // 0

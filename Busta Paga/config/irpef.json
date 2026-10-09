@@ -1,0 +1,37 @@
+{
+  "anno": 2026,
+  "scaglioni": {
+    "fonte": "Art. 11 TUIR, modificato dalla Legge di Bilancio 2026 (L. 199/2025)",
+    "fasce": [
+      { "da": 0, "a": 28000, "aliquota": 0.23 },
+      { "da": 28000, "a": 50000, "aliquota": 0.33 },
+      { "da": 50000, "aliquota": 0.43 }
+    ]
+  },
+  "detrazioni": {
+    "fonte": "Art. 13 c. 1 TUIR - detrazioni per lavoro dipendente",
+    "fasce": [
+      { "da": 0, "a": 15000, "base": 1955, "variabile": 0 },
+      { "da": 15000, "a": 28000, "base": 1910, "variabile": 1190 },
+      { "da": 28000, "a": 50000, "base": 0, "variabile": 1910 }
+    ],
+    "maggiorazione": { "da": 25000, "a": 35000, "importo": 65 },
+    "minimo": { "indeterminato": 690, "determinato": 1380 }
+  },
+  "cuneoFiscale": {
+    "fonte": "L. 207/2024 (Legge di Bilancio 2025), art. 1 c. 4-9",
+    "sommaEsente": {
+      "fasce": [
+        { "da": 0, "a": 8500, "percentuale": 0.071 },
+        { "da": 8500, "a": 15000, "percentuale": 0.053 },
+        { "da": 15000, "a": 20000, "percentuale": 0.048 }
+      ]
+    },
+    "ulterioreDetrazione": {
+      "fasce": [
+        { "da": 20000, "a": 32000, "base": 1000, "variabile": 0 },
+        { "da": 32000, "a": 40000, "base": 0, "variabile": 1000 }
+      ]
+    }
+  }
+}

@@ -1,9 +1,0 @@
-{
-  "anno": 2026,
-  "fonte": "Art. 11 TUIR, modificato dalla Legge di Bilancio 2026 (L. 199/2025)",
-  "scaglioni": [
-    { "da": 0, "a": 28000, "aliquota": 0.23 },
-    { "da": 28000, "a": 50000, "aliquota": 0.33 },
-    { "da": 50000, "aliquota": 0.43 }
-  ]
-}
