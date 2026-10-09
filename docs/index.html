@@ -83,7 +83,7 @@ footer a:hover{color:var(--acc)}
    niente pulsanti: tutta la card apre la pagina */
 @media(max-width:700px){
   .grid{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:12px}
-  .card{display:grid;grid-template-rows:auto auto auto auto auto;aspect-ratio:auto;height:auto;background:#14161f var(--sfondo,none) 50% 100%/cover no-repeat}
+  .card{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto auto;aspect-ratio:auto;height:auto;background:#14161f var(--sfondo,none) 50% 100%/cover no-repeat}
   .card:hover{transform:none}
   .card:has(.soggetto) .cover{display:none}
   .card .body{display:contents}
