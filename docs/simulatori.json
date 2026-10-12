@@ -27,7 +27,6 @@
         "tags": ["Previdenza", "Imposte"],
         "y": 2026,
         "codice": "Fondo Pensione",
-        "wip": true,
         "url": "fondo-pensione/fondo-pensione.html",
         "img": "fondo-pensione/img/cover_verticale.svg"
     }
