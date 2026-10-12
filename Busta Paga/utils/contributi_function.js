@@ -41,6 +41,7 @@ export function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista
         imponibile,
         ivs: arrotonda(ivs),
         fondo: arrotonda(fondoImporto),
+        aliquotaFondo: fondoIntegrazione.aliquota,
         aggiuntivo: arrotonda(aggiuntivo),
         totale: arrotonda(ivs + fondoImporto + aggiuntivo),
     };
