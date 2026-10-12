@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulatore fondo pensione</title>
+
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<meta name="description" content="Come cresce un fondo pensione anno per anno, quanta IRPEF risparmi con la deducibilità dei contributi e quanto resta dopo la tassa sulla prestazione.">
+<style>
+/* Identità del sito FedeGambe: blu = principale, rosso = trattenute. Variabili --* , niente colori fissi. */
+:root{
+  --barra:60px; --g1:#f0e6d2; --g2:#cfe3ef; --g3:#e8e0cc; --bg:#f0e6d2; --surface:#f7f0df; --surface-2:#e4d9bd; --ink:#0d1a2b; --ink-2:#34475c; --ink-3:#5a6b7c; --line:#d6caa8; --track:#dcd2b3;
+  --teal:#2b79b0; --teal-ink:#144a74; --teal-soft:#d3e6f3; --rosso:#d6452a; --rosso-ink:#b3321b; --rosso-soft:#f6ddd5; --sabbia:#9fc3dc;
+  --scelto-bg:#0d1a2b; --scelto-ink:#f0e6d2; --arancio:#2b79b0; --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#dcebd5;
+  --ombra:0 1px 2px rgba(13,26,43,.04), 0 8px 24px -12px rgba(13,26,43,.14);
+  --f-display:Georgia,"Times New Roman",serif;
+  --f-body:"Inter",system-ui,sans-serif;
+  --f-data:ui-monospace,Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --g1:#16304b; --g2:#0b1422; --g3:#070d17; --bg:#0d1a2b; --surface:#132338; --surface-2:#1b3250; --ink:#f0e6d2; --ink-2:#c5cdd6; --ink-3:#93a3b3; --line:#26405e; --track:#20384f;
+  --teal:#6cb4e0; --teal-ink:#8fc8ec; --teal-soft:#16324b; --rosso:#e8694d; --rosso-ink:#f08d76; --rosso-soft:#3a2019; --sabbia:#4a6f8c;
+  --scelto-bg:#6cb4e0; --scelto-ink:#0d1a2b; --ombra:none; --arancio:#6cb4e0; --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#1d2b1c;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{margin:0; color:var(--ink); font:16px/1.55 var(--f-body); min-height:100vh; -webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 600px at 10% 0%,var(--g1),transparent 70%),radial-gradient(900px 700px at 100% 100%,var(--g2),transparent 70%),var(--g3); background-attachment:fixed}
+body::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pagina{max-width:1200px; margin:0 auto; padding:24px 16px 96px}
+h1,h2,h3,legend{font-family:var(--f-display); letter-spacing:-.03em}
+h2{font-size:1.05rem; font-weight:800; margin:0; line-height:1.2}
+.num{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+a{color:var(--teal-ink)}
+:focus-visible{outline:2px solid var(--teal); outline-offset:2px}
+button{font:inherit; color:inherit; cursor:pointer}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+
+/* Barra */
+.barra{position:fixed; z-index:20; inset:0 0 auto; height:calc(var(--barra) + env(safe-area-inset-top,0px)); padding:env(safe-area-inset-top,0px) 20px 0;
+  display:flex; align-items:center; justify-content:flex-end; background:transparent; gap:16px; --colore-parte:var(--arancio); transition:background .35s, box-shadow .35s}
+.barra.compatta{background:color-mix(in srgb, var(--bg) 60%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 1px 0 var(--line)}
+.dove{flex:1; min-width:0; opacity:0; transform:translateY(-6px); transition:opacity .25s, transform .25s; pointer-events:none}
+.barra.compatta .dove{opacity:1; transform:none; pointer-events:auto}
+.dove .progetto{display:block; width:max-content; max-width:100%; font:600 .68rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.dove .progetto:hover{color:var(--ink)}
+.posizione{font:700 1rem/1.3 var(--f-display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; position:relative; padding-left:16px; min-height:1.3em}
+.posizione::before{content:""; position:absolute; left:0; top:.4em; width:.55em; height:.55em; border-radius:50%; background:var(--colore-parte)}
+.azioni{display:flex; gap:8px; flex:none; margin-left:auto}
+.avanzamento{position:absolute; left:0; bottom:0; width:100%; height:3px; background:var(--colore-parte);
+  transform-origin:left; transform:scaleX(var(--avanzamento,0)); opacity:0; transition:opacity .25s}
+.barra.compatta .avanzamento{opacity:1}
+.barra:not(.compatta) .bottone-barra{color:#0d1a2b; border-color:#0d1a2b}
+.barra:not(.compatta) .bottone-barra:hover{background:#0d1a2b; color:#f0e6d2}
+.barra:not(.compatta) .bottone-barra svg path{fill:#0d1a2b}
+.bottone-barra{font:600 .8rem/1 var(--f-data); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:none; border:1px solid var(--ink); border-radius:999px;
+  padding:8px 12px; cursor:pointer; text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
+.bottone-barra:hover{background:var(--ink); color:var(--bg)}
+.firma{display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font:600 .9rem/1 var(--f-data); letter-spacing:.06em}
+.firma:hover{color:var(--arancio)}
+
+/* Banner */
+.banner{position:relative; background:#3d8fc4; padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0; overflow:hidden; border-bottom:3px solid #0d1a2b}
+.banner img{position:absolute; right:0; top:var(--barra); height:calc(100% - var(--barra)); width:auto; max-width:none; -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%); mask-image:linear-gradient(90deg,transparent,#000 22%)}
+.banner .dentro{position:relative; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
+.banner h1{margin:0; padding:0; color:#0d1a2b; font-size:clamp(1.9rem,4.6vw,3.2rem); font-weight:800; line-height:1.05; max-width:16ch; text-wrap:balance}
+.banner h1 em{color:#fff4dc; font-style:italic}
+.banner p{margin:10px 0 0; color:#0d1a2b; font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase}
+@media (max-width:640px){ .banner img{opacity:.55} }
+
+.intro{color:var(--ink-2); margin:12px 0 14px; font-size:1.02rem}
+.dati-modello{display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none}
+.dati-modello li{font-size:.82rem; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:4px 12px}
+.dati-modello b{font-family:var(--f-data); font-weight:600; color:var(--ink)}
+
+/* Preset */
+.pulsante{min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:var(--surface);
+  font-size:.9rem; font-weight:600; display:inline-flex; align-items:center; gap:8px; transition:border-color .15s, background .15s}
+.pulsante:hover{border-color:var(--ink-3)}
+.pulsante .punto{width:8px; height:8px; border-radius:50%}
+.pulsante.leggero{border-color:transparent; background:transparent; color:var(--ink-2)}
+.pulsante.leggero:hover{background:var(--surface-2)}
+.scheda{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px; box-shadow:var(--ombra)}
+.scheda:hover{border-color:var(--ink-3)}
+.layout{display:grid; gap:16px; grid-template-columns:minmax(0,1fr)}
+
+/* Form */
+form{display:grid; gap:20px}
+fieldset{border:0; margin:0; padding:0; min-width:0}
+.scheda.unica{padding:24px; min-width:0}
+.controlli{display:grid; gap:24px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){
+  .controlli{grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:"a b" "c b" "d b"; grid-template-rows:auto auto 1fr; gap:28px 36px}
+  .controlli .gruppo:nth-child(1){grid-area:a}
+  .controlli{position:relative}
+  .controlli::before{content:""; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--line)}
+  .controlli .gruppo:nth-child(2){grid-area:b}
+  .controlli .gruppo:nth-child(3){grid-area:c; border-top:1px solid var(--line); padding-top:24px}
+  .controlli .gruppo:nth-child(4){grid-area:d; border-top:1px solid var(--line); padding-top:24px}
+}
+@media (max-width:759px){ .controlli .gruppo + .gruppo{border-top:1px solid var(--line); padding-top:20px} }
+.gruppo{display:flex; flex-direction:column; min-width:0}
+.gtitolo{display:flex; align-items:center; gap:10px; font-size:1.02rem; margin:0 0 16px}
+.passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font:700 .82rem var(--f-data); flex:none; background:var(--arancio); color:#0d1a2b}
+.campi{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; flex:1; align-content:start}
+.etichetta,.campo > legend{display:block; font:600 .88rem var(--f-body); letter-spacing:0; color:var(--ink-2); margin:0 0 7px; padding:0}
+.aiuto{font-size:.8rem; color:var(--ink-3); margin:6px 0 0}
+.aiuto:empty{display:none}
+.errore-campo{font-size:.8rem; color:var(--rosso-ink); font-weight:600; margin:6px 0 0}
+.coppia{display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
+.coppia{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+
+.segmenti{display:flex; flex-wrap:wrap; gap:6px}
+.segmento{position:relative; flex:1 1 auto}
+.segmento input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer}
+.segmento span{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:44px; height:100%; padding:6px 12px;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg); font-size:.9rem; line-height:1.2; transition:background .15s, border-color .15s, color .15s}
+.segmento:hover span{border-color:var(--ink-3)}
+.segmento input:checked + span{background:var(--scelto-bg); border-color:var(--scelto-bg); color:var(--scelto-ink); font-weight:600}
+.segmento input:focus-visible + span{outline:2px solid var(--teal); outline-offset:2px}
+
+select,input[type=number],input[type=text]{width:100%; font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:0 12px; min-height:44px}
+select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size:5px 5px; background-repeat:no-repeat; padding-right:36px}
+input[type=number]{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+input[aria-invalid=true]{border-color:var(--rosso); background:var(--rosso-soft)}
+.con-unita{position:relative}
+.con-unita input{padding-right:76px}
+.con-unita .unita{position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:.82rem; color:var(--ink-3); pointer-events:none}
+.con-unita.corto input{padding-right:58px}
+.contatore{display:grid; grid-template-columns:44px minmax(0,1fr) 44px; gap:6px}
+.contatore input{text-align:center; padding:0 4px; -moz-appearance:textfield; appearance:textfield}
+.contatore input::-webkit-inner-spin-button,.contatore input::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
+.contatore button{border:1px solid var(--line); background:var(--surface-2); border-radius:8px; font-size:1.2rem; line-height:1}
+.contatore button:hover:not(:disabled){border-color:var(--ink-3)}
+.interruttore{align-self:flex-start; min-height:40px; padding:0 16px; border-radius:999px; font:600 .88rem/1 var(--f-body);
+  color:var(--ink); background:transparent; border:1px solid var(--ink-3); display:inline-flex; align-items:center; gap:8px; text-align:left;
+  transition:background .15s, color .15s, border-color .15s, transform .05s}
+.interruttore::before{content:""; width:14px; height:14px; border-radius:4px; border:2px solid currentColor; box-sizing:border-box; flex:none}
+.interruttore:hover{background:var(--surface-2); border-color:var(--ink)}
+.interruttore:active{transform:translateY(1px)}
+.interruttore[aria-pressed=true]{background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.interruttore[aria-pressed=true]::before{background:currentColor; box-shadow:inset 0 0 0 2px var(--scelto-bg)}
+
+/* Risultato */
+.risultato{display:flex; flex-direction:column; min-width:0}
+.risultato .delta{font:400 .78rem/1.4 var(--f-body); color:var(--ink-2); margin:4px 0 0}
+.kpi{font:800 clamp(2.2rem,5vw,2.9rem)/1.05 var(--f-display); letter-spacing:-.03em; color:var(--teal-ink); margin:10px 0 2px; font-variant-numeric:tabular-nums}
+.kpi-sub{font:600 .88rem var(--f-data); color:var(--ink-2); margin:0}
+.opzioni{list-style:none; padding:0; margin:16px 0 0; display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.opzioni li{display:flex; flex-direction:column; gap:2px; padding:10px 14px; border-radius:10px; background:var(--surface-2); font-size:.85rem; border:1px solid transparent}
+.opzioni li b{font:800 1.1rem var(--f-display); font-variant-numeric:tabular-nums}
+.opzioni li small{font:.72rem/1.4 var(--f-body); color:var(--ink-3)}
+.opzioni li.best{background:var(--verde-soft); border-color:var(--verde)}
+.opzioni li.best > span{color:var(--verde-ink); font-weight:700}
+.confronto{font-size:.76rem; color:var(--ink-3); margin:auto 0 0; padding-top:12px}
+.inattivo{opacity:.4; transition:opacity .2s}
+.avviso{background:var(--rosso-soft); color:var(--rosso-ink); border-radius:8px; padding:10px 14px; font-size:.88rem; font-weight:600; margin:12px 0 0}
+.avviso.lieve{background:var(--surface-2); color:var(--ink-2); font-weight:500; font-size:.8rem}
+
+/* Cascata */
+.riga-sotto{margin-top:16px}
+#spiegazione{padding:26px 28px}
+@media (max-width:520px){ #spiegazione{padding:20px 16px} }
+.sottotitolo{font-size:.86rem; color:var(--ink-3); margin:4px 0 12px}
+.cascata{display:grid; gap:4px}
+.riga{display:grid; grid-template-columns:minmax(0,12em) minmax(0,1fr) 6.2em; gap:10px; align-items:center; min-height:31px}
+.riga .nome{font-size:.86rem; line-height:1.2; min-width:0}
+.riga .nome b{display:block; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .nome span{display:block; font-size:.76rem; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .pista{position:relative; height:18px}
+.riga .pista::before{content:""; position:absolute; inset:50% 0 auto; height:1px; background:var(--line)}
+.riga .seg{position:absolute; top:0; bottom:0; border-radius:3px; min-width:2px; transition:left .3s, width .3s}
+.riga .seg.su{background:var(--verde)} .riga .seg.giu{background:var(--rosso)} .riga .seg.tot{background:var(--teal)}
+.riga .val{font:500 .8rem var(--f-data); text-align:right; white-space:nowrap}
+.riga .val.su{color:var(--verde-ink)} .riga .val.giu{color:var(--rosso-ink)}
+.riga.estremo{border-top:1px dashed var(--line); padding-top:4px}
+.riga.estremo .val{font-weight:600; color:var(--ink)}
+.legenda{display:flex; flex-wrap:wrap; gap:14px; font-size:.8rem; color:var(--ink-2); margin:14px 0 0}
+.legenda i{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:6px}
+.schede{display:flex; gap:10px; margin-top:22px}
+.scheda-tab{flex:0 1 auto; min-width:0; padding:9px 14px; border:1px solid var(--ink-3); border-radius:999px; background:transparent; color:var(--ink); font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; transition:background .15s, color .15s}
+.scheda-tab:hover{background:var(--surface-2)}
+.scheda-tab:active{transform:translateY(1px)}
+.scheda-tab[aria-selected=true]{background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.pannello{margin-top:16px}
+.pannello.metodo{font-size:.84rem; color:var(--ink-2)}
+.pannello.metodo p{margin:6px 0}
+@media (max-width:520px){ .schede{gap:6px} .scheda-tab{flex:1 1 0; font-size:.68rem; letter-spacing:.04em; padding:9px 6px} }
+details.metodo{margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:.84rem; color:var(--ink-2)}
+details.metodo summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
+details.metodo p{margin:6px 0}
+.tabella{width:100%; border-collapse:collapse; margin:8px 0; font-size:.84rem}
+.tabella th,.tabella td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:right}
+.tabella th:first-child,.tabella td:first-child{text-align:left; font-weight:500}
+.tabella thead th{font:600 .72rem var(--f-data); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+.tabella td{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+
+/* Famiglia comprimibile, altre voci */
+.famiglia summary{cursor:pointer; list-style:none; min-height:44px; margin-bottom:0; font:800 1.02rem/1.2 var(--f-display); letter-spacing:-.03em}
+.famiglia summary::-webkit-details-marker{display:none}
+.famiglia summary::after{content:"+"; margin-left:auto; font:600 1.2rem var(--f-data); color:var(--ink-3)}
+.famiglia[open] summary{margin-bottom:16px}
+.famiglia[open] summary::after{content:"−"}
+.voci{display:grid; gap:8px; margin-bottom:6px}
+.voci:empty{display:none}
+.voce{display:grid; grid-template-columns:minmax(0,1fr) 6em 6.5em 44px; gap:6px}
+@media (max-width:520px){ .voce{grid-template-columns:minmax(0,1fr) 6.5em 44px} .voce .v-d{grid-column:1/-1} }
+.voce button{border:1px solid var(--line); background:var(--surface-2); border-radius:8px; font-size:1.2rem; line-height:1}
+.voce input,.voce select{padding-left:8px}
+.voce select{padding-right:26px; background-position:calc(100% - 14px) 50%, calc(100% - 9px) 50%}
+
+.valore-unita{display:grid; grid-template-columns:minmax(0,1fr) 6.5em; gap:6px}
+.valore-unita select{padding-left:8px; padding-right:26px; background-position:calc(100% - 14px) 50%, calc(100% - 9px) 50%}
+.tabella .sez th{text-align:left; padding:16px 8px 4px; font:800 .95rem var(--f-display); letter-spacing:-.02em; color:var(--teal-ink); border-bottom:2px solid var(--line)}
+.tabella thead th small{font:400 .7rem var(--f-body); text-transform:none; letter-spacing:0; color:var(--ink-3)}
+.tabella tr.tot td{font-weight:700; color:var(--ink)}
+
+/* Dati comprimibili e invio */
+.dati > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:14px; min-height:44px}
+.dati > summary::-webkit-details-marker{display:none}
+.dati > summary::after{content:"Comprimi"; flex:none; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--ink-3); border-radius:999px; padding:9px 14px; margin-left:auto}
+.dati:not([open]) > summary::after{content:"Modifica"; background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.dati > summary h2{font-size:1.15rem; flex:none}
+.dati .riepilogo{display:none; min-width:0; color:var(--ink-2); font-size:.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.dati:not([open]) .riepilogo{display:block}
+.dati[open] > summary{margin-bottom:22px}
+.dati{margin-top:28px}
+.invia{width:100%; min-height:56px; border:0; border-radius:12px; background:var(--scelto-bg); color:var(--scelto-ink); font:800 1.05rem var(--f-display); letter-spacing:-.01em; transition:transform .05s, filter .15s}
+.invia:hover{filter:brightness(1.12)}
+.invia:active{transform:translateY(1px)}
+#esito > .scheda:first-child{margin-top:16px}
+
+.kpi-mesi{font:500 .84rem var(--f-body); color:var(--ink-3); margin:4px 0 0}
+.scorri{overflow-x:auto; margin:8px 0; -webkit-overflow-scrolling:touch}
+.tabella.larga{max-width:none; min-width:760px; margin:0}
+.tabella.larga td,.tabella.larga th{white-space:nowrap; padding:7px 10px}
+.tabella.larga thead th{white-space:normal; vertical-align:bottom}
+.tabella tr.agg td{background:var(--surface-2)}
+.nota{font-size:.82rem; color:var(--ink-3); margin:6px 0}
+
+.ripristina{border:1px solid var(--rosso); background:var(--rosso-soft); color:var(--rosso-ink); border-radius:999px; padding:9px 12px; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; transition:background .15s, color .15s}
+.ripristina:hover{background:var(--rosso); color:#fff}
+.dati[open] .ripr-s{display:none}
+.dati > summary .ripr-s{margin-left:auto}
+.dati:not([open]) > summary::after{margin-left:0}
+.azioni-form{display:flex; justify-content:center; gap:12px}
+.azioni-form button{flex:0 0 220px; min-height:48px; padding:0 12px; border-radius:999px; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase}
+.azioni-form .invia{border:1px solid var(--scelto-bg)}
+@media (max-width:520px){ .azioni-form button{flex:1 1 0} .dati > summary{flex-wrap:wrap} .dati:not([open]) > summary .riepilogo{order:5; flex:1 0 100%; white-space:normal} }
+.tabella.larga tr.tot td{border-top:2px solid var(--ink-3); background:var(--surface-2); padding-top:14px; padding-bottom:14px; font-weight:700; color:var(--ink)}
+.tabella.larga tr.vuoto td{border:0; padding:0; height:14px}
+
+.grafico svg{display:block; width:100%; height:auto; touch-action:pan-y}
+.grafico text{font:500 11px var(--f-data); fill:var(--ink-3)}
+.grafico .asse{stroke:var(--line); stroke-width:1}
+.grafico-info{min-height:3.2em; margin:10px 0 0; font:500 .84rem/1.5 var(--f-data); color:var(--ink-2)}
+.grafico-info b{color:var(--ink)}
+.sotto{font:800 1rem var(--f-display); letter-spacing:-.02em; margin:26px 0 2px}
+.scorri.alta{max-height:440px; overflow:auto}
+.scorri.alta thead th{position:sticky; top:0; background:var(--surface); z-index:1}
+
+/* Barra mobile */
+.barra-mobile{position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); z-index:10;
+  display:flex; align-items:center; gap:12px; padding:10px 10px 10px 16px; border-radius:14px;
+  background:var(--ink); color:var(--bg); box-shadow:0 10px 30px -10px rgba(0,0,0,.4);
+  transform:translateY(160%); transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+.barra-mobile.visibile{transform:none}
+.barra-mobile .etic{font-size:.8rem; opacity:.8}
+.barra-mobile strong{font:800 1.3rem var(--f-display); font-variant-numeric:tabular-nums}
+.barra-mobile .mdelta{font:500 .8rem var(--f-data); opacity:.85}
+.barra-mobile a{margin-left:auto; color:var(--bg); background:color-mix(in srgb, var(--bg) 16%, transparent); border-radius:10px; padding:0 14px;
+  min-height:44px; display:inline-flex; align-items:center; text-decoration:none; font-weight:600; font-size:.88rem}
+@media (min-width:1000px){ .barra-mobile{display:none} }
+
+footer{margin-top:48px; padding-top:18px; border-top:3px solid var(--ink); color:var(--ink-3); font:600 .78rem/1.6 var(--f-data); text-transform:uppercase; letter-spacing:.06em}
+footer a{color:inherit} footer a:hover{color:var(--arancio)}
+footer .firma{margin-top:14px}
+@media (max-width:560px){ .solo-largo{display:none} }
+[hidden]{display:none !important}
+/* BANNER A DUE LIVELLI: img/banner_sfondo.svg è il fondo del banner (continuo, anche dietro alla barra e al titolo);
+   <img class="soggetto" src="img/banner_soggetto.svg"> è il soggetto. Colore di fondo e del testo: --banner-fondo, --banner-testo (nella pagina).
+   Desktop: titolo e sottotitolo a sinistra, soggetto a destra.
+   Telefono (fino a 700px): solo il titolo prima della grafica, poi il soggetto con il sottotitolo sopra la sua parte bassa, su una sfumatura. */
+.banner{position:relative; overflow:hidden; padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0;
+  background:var(--banner-fondo) url("img/banner_sfondo.svg") 50% 50% / cover no-repeat; border-bottom:3px solid var(--ink)}
+.banner .soggetto{position:absolute; z-index:0; top:calc(var(--barra) + 10px); bottom:18px; right:max(16px, calc(50vw - 600px)); left:auto;
+  width:min(46%, 560px); height:calc(100% - var(--barra) - 28px); max-width:none; opacity:1; -webkit-mask-image:none; mask-image:none; object-fit:contain; object-position:100% 0}
+.banner .dentro{position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
+.banner picture{display:contents}
+/* strisce a tutta larghezza (classe "largo"): su desktop il soggetto è ruotato di 90° (banner_soggetto_ruotato.svg, base a destra)
+   e occupa tutta l'altezza del banner, largo metà schermo (ritagliato sopra e sotto), allineato al bordo destro; su telefono resta orizzontale sotto il titolo */
+@media (min-width:701px){
+  .banner .soggetto.largo{top:0; bottom:0; right:0; width:50vw; height:100%; object-fit:cover; object-position:100% 50%}  /* largo metà schermo, ritagliato sopra e sotto */
+}
+.banner h1{margin:0; padding:0; border:0; color:var(--banner-testo); font-size:clamp(1.9rem,4.6vw,3.2rem); font-weight:800; line-height:1.05; max-width:16ch; text-wrap:balance}
+.banner p{margin:10px 0 0; color:var(--banner-testo); font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase; max-width:52ch}
+@media (max-width:700px){
+  .banner{display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto auto}
+  .banner .dentro{display:contents}
+  .banner h1{grid-row:1; grid-column:1; position:relative; z-index:2; padding:22px 16px 16px; max-width:none}
+  .banner .soggetto{grid-row:2; grid-column:1; position:relative; inset:auto; width:100%; height:min(44vw, 240px); box-sizing:border-box;
+    padding:0 16px 18px; object-position:50% 0}
+  .banner p{grid-row:3; grid-column:1; position:relative; z-index:2; margin:-48px 0 0; padding:34px 16px 18px; max-width:none;
+    background:linear-gradient(to bottom, transparent, color-mix(in srgb, var(--banner-fondo) 86%, transparent) 34px)}
+  .banner .soggetto.largo{object-fit:cover; object-position:50% 100%; padding:0}  /* strisce a tutta larghezza */
+  .banner::after{display:none}
+}
+/* /BANNER A DUE LIVELLI */
+.banner{--banner-fondo:#3d8fc4; --banner-testo:#0d1a2b}
+/* FONT MOBILE (telefono, fino a 700px): gerarchia titolo > titoli di sezione > testo > etichette > note */
+@media (max-width:700px){
+  h1, .banner h1{font-size:clamp(1.9rem,8.5vw,2.25rem)}
+  h2, .sezione > legend, .gtitolo, .risultati h2{font-size:1.25rem}
+  h3{font-size:1.05rem}
+  .intro{font-size:1rem}
+  .etichetta, .campo > legend{font-size:.9rem}
+}
+/* /FONT MOBILE */
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
+</head>
+<body>
+<header class="barra" id="barra">
+  <div class="dove">
+    <a class="progetto" href="#">Simulatore fondo pensione</a>
+    <div class="posizione" id="barra-capitolo" aria-live="polite"></div>
+  </div>
+  <nav class="azioni" aria-label="Navigazione">
+    <a class="bottone-barra" href="../">← Simulatori</a>  <a class="bottone-barra" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="16" height="16" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>← Progetti</span></a>
+    <button class="bottone-barra" id="tema" type="button" aria-label="Cambia tema chiaro/scuro">Tema</button>
+  </nav>
+  <div class="avanzamento"></div>
+</header>
+<section class="banner">
+  <img class="soggetto" src="img/banner_soggetto.svg" alt="">
+  <div class="dentro">
+    <h1>Il tuo fondo <em>pensione</em></h1>
+    <p>Crescita e deducibilità IRPEF, 2026</p>
+  </div>
+</section>
+<div class="pagina">
+  <p class="intro">Imposta età, stipendio e versamenti: il simulatore fa crescere il tuo fondo pensione anno per anno, calcola quanta IRPEF risparmi grazie alla deducibilità dei contributi e quanto ti resta dopo la tassazione della prestazione.</p>
+  <ul class="dati-modello" id="dati-modello"></ul>
+
+  <details class="scheda dati capitolo" id="dati" data-titolo="Dati" open>
+  <summary><h2>Inserisci i dati</h2><span class="riepilogo" id="riepilogo"></span><button type="button" class="ripristina ripr-s">Ripristina</button></summary>
+  <form id="profilo" novalidate>
+    <fieldset class="unica" aria-label="Dati">
+    <div class="controlli">
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">1</span>Chi sei</h2><div class="campi">
+        <div class="coppia">
+          <div class="campo"><label class="etichetta" for="eta">Età oggi</label>
+            <div class="con-unita corto"><input type="number" id="eta" name="eta" inputmode="numeric" step="1" value="35" aria-describedby="eta-e"><span class="unita">anni</span></div>
+            <p class="errore-campo" id="eta-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="pens">Età di pensionamento</label>
+            <div class="con-unita corto"><input type="number" id="pens" name="pens" inputmode="numeric" step="1" value="67" aria-describedby="pens-e"><span class="unita">anni</span></div>
+            <p class="errore-campo" id="pens-e" role="alert" hidden></p></div>
+        </div>
+        <div class="campo"><label class="etichetta" for="ral">Retribuzione annua lorda (RAL)</label>
+          <div class="con-unita"><input type="number" id="ral" name="ral" inputmode="decimal" step="500" value="30000" aria-describedby="ral-e"><span class="unita">€</span></div>
+          <p class="errore-campo" id="ral-e" role="alert" hidden></p></div>
+        <div class="campo"><label class="etichetta" for="comune">Comune di domicilio fiscale</label>
+          <input type="text" id="comune" name="comune" list="elenco-comuni" autocomplete="off" value="MODENA (MO)" aria-describedby="comune-e">
+          <datalist id="elenco-comuni"></datalist>
+          <p class="aiuto">Serve per le addizionali: anche quelle si riducono con la deduzione.</p>
+          <p class="errore-campo" id="comune-e" role="alert" hidden></p></div>
+      </div></div>
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">2</span>Versamenti</h2><div class="campi">
+        <div class="campo"><label class="etichetta" for="vl">Il tuo contributo</label>
+          <div class="valore-unita"><input type="number" id="vl" name="vl" inputmode="decimal" step="0.1" value="2" aria-describedby="vl-e"><select id="vl-u" aria-label="Unità"><option value="p">% RAL</option><option value="e">€/anno</option></select></div>
+          <p class="errore-campo" id="vl-e" role="alert" hidden></p></div>
+        <div class="campo"><label class="etichetta" for="vd">Contributo del datore di lavoro</label>
+          <div class="valore-unita"><input type="number" id="vd" name="vd" inputmode="decimal" step="0.1" value="2" aria-describedby="vd-e"><select id="vd-u" aria-label="Unità"><option value="p">% RAL</option><option value="e">€/anno</option></select></div>
+          <p class="errore-campo" id="vd-e" role="alert" hidden></p></div>
+        <p class="aiuto">Le percentuali dipendono dal contratto collettivo e dal fondo. Tuo contributo e quello del datore si deducono insieme fino al limite annuo; il TFR non si deduce.</p>
+        <button type="button" class="interruttore" id="tfr" aria-pressed="true">Versa il TFR al fondo</button>
+        <div class="coppia">
+          <div class="campo"><label class="etichetta" for="m0">Già accumulato</label>
+            <div class="con-unita corto"><input type="number" id="m0" name="m0" inputmode="decimal" step="500" value="0" aria-describedby="m0-e"><span class="unita">€</span></div>
+            <p class="errore-campo" id="m0-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="a0">Anni già iscritto</label>
+            <div class="con-unita corto"><input type="number" id="a0" name="a0" inputmode="numeric" step="1" value="0" aria-describedby="a0-e"><span class="unita">anni</span></div>
+            <p class="errore-campo" id="a0-e" role="alert" hidden></p></div>
+        </div>
+      </div></div>
+
+      <div class="gruppo"><h2 class="gtitolo"><span class="passo">3</span>Ipotesi</h2><div class="campi">
+        <div class="coppia">
+          <div class="campo"><label class="etichetta" for="rg">Rendimento lordo</label>
+            <div class="con-unita corto"><input type="number" id="rg" name="rg" inputmode="decimal" step="0.1" value="4" aria-describedby="rg-e"><span class="unita">% anno</span></div>
+            <p class="errore-campo" id="rg-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="ct">Costi del fondo (ISC)</label>
+            <div class="con-unita corto"><input type="number" id="ct" name="ct" inputmode="decimal" step="0.1" value="1" aria-describedby="ct-e"><span class="unita">% anno</span></div>
+            <p class="errore-campo" id="ct-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="ts">Quota in titoli di Stato</label>
+            <div class="con-unita corto"><input type="number" id="ts" name="ts" inputmode="decimal" step="5" value="30" aria-describedby="ts-e"><span class="unita">%</span></div>
+            <p class="errore-campo" id="ts-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="inf">Inflazione</label>
+            <div class="con-unita corto"><input type="number" id="inf" name="inf" inputmode="decimal" step="0.1" value="2" aria-describedby="inf-e"><span class="unita">% anno</span></div>
+            <p class="errore-campo" id="inf-e" role="alert" hidden></p></div>
+          <div class="campo"><label class="etichetta" for="cr">Crescita della retribuzione</label>
+            <div class="con-unita corto"><input type="number" id="cr" name="cr" inputmode="decimal" step="0.1" value="2" aria-describedby="cr-e"><span class="unita">% anno</span></div>
+            <p class="errore-campo" id="cr-e" role="alert" hidden></p></div>
+        </div>
+        <p class="aiuto">Sono ipotesi, non previsioni. I rendimenti futuri non sono garantiti; i costi (ISC) si trovano nella scheda dei costi del fondo. Sui titoli di Stato l'imposta sui rendimenti è del 12,5% invece del 20%.</p>
+      </div></div>
+
+    </div>
+    </fieldset>
+    <div class="azioni-form"><button type="button" class="ripristina">Ripristina</button><button type="submit" class="invia">Calcola il fondo</button></div>
+  </form>
+  </details>
+
+  <div id="esito" hidden>
+  <section class="scheda risultato riga-sotto capitolo" id="risultato" data-titolo="Quanto avrai">
+    <h2>Quanto avrai</h2>
+    <p class="delta" id="delta"></p>
+    <div id="avviso"></div>
+    <div id="blocco-risultato" aria-live="polite">
+      <p class="kpi num" id="kpi">–</p>
+      <p class="kpi-sub" id="kpi-sub"></p>
+      <p class="kpi-mesi" id="kpi-mesi"></p>
+      <ul class="opzioni" id="opzioni"></ul>
+    </div>
+    <p class="confronto" id="rend"></p>
+  </section>
+
+  <section class="scheda riga-sotto capitolo" id="confronto" data-titolo="Con o senza fondo">
+    <h2>Con il fondo o senza?</h2>
+    <p class="sottotitolo" id="sottotitolo-confronto"></p>
+    <button type="button" class="interruttore" id="cmp" aria-pressed="false">Conta anche il contributo del datore</button>
+    <ul class="opzioni" id="opzioni-confronto"></ul>
+    <div class="grafico" id="grafico-confronto"></div>
+    <p class="legenda"><span><i style="background:var(--verde)"></i>Nel fondo, con la deduzione (netto)</span><span><i style="background:var(--teal)"></i>Stessi soldi investiti fuori dal fondo</span><span><i style="background:var(--ink)"></i>Soldi tenuti in contanti</span></p>
+    <p class="grafico-info" id="confronto-info" aria-live="polite"></p>
+    <p class="confronto" id="nota-confronto"></p>
+  </section>
+
+  <section class="scheda riga-sotto capitolo" id="spiegazione" data-titolo="Come cresce">
+    <h2>Come cresce il fondo</h2>
+    <p class="sottotitolo" id="sottotitolo-grafico"></p>
+    <div class="grafico" id="grafico"></div>
+    <p class="legenda"><span><i style="background:var(--teal)"></i>Versamenti (tuoi, datore, TFR)</span><span><i style="background:var(--verde)"></i>Rendimenti netti</span><span><i style="background:var(--ink)"></i>IRPEF risparmiata (cumulata)</span></p>
+    <p class="grafico-info" id="grafico-info" aria-live="polite"></p>
+    <h3 class="sotto">IRPEF risparmiata ogni anno</h3>
+    <p class="sottotitolo">Quanto ti torna in tasca ogni anno grazie alla deduzione: cresce con lo stipendio finché il tuo versamento resta sotto il limite.</p>
+    <div class="grafico" id="grafico-irpef"></div>
+    <div class="schede" role="tablist" aria-label="Approfondimenti">
+      <button type="button" role="tab" class="scheda-tab" id="t-anni" aria-controls="p-anni" aria-selected="true">Anno per anno</button>
+      <button type="button" role="tab" class="scheda-tab" id="t-come" aria-controls="p-come" aria-selected="false">Come funziona il calcolo</button>
+    </div>
+    <div class="pannello" role="tabpanel" id="p-anni" aria-labelledby="t-anni"><div id="tabella"></div></div>
+    <div class="pannello metodo" role="tabpanel" id="p-come" aria-labelledby="t-come" hidden>
+      <p><b>Versamenti:</b> il tuo contributo e quello del datore (in % della RAL o in euro) più il TFR maturato, pari a circa il 6,91% della RAL. La RAL cresce ogni anno della percentuale indicata.</p>
+      <p><b>Rendimento:</b> rendimento lordo meno i costi del fondo, poi si toglie l'imposta sostitutiva: 20%, ridotta al 12,5% sulla parte in titoli di Stato. I versamenti rendono per metà anno.</p>
+      <p><b>Deducibilità:</b> il tuo contributo e quello del datore si deducono insieme fino a 5.164,57 € l'anno (il TFR non si deduce). Il risparmio è la differenza di netto con e senza deduzione, calcolata con lo stesso motore del simulatore busta paga: IRPEF, detrazioni, cuneo fiscale e addizionali del tuo comune.</p>
+      <p><b>Con il fondo o senza:</b> ogni anno confronto due strade per lo stesso importo lordo. Nel fondo versi tutto e il fisco ti restituisce l'IRPEF risparmiata; fuori dal fondo paghi l'IRPEF e ti restano in tasca meno soldi, che puoi tenere in contanti o investire con lo stesso rendimento e gli stessi costi (26% sul guadagno, 12,5% sui titoli di Stato, a fine periodo). Il fondo è mostrato netto della tassa sulla prestazione. Il TFR non è nel confronto: è tuo comunque, nel fondo o in azienda.</p>
+      <p><b>Prestazione:</b> si paga il 15% sui contributi dedotti, su quelli del datore e sul TFR, ridotto di 0,30 punti per ogni anno di iscrizione oltre il 15°, fino al 9%. I rendimenti sono già stati tassati ogni anno.</p>
+      <p><b>Euro di oggi:</b> il valore "di oggi" divide per l'inflazione. Il calcolo fiscale è fatto in euro di oggi: si assume che scaglioni e detrazioni crescano con l'inflazione, mentre il limite di deduzione resta fisso come in legge.</p>
+      <p><b>Limiti:</b> non sono considerati il recupero del plafond non dedotto nei primi 5 anni di iscrizione, riscatti e anticipazioni, la rendita (che ha un'altra tassazione sui rendimenti) e il confronto con il TFR lasciato in azienda. Un montante già accumulato è tassato per intero alla prestazione.</p>
+    </div>
+  </section>
+  </div>
+
+  <footer><span id="piede">Stima indicativa 2026 su dati normativi pubblici. Non è consulenza fiscale né sostituisce la consulenza di un professionista. Nessun dato lascia il browser.</span><p><a class="firma" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="28" height="28" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>Federico Gamberini</span></a></p></footer>
+</div>
+
+<!-- Barra fissa mobile: compare quando il KPI esce dallo schermo -->
+<div class="barra-mobile" id="barra-mobile">
+  <div><div class="etic">Fondo netto</div><strong id="mob-p">–</strong> <span class="mdelta" id="mob-delta"></span></div>
+  <a href="#risultato">Vedi il fondo</a>
+</div>
+
+<script src="../busta-paga/comuni.js"></script>
+<script src="../busta-paga/script.js"></script>
+<script src="script.js"></script>
+<script src="dashboard.js"></script>
+<script>
+(function () {
+  var barra = document.getElementById("barra"), banner = document.querySelector(".banner");
+  var capitoli = [].slice.call(document.querySelectorAll(".capitolo")), inCoda = false;
+  function aggiornaBarra() {
+    inCoda = false;
+    var y = scrollY, hb = barra.offsetHeight, max = document.documentElement.scrollHeight - innerHeight, cap = null;
+    barra.classList.toggle("compatta", y > banner.offsetHeight - hb * 2);
+    var vis = capitoli.filter(function (c) { return c.getClientRects().length; });
+    vis.forEach(function (c) { if (c.getBoundingClientRect().top <= hb + 40) cap = c; });
+    if (y >= max - 2) cap = vis[vis.length - 1];   // in fondo l'ultimo non arriva in cima
+    document.getElementById("barra-capitolo").textContent = cap ? cap.dataset.titolo : "";
+    barra.style.setProperty("--avanzamento", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
+  }
+  addEventListener("scroll", function () { if (!inCoda) { inCoda = true; requestAnimationFrame(aggiornaBarra); } }, {passive: true});
+  addEventListener("resize", aggiornaBarra);
+  aggiornaBarra();
+})();
+document.getElementById("tema").addEventListener("click", () => {
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.theme = r.dataset.theme } catch {}
+});
+</script>
+</body>
+</html>

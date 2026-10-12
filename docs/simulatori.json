@@ -5,6 +5,7 @@
         "d": "Confronta il rendimento netto dopo imposta sugli interessi e bollo, anche dividendo la giacenza tra i due conti.",
         "tags": ["Finanza", "Conti"],
         "y": 2026,
+        "codice": "CD CC",
         "url": "cd-cc/cd-cc.html",
         "img": "cd-cc/img/cover_verticale.svg",
         "chiara": true
@@ -15,7 +16,19 @@
         "d": "Calcola netto annuo e mensile da RAL: contributi INPS, IRPEF, detrazioni, cuneo fiscale L. 207/2024 e addizionali del tuo comune.",
         "tags": ["Lavoro", "Imposte"],
         "y": 2026,
+        "codice": "Busta Paga",
         "url": "busta-paga/busta-paga.html",
         "img": "busta-paga/img/cover_verticale.svg"
+    },
+    {
+        "id": "fondo-pensione",
+        "t": "Fondo pensione: crescita e deducibilità",
+        "d": "Vedi come cresce il fondo anno per anno, quanta IRPEF risparmi con la deduzione dei contributi e quanto resta dopo la tassa sulla prestazione.",
+        "tags": ["Previdenza", "Imposte"],
+        "y": 2026,
+        "codice": "Fondo Pensione",
+        "wip": true,
+        "url": "fondo-pensione/fondo-pensione.html",
+        "img": "fondo-pensione/img/cover_verticale.svg"
     }
 ]

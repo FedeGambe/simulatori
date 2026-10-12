@@ -31,7 +31,7 @@ var CONFIG = {
 };
 ${irpef}
 ${corpo}
-window.Busta = { calcolaNetto: calcolaNetto, cercaComuni: cercaComuni, trovaComune: trovaComune, elencoRegioni: elencoRegioni, anno: CONFIG["irpef.json"].anno };
+window.Busta = { calcolaNetto: calcolaNetto, calcolaDeduzioni: calcolaDeduzioni, cercaComuni: cercaComuni, trovaComune: trovaComune, elencoRegioni: elencoRegioni, anno: CONFIG["irpef.json"].anno };
 })();
 `;
 

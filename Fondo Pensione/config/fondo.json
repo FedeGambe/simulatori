@@ -1,0 +1,20 @@
+{
+  "anno": 2026,
+  "tfr": {
+    "quotaAnnua": 0.0691,
+    "fonte": "Art. 2120 c.c.: retribuzione / 13,5, meno lo 0,50% di contributo INPS"
+  },
+  "imposta": {
+    "rendimenti": 0.2,
+    "rendimentiTitoliStato": 0.125,
+    "rendimentiLiberi": 0.26,
+    "fonte": "D.Lgs. 252/2005 art. 17: 20% sul risultato netto annuo del fondo, 12,5% sulla parte in titoli di Stato. Investimento libero: 26% sul guadagno, 12,5% sui titoli di Stato"
+  },
+  "prestazione": {
+    "aliquota": 0.15,
+    "minima": 0.09,
+    "dopoAnni": 15,
+    "riduzionePerAnno": 0.003,
+    "fonte": "D.Lgs. 252/2005 art. 11 c. 6: 15% ridotto di 0,30 punti per ogni anno oltre il 15°, fino al 9%"
+  }
+}
