@@ -8,6 +8,7 @@
         "codice": "CD CC",
         "url": "cd-cc/cd-cc.html",
         "img": "cd-cc/img/cover_verticale.svg",
+        "colore": "#c98a12",
         "chiara": true
     },
     {
@@ -18,7 +19,8 @@
         "y": 2026,
         "codice": "Busta Paga",
         "url": "busta-paga/busta-paga.html",
-        "img": "busta-paga/img/cover_verticale.svg"
+        "img": "busta-paga/img/cover_verticale.svg",
+        "colore": "#2b79b0"
     },
     {
         "id": "fondo-pensione",
@@ -28,6 +30,7 @@
         "y": 2026,
         "codice": "Fondo Pensione",
         "url": "fondo-pensione/fondo-pensione.html",
-        "img": "fondo-pensione/img/cover_verticale.svg"
+        "img": "fondo-pensione/img/cover_verticale.svg",
+        "colore": "#2f6b52"
     }
 ]

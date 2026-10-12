@@ -73,7 +73,7 @@ a{color:inherit;text-decoration:none}
 .links a{min-width:110px;text-align:center;padding:12px 18px;border:1.5px solid #fff;font:700 .8rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em;border-radius:4px}
 .links a.main{background:#fff;color:#14161f}
 .links .wip{min-width:110px;text-align:center;padding:12px 18px;border:1.5px dashed #fff;font:700 .8rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;color:#fff;cursor:default}
-.links a:hover{background:var(--acc);border-color:var(--acc);color:#fff}
+.links a:hover{background:var(--col,var(--acc));border-color:var(--col,var(--acc));color:#fff}
 @media(hover:none){.links{opacity:1;inset:auto 0 70px 0}.card::after{display:none}}
 .empty{padding:40px 0;text-align:center;color:var(--mute)}
 footer{border-top:3px solid var(--ink);padding:28px 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font:600 .8rem/1 ui-monospace,Consolas,monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
@@ -194,7 +194,7 @@ const $ = s => document.querySelector(s);
 // simulatori.json: una voce per simulatore; ogni simulatore sta nella sua cartella (url relativo)
 fetch("simulatori.json").then(r => r.json()).then(S => {
   $("#grid").innerHTML = S.map((s, i) => `
- <article class="card${s.chiara ? " light" : ""}" style="animation-delay:${i * 80}ms;--sfondo:url(${s.img.replace('cover_verticale','cover_sfondo')})">
+ <article class="card${s.chiara ? " light" : ""}" style="animation-delay:${i * 80}ms;${s.colore ? `--col:${s.colore};` : ""}--sfondo:url(${s.img.replace('cover_verticale','cover_sfondo')})">
   <img class="cover" src="${s.img}" alt="" loading="lazy">
   ${s.img.endsWith("cover_verticale.svg")?`<img class="soggetto" onload="this.classList.toggle('largo',this.naturalWidth/this.naturalHeight>2.6)" src="${s.img.replace("cover_verticale","cover_soggetto")}" alt="" loading="lazy">`:""}
   ${s.wip ? "" : `<a class="vai" href="${s.url}" aria-label="${s.t}"></a>`}
