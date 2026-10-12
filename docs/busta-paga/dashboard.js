@@ -121,7 +121,8 @@
       if (badM) ok = false; else v.ral = m * v.mensilita;
     }
     v.eur = {};
-    UNITA.forEach(function (id) { v.eur[id] = v[id] === undefined ? 0 : $(id + "-u").value === "p" ? v[id] / 100 * v.ral / v.mensilita : v[id]; });
+    UNITA.forEach(function (id) { v.eur[id] = v[id] === undefined ? 0 : $(id + "-u").value === "p" ? v[id] / 100 * v.ral / v.mensilita : v[id] * 12 / v.mensilita; });
+    v.eur.ps = v.ps === undefined ? 0 : v.ps * 12 / v.mensilita;
     $("mens-aiuto").textContent = isNaN(m) ? aiutoM : "Totale " + eur.format(m) + " × " + v.mensilita + " = RAL " + eur.format(m * v.mensilita) + ". " + aiutoM;
     v.voci = []; v.vociUi = [];
     var badV = false;
@@ -131,7 +132,7 @@
       iv.setAttribute("aria-invalid", bad);
       if (bad) { badV = true; return; }
       if (n === 0) return;
-      v.voci.push(Object.assign({descrizione: r.querySelector(".v-d").value.trim() || "Altra voce", deducibile: false}, t === "p" ? {aliquota: n / 100} : {importo: n}));
+      v.voci.push(Object.assign({descrizione: r.querySelector(".v-d").value.trim() || "Altra voce", deducibile: false}, t === "p" ? {aliquota: n / 100} : {importo: n * 12 / v.mensilita}));
       v.vociUi.push({t: t, n: n});
     });
     $("voci-e").hidden = !badV;
@@ -299,7 +300,7 @@
         fondo: v.fondo,
         comune: v.comune,
         altreVoci: v.voci,
-        deduzioni: {previdenzaComplementare: v.eur.pl, previdenzaComplementareDitta: v.eur.pd, assistenzaSanitaria: v.ps},
+        deduzioni: {previdenzaComplementare: v.eur.pl, previdenzaComplementareDitta: v.eur.pd, assistenzaSanitaria: v.eur.ps},
         familiari: {coniuge: stato.coniuge, figli21: v.f21 - v.fd, figliDisabili21: v.fd, altri: v.alt, quota: v.quota}
       });
     } catch (e) {

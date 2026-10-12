@@ -4,15 +4,16 @@ const config = leggiConfig("contributi.json");
 
 // l'imponibile previdenziale si arrotonda all'euro;
 // il massimale vale solo per chi non ha contributi prima del 1996
-export function calcolaImponibilePrevidenziale(lordoMensile, { massimale = false } = {}, contributi = config.contributi) {
+// mensilita: soglie e massimale sono annui, ogni pagamento ne vale 1/mensilita (12, 13 o 14)
+export function calcolaImponibilePrevidenziale(lordoMensile, { massimale = false, mensilita = 12 } = {}, contributi = config.contributi) {
     const imponibile = Math.round(lordoMensile);
-    return massimale ? Math.min(imponibile, Math.round(contributi.massimale / 12)) : imponibile;
+    return massimale ? Math.min(imponibile, Math.round(contributi.massimale / mensilita)) : imponibile;
 }
 
-// 1% sulla parte del mese che supera la prima fascia pensionabile
-export function calcolaContributoAggiuntivo(imponibile, contributi = config.contributi) {
+// 1% sulla parte del pagamento che supera la prima fascia pensionabile (annua / mensilità)
+export function calcolaContributoAggiuntivo(imponibile, contributi = config.contributi, mensilita = 12) {
     const aggiuntivo = contributi.contributoAggiuntivo;
-    return Math.max(0, imponibile - aggiuntivo.sogliaMensile) * aggiuntivo.aliquota;
+    return Math.max(0, imponibile - aggiuntivo.soglia / mensilita) * aggiuntivo.aliquota;
 }
 
 // altreVoci: voci inserite dall'utente (es. Ebitermo), con importo fisso o aliquota
@@ -26,16 +27,16 @@ export function calcolaAltreVoci(imponibile, altreVoci = []) {
 }
 
 // fondo: chiave di fondiIntegrazione (cigs, fisOltre5, fisFino5, fsba, fsbaOltre15, nessuno)
-export function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista = false, massimale = false } = {}, contributi = config.contributi) {
+export function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista = false, massimale = false, mensilita = 12 } = {}, contributi = config.contributi) {
     const fondoIntegrazione = contributi.fondiIntegrazione[fondo];
     if (!fondoIntegrazione) {
         throw new Error(`Fondo di integrazione sconosciuto: ${fondo}`);
     }
 
-    const imponibile = calcolaImponibilePrevidenziale(lordoMensile, { massimale }, contributi);
+    const imponibile = calcolaImponibilePrevidenziale(lordoMensile, { massimale, mensilita }, contributi);
     const ivs = imponibile * (apprendista ? contributi.ivs.apprendista : contributi.ivs.ordinario);
     const fondoImporto = imponibile * fondoIntegrazione.aliquota;
-    const aggiuntivo = calcolaContributoAggiuntivo(imponibile, contributi);
+    const aggiuntivo = calcolaContributoAggiuntivo(imponibile, contributi, mensilita);
 
     return {
         imponibile,
@@ -47,13 +48,13 @@ export function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista
     };
 }
 
-// i limiti delle deduzioni sono annui: nel mese si applica 1/12
+// i limiti delle deduzioni sono annui: in ogni pagamento si applica 1/mensilita
 // il limite della previdenza complementare è unico per quota lavoratore e quota ditta:
 // la quota ditta non entra nel lordo, ma consuma parte del limite
-export function calcolaDeduzioni({ previdenzaComplementare = 0, previdenzaComplementareDitta = 0, assistenzaSanitaria = 0 } = {}, deduzioni = config.deduzioni) {
-    const limitePrevidenza = deduzioni.previdenzaComplementare.limite / 12;
+export function calcolaDeduzioni({ previdenzaComplementare = 0, previdenzaComplementareDitta = 0, assistenzaSanitaria = 0, mensilita = 12 } = {}, deduzioni = config.deduzioni) {
+    const limitePrevidenza = deduzioni.previdenzaComplementare.limite / mensilita;
     return Math.min(previdenzaComplementare, Math.max(0, limitePrevidenza - previdenzaComplementareDitta))
-        + Math.min(assistenzaSanitaria, deduzioni.assistenzaSanitaria.limite / 12);
+        + Math.min(assistenzaSanitaria, deduzioni.assistenzaSanitaria.limite / mensilita);
 }
 
 // dal lordo all'imponibile IRPEF del mese:
@@ -65,7 +66,7 @@ export function calcolaImponibileFiscale(lordoMensile, opzioni = {}) {
 
     const vociDeducibili = voci.filter((voce) => voce.deducibile).reduce((somma, voce) => somma + voce.importo, 0);
     const vociNonDeducibili = voci.filter((voce) => !voce.deducibile).reduce((somma, voce) => somma + voce.importo, 0);
-    const importoDeduzioni = calcolaDeduzioni(deduzioni);
+    const importoDeduzioni = calcolaDeduzioni({ ...deduzioni, mensilita: opzioni.mensilita });
 
     return {
         lordo: lordoMensile,

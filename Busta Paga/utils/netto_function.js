@@ -68,7 +68,7 @@ function calcolaMesi({ ral, mensilita, irpef, addizionali, nettoAnnuo }, tratten
 //   giorni, tempoDeterminato, familiari ({ coniuge, figli21, ... }), comune / regione (addizionali)
 // semplificazioni: TFR e assegno unico esclusi; `mesi` ripartisce il netto sui singoli pagamenti (stima, il totale annuo è quello esatto)
 export function calcolaNetto(ral, { mensilita = 14, ...opzioni } = {}) {
-    const fiscale = calcolaImponibileFiscale(ral / mensilita, opzioni);
+    const fiscale = calcolaImponibileFiscale(ral / mensilita, { ...opzioni, mensilita });
     const imponibileAnnuo = fiscale.imponibileFiscale * mensilita;
 
     const irpef = calcolaIrpef(imponibileAnnuo, opzioni);

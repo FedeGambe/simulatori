@@ -3,7 +3,7 @@
 "use strict";
 var CONFIG = {
 "irpef.json": {"anno":2026,"scaglioni":{"fonte":"Art. 11 TUIR, modificato dalla Legge di Bilancio 2026 (L. 199/2025)","fasce":[{"da":0,"a":28000,"aliquota":0.23},{"da":28000,"a":50000,"aliquota":0.33},{"da":50000,"aliquota":0.43}]},"detrazioni":{"fonte":"Art. 13 c. 1 TUIR - detrazioni per lavoro dipendente","fasce":[{"da":0,"a":15000,"base":1955,"variabile":0},{"da":15000,"a":28000,"base":1910,"variabile":1190},{"da":28000,"a":50000,"base":0,"variabile":1910}],"maggiorazione":{"da":25000,"a":35000,"importo":65},"minimo":{"indeterminato":690,"determinato":1380}},"cuneoFiscale":{"fonte":"L. 207/2024 (Legge di Bilancio 2025), art. 1 c. 4-9","sommaEsente":{"fasce":[{"da":0,"a":8500,"percentuale":0.071},{"da":8500,"a":15000,"percentuale":0.053},{"da":15000,"a":20000,"percentuale":0.048}]},"ulterioreDetrazione":{"fasce":[{"da":20000,"a":32000,"base":1000,"variabile":0},{"da":32000,"a":40000,"base":0,"variabile":1000}]}},"detrazioniFamiliari":{"fonte":"Art. 12 TUIR. Figli under 21: assegno unico (fuori busta), nessuna detrazione","coniuge":{"fasce":[{"da":0,"a":15000,"base":800,"variabile":-110,"divisore":15000},{"da":15000,"a":15200,"fisso":710},{"da":15200,"a":15400,"fisso":720},{"da":15400,"a":15600,"fisso":730},{"da":15600,"a":29000,"fisso":690},{"da":29000,"a":29200,"fisso":700},{"da":29200,"a":34700,"fisso":710},{"da":34700,"a":35000,"fisso":720},{"da":35000,"a":35100,"fisso":710},{"da":35100,"a":35200,"fisso":705},{"da":35200,"a":40000,"fisso":690}],"oltre":{"da":40000,"a":80000,"importo":690}},"figlio21":{"importo":950,"importoDisabile":1350,"redditoMax":95000,"incrementoPerFiglio":15000},"altriFamiliari":{"importo":750,"redditoMax":80000}}},
-"contributi.json": {"anno":2026,"contributi":{"fonte":"Circolare INPS n. 6 del 30/01/2026 - quote a carico del lavoratore","ivs":{"ordinario":0.0919,"apprendista":0.0584},"fondiIntegrazione":{"cigs":{"aliquota":0.003,"ambito":"industria oltre 15 dipendenti"},"fisOltre5":{"aliquota":0.002667,"ambito":"FIS oltre 5 dipendenti (1/3 di 0,80%)"},"fisFino5":{"aliquota":0.001667,"ambito":"FIS fino a 5 dipendenti (1/3 di 0,50%)"},"fsba":{"aliquota":0.0015,"ambito":"artigianato fino a 15 dipendenti (1/4 di 0,60%)"},"fsbaOltre15":{"aliquota":0.0025,"ambito":"artigianato oltre 15 dipendenti (1/4 di 1,00%)"},"nessuno":{"aliquota":0,"ambito":"nessun fondo"}},"contributoAggiuntivo":{"aliquota":0.01,"soglia":56224,"sogliaMensile":4685},"massimale":122295},"deduzioni":{"fonte":"Art. 10 c. 1 lett. e-bis e art. 51 c. 2 lett. a TUIR","previdenzaComplementare":{"limite":5164.57},"assistenzaSanitaria":{"limite":3615.2}}},
+"contributi.json": {"anno":2026,"contributi":{"fonte":"Circolare INPS n. 6 del 30/01/2026 - quote a carico del lavoratore","ivs":{"ordinario":0.0919,"apprendista":0.0584},"fondiIntegrazione":{"cigs":{"aliquota":0.003,"ambito":"industria oltre 15 dipendenti"},"fisOltre5":{"aliquota":0.002667,"ambito":"FIS oltre 5 dipendenti (1/3 di 0,80%)"},"fisFino5":{"aliquota":0.001667,"ambito":"FIS fino a 5 dipendenti (1/3 di 0,50%)"},"fsba":{"aliquota":0.0015,"ambito":"artigianato fino a 15 dipendenti (1/4 di 0,60%)"},"fsbaOltre15":{"aliquota":0.0025,"ambito":"artigianato oltre 15 dipendenti (1/4 di 1,00%)"},"nessuno":{"aliquota":0,"ambito":"nessun fondo"}},"contributoAggiuntivo":{"aliquota":0.01,"soglia":56224},"massimale":122295},"deduzioni":{"fonte":"Art. 10 c. 1 lett. e-bis e art. 51 c. 2 lett. a TUIR","previdenzaComplementare":{"limite":5164.57},"assistenzaSanitaria":{"limite":3615.2}}},
 "addizionali-regionali.json": {"anno":2026,"fonte":"MEF - Dipartimento delle Finanze, aliquote addizionale regionale IRPEF 2026","note":"Le fasce si applicano a scaglioni, come l'IRPEF. Non sono gestite le agevolazioni legate a figli o disabilità: vanno inserite manualmente.","regioni":{"ABRUZZO":{"fasce":[{"da":0,"a":28000,"aliquota":0.0167},{"da":28000,"a":50000,"aliquota":0.0287},{"da":50000,"aliquota":0.0333}]},"BASILICATA":{"fasce":[{"da":0,"aliquota":0.0123}]},"BOLZANO":{"fasce":[{"da":0,"a":50000,"aliquota":0.0123},{"da":50000,"aliquota":0.0173}],"detrazioni":[{"da":0,"a":90000,"importo":430.5},{"da":50000,"importo":125,"rampa":25000}]},"CALABRIA":{"fasce":[{"da":0,"aliquota":0.0173}]},"CAMPANIA":{"fasce":[{"da":0,"a":15000,"aliquota":0.0173},{"da":15000,"a":28000,"aliquota":0.0296},{"da":28000,"a":50000,"aliquota":0.032},{"da":50000,"aliquota":0.0333}]},"EMILIA-ROMAGNA":{"fasce":[{"da":0,"a":15000,"aliquota":0.0133},{"da":15000,"a":28000,"aliquota":0.0193},{"da":28000,"a":50000,"aliquota":0.0278},{"da":50000,"aliquota":0.0333}]},"FRIULI VENEZIA GIULIA":{"fasce":[{"da":0,"aliquota":0.0123}],"aliquotaRidotta":{"fino":15000,"aliquota":0.007}},"LAZIO":{"fasce":[{"da":0,"a":15000,"aliquota":0.0173},{"da":15000,"aliquota":0.0333}],"aliquotaRidotta":{"fino":28000,"aliquota":0.0173},"detrazioni":[{"da":28000,"a":30000,"importo":60}]},"LIGURIA":{"fasce":[{"da":0,"a":28000,"aliquota":0.0123},{"da":28000,"a":50000,"aliquota":0.0318},{"da":50000,"aliquota":0.0323}]},"LOMBARDIA":{"fasce":[{"da":0,"a":15000,"aliquota":0.0123},{"da":15000,"a":28000,"aliquota":0.0158},{"da":28000,"a":50000,"aliquota":0.0172},{"da":50000,"aliquota":0.0173}]},"MARCHE":{"fasce":[{"da":0,"a":15000,"aliquota":0.0123},{"da":15000,"a":28000,"aliquota":0.0153},{"da":28000,"a":50000,"aliquota":0.017},{"da":50000,"aliquota":0.0173}]},"MOLISE":{"fasce":[{"da":0,"a":15000,"aliquota":0.0203},{"da":15000,"a":28000,"aliquota":0.0223},{"da":28000,"aliquota":0.0363}]},"PIEMONTE":{"fasce":[{"da":0,"a":15000,"aliquota":0.0162},{"da":15000,"a":28000,"aliquota":0.0268},{"da":28000,"a":50000,"aliquota":0.0331},{"da":50000,"aliquota":0.0333}]},"PUGLIA":{"fasce":[{"da":0,"a":15000,"aliquota":0.0133},{"da":15000,"a":28000,"aliquota":0.0213},{"da":28000,"a":50000,"aliquota":0.0323},{"da":50000,"aliquota":0.0333}]},"SARDEGNA":{"fasce":[{"da":0,"aliquota":0.0123}]},"SICILIA":{"fasce":[{"da":0,"aliquota":0.0123}]},"TOSCANA":{"fasce":[{"da":0,"a":15000,"aliquota":0.0142},{"da":15000,"a":28000,"aliquota":0.0143},{"da":28000,"a":50000,"aliquota":0.0332},{"da":50000,"aliquota":0.0333}]},"TRENTO":{"fasce":[{"da":0,"a":50000,"aliquota":0.0123},{"da":50000,"aliquota":0.0173}],"esenzione":30000},"UMBRIA":{"fasce":[{"da":0,"a":15000,"aliquota":0.0173},{"da":15000,"a":28000,"aliquota":0.0302},{"da":28000,"a":50000,"aliquota":0.0312},{"da":50000,"aliquota":0.0333}],"aliquotaRidotta":{"fino":28000,"aliquota":0.0123},"detrazioni":[{"da":28000,"a":50000,"importo":150}]},"VALLE D'AOSTA":{"fasce":[{"da":0,"aliquota":0.0123}],"esenzione":15000},"VENETO":{"fasce":[{"da":0,"aliquota":0.0123}]}},"province":{"AG":"SICILIA","AL":"PIEMONTE","AN":"MARCHE","AO":"VALLE D'AOSTA","AP":"MARCHE","AQ":"ABRUZZO","AR":"TOSCANA","AT":"PIEMONTE","AV":"CAMPANIA","BA":"PUGLIA","BG":"LOMBARDIA","BI":"PIEMONTE","BL":"VENETO","BN":"CAMPANIA","BO":"EMILIA-ROMAGNA","BR":"PUGLIA","BS":"LOMBARDIA","BT":"PUGLIA","BZ":"BOLZANO","CA":"SARDEGNA","CB":"MOLISE","CE":"CAMPANIA","CH":"ABRUZZO","CL":"SICILIA","CN":"PIEMONTE","CO":"LOMBARDIA","CR":"LOMBARDIA","CS":"CALABRIA","CT":"SICILIA","CZ":"CALABRIA","EN":"SICILIA","FC":"EMILIA-ROMAGNA","FE":"EMILIA-ROMAGNA","FG":"PUGLIA","FI":"TOSCANA","FM":"MARCHE","FR":"LAZIO","GE":"LIGURIA","GO":"FRIULI VENEZIA GIULIA","GR":"TOSCANA","IM":"LIGURIA","IS":"MOLISE","KR":"CALABRIA","LC":"LOMBARDIA","LE":"PUGLIA","LI":"TOSCANA","LO":"LOMBARDIA","LT":"LAZIO","LU":"TOSCANA","MB":"LOMBARDIA","MC":"MARCHE","ME":"SICILIA","MI":"LOMBARDIA","MN":"LOMBARDIA","MO":"EMILIA-ROMAGNA","MS":"TOSCANA","MT":"BASILICATA","NA":"CAMPANIA","NO":"PIEMONTE","NU":"SARDEGNA","OR":"SARDEGNA","PA":"SICILIA","PC":"EMILIA-ROMAGNA","PD":"VENETO","PE":"ABRUZZO","PG":"UMBRIA","PI":"TOSCANA","PN":"FRIULI VENEZIA GIULIA","PO":"TOSCANA","PR":"EMILIA-ROMAGNA","PT":"TOSCANA","PU":"MARCHE","PV":"LOMBARDIA","PZ":"BASILICATA","RA":"EMILIA-ROMAGNA","RC":"CALABRIA","RE":"EMILIA-ROMAGNA","RG":"SICILIA","RI":"LAZIO","RM":"LAZIO","RN":"EMILIA-ROMAGNA","RO":"VENETO","SA":"CAMPANIA","SI":"TOSCANA","SO":"LOMBARDIA","SP":"LIGURIA","SR":"SICILIA","SS":"SARDEGNA","SU":"SARDEGNA","SV":"LIGURIA","TA":"PUGLIA","TE":"ABRUZZO","TN":"TRENTO","TO":"PIEMONTE","TP":"SICILIA","TR":"UMBRIA","TS":"FRIULI VENEZIA GIULIA","TV":"VENETO","UD":"FRIULI VENEZIA GIULIA","VA":"LOMBARDIA","VB":"PIEMONTE","VC":"PIEMONTE","VE":"VENETO","VI":"VENETO","VR":"VENETO","VT":"LAZIO","VV":"CALABRIA"},"rate":{"regionale":11,"comunaleSaldo":11,"comunaleAcconto":{"percentuale":0.3,"rate":9}}},
 "addizionali-comunali.json": window.COMUNI
 };
@@ -146,15 +146,16 @@ const config = leggiConfig("contributi.json");
 
 // l'imponibile previdenziale si arrotonda all'euro;
 // il massimale vale solo per chi non ha contributi prima del 1996
-function calcolaImponibilePrevidenziale(lordoMensile, { massimale = false } = {}, contributi = config.contributi) {
+// mensilita: soglie e massimale sono annui, ogni pagamento ne vale 1/mensilita (12, 13 o 14)
+function calcolaImponibilePrevidenziale(lordoMensile, { massimale = false, mensilita = 12 } = {}, contributi = config.contributi) {
     const imponibile = Math.round(lordoMensile);
-    return massimale ? Math.min(imponibile, Math.round(contributi.massimale / 12)) : imponibile;
+    return massimale ? Math.min(imponibile, Math.round(contributi.massimale / mensilita)) : imponibile;
 }
 
-// 1% sulla parte del mese che supera la prima fascia pensionabile
-function calcolaContributoAggiuntivo(imponibile, contributi = config.contributi) {
+// 1% sulla parte del pagamento che supera la prima fascia pensionabile (annua / mensilità)
+function calcolaContributoAggiuntivo(imponibile, contributi = config.contributi, mensilita = 12) {
     const aggiuntivo = contributi.contributoAggiuntivo;
-    return Math.max(0, imponibile - aggiuntivo.sogliaMensile) * aggiuntivo.aliquota;
+    return Math.max(0, imponibile - aggiuntivo.soglia / mensilita) * aggiuntivo.aliquota;
 }
 
 // altreVoci: voci inserite dall'utente (es. Ebitermo), con importo fisso o aliquota
@@ -168,16 +169,16 @@ function calcolaAltreVoci(imponibile, altreVoci = []) {
 }
 
 // fondo: chiave di fondiIntegrazione (cigs, fisOltre5, fisFino5, fsba, fsbaOltre15, nessuno)
-function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista = false, massimale = false } = {}, contributi = config.contributi) {
+function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista = false, massimale = false, mensilita = 12 } = {}, contributi = config.contributi) {
     const fondoIntegrazione = contributi.fondiIntegrazione[fondo];
     if (!fondoIntegrazione) {
         throw new Error(`Fondo di integrazione sconosciuto: ${fondo}`);
     }
 
-    const imponibile = calcolaImponibilePrevidenziale(lordoMensile, { massimale }, contributi);
+    const imponibile = calcolaImponibilePrevidenziale(lordoMensile, { massimale, mensilita }, contributi);
     const ivs = imponibile * (apprendista ? contributi.ivs.apprendista : contributi.ivs.ordinario);
     const fondoImporto = imponibile * fondoIntegrazione.aliquota;
-    const aggiuntivo = calcolaContributoAggiuntivo(imponibile, contributi);
+    const aggiuntivo = calcolaContributoAggiuntivo(imponibile, contributi, mensilita);
 
     return {
         imponibile,
@@ -189,13 +190,13 @@ function calcolaContributi(lordoMensile, { fondo = "nessuno", apprendista = fals
     };
 }
 
-// i limiti delle deduzioni sono annui: nel mese si applica 1/12
+// i limiti delle deduzioni sono annui: in ogni pagamento si applica 1/mensilita
 // il limite della previdenza complementare è unico per quota lavoratore e quota ditta:
 // la quota ditta non entra nel lordo, ma consuma parte del limite
-function calcolaDeduzioni({ previdenzaComplementare = 0, previdenzaComplementareDitta = 0, assistenzaSanitaria = 0 } = {}, deduzioni = config.deduzioni) {
-    const limitePrevidenza = deduzioni.previdenzaComplementare.limite / 12;
+function calcolaDeduzioni({ previdenzaComplementare = 0, previdenzaComplementareDitta = 0, assistenzaSanitaria = 0, mensilita = 12 } = {}, deduzioni = config.deduzioni) {
+    const limitePrevidenza = deduzioni.previdenzaComplementare.limite / mensilita;
     return Math.min(previdenzaComplementare, Math.max(0, limitePrevidenza - previdenzaComplementareDitta))
-        + Math.min(assistenzaSanitaria, deduzioni.assistenzaSanitaria.limite / 12);
+        + Math.min(assistenzaSanitaria, deduzioni.assistenzaSanitaria.limite / mensilita);
 }
 
 // dal lordo all'imponibile IRPEF del mese:
@@ -207,7 +208,7 @@ function calcolaImponibileFiscale(lordoMensile, opzioni = {}) {
 
     const vociDeducibili = voci.filter((voce) => voce.deducibile).reduce((somma, voce) => somma + voce.importo, 0);
     const vociNonDeducibili = voci.filter((voce) => !voce.deducibile).reduce((somma, voce) => somma + voce.importo, 0);
-    const importoDeduzioni = calcolaDeduzioni(deduzioni);
+    const importoDeduzioni = calcolaDeduzioni({ ...deduzioni, mensilita: opzioni.mensilita });
 
     return {
         lordo: lordoMensile,
@@ -380,7 +381,7 @@ function calcolaMesi({ ral, mensilita, irpef, addizionali, nettoAnnuo }, tratten
 //   giorni, tempoDeterminato, familiari ({ coniuge, figli21, ... }), comune / regione (addizionali)
 // semplificazioni: TFR e assegno unico esclusi; `mesi` ripartisce il netto sui singoli pagamenti (stima, il totale annuo è quello esatto)
 function calcolaNetto(ral, { mensilita = 14, ...opzioni } = {}) {
-    const fiscale = calcolaImponibileFiscale(ral / mensilita, opzioni);
+    const fiscale = calcolaImponibileFiscale(ral / mensilita, { ...opzioni, mensilita });
     const imponibileAnnuo = fiscale.imponibileFiscale * mensilita;
 
     const irpef = calcolaIrpef(imponibileAnnuo, opzioni);

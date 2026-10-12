@@ -16,8 +16,7 @@
     },
     "contributoAggiuntivo": {
       "aliquota": 0.01,
-      "soglia": 56224,
-      "sogliaMensile": 4685
+      "soglia": 56224
     },
     "massimale": 122295
   },
