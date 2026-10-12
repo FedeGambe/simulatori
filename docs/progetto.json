@@ -9,5 +9,6 @@
     ],
     "y": 2026,
     "live": "/simulatori/",
-    "img": "img/cover_verticale.svg"
+    "img": "img/cover_verticale.svg",
+    "codice": false
 }
