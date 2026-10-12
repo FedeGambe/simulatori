@@ -415,5 +415,5 @@ function calcolaNetto(ral, { mensilita = 14, ...opzioni } = {}) {
 }
 
 
-window.Busta = { calcolaNetto: calcolaNetto, calcolaDeduzioni: calcolaDeduzioni, cercaComuni: cercaComuni, trovaComune: trovaComune, elencoRegioni: elencoRegioni, anno: CONFIG["irpef.json"].anno };
+window.Busta = { calcolaNetto: calcolaNetto, calcolaDeduzioni: calcolaDeduzioni, cercaComuni: cercaComuni, trovaComune: trovaComune, elencoRegioni: elencoRegioni, anno: CONFIG["irpef.json"].anno, maggiorazione: CONFIG["irpef.json"].detrazioni.maggiorazione };
 })();

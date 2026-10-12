@@ -11,7 +11,7 @@
 /* Identità del fondo pensione (dalla copertina): verde = il fondo e i suoi rendimenti, ocra = principale/versamenti, terracotta = trattenute. Variabili --* , niente colori fissi. */
 :root{
   --barra:60px; --g1:#f0e6d2; --g2:#d6e6dc; --g3:#e8e0cc; --bg:#f0e6d2; --surface:#f7f0df; --surface-2:#e4d9bd; --ink:#11201a; --ink-2:#34473d; --ink-3:#5a6b60; --line:#d6caa8; --track:#dcd2b3;
-  --teal:#c98a1e; --teal-ink:#8a5a0f; --teal-soft:#f5e6c8; --rosso:#c4532d; --rosso-ink:#a8401f; --rosso-soft:#f6dfd4; --sabbia:#b9d3c2;
+  --teal:#c98a1e; --teal-ink:#8a5a0f; --teal-soft:#f5e6c8; --rosso:#c4532d; --rosso-ink:#a8401f; --rosso-soft:#f6dfd4; --sabbia:#cbb994;
   --scelto-bg:#1f4a39; --scelto-ink:#f4ecd8; --arancio:#e8a33d; --su-arancio:#11140f; --verde:#2f6b52; --verde-ink:#1f4a39; --verde-soft:#dbe8df;
   --ombra:0 1px 2px rgba(17,32,26,.04), 0 8px 24px -12px rgba(17,32,26,.14);
   --f-display:Georgia,"Times New Roman",serif;
@@ -19,9 +19,9 @@
   --f-data:ui-monospace,Consolas,monospace;
 }
 :root[data-theme="dark"]{
-  --g1:#173126; --g2:#0b1510; --g3:#070d0a; --bg:#0e1612; --surface:#142019; --surface-2:#1c2c23; --ink:#f4ecd8; --ink-2:#c9cfc6; --ink-3:#97a398; --line:#284034; --track:#22362b;
-  --teal:#e8a33d; --teal-ink:#f0bb63; --teal-soft:#3a2c14; --rosso:#e0714d; --rosso-ink:#ef9373; --rosso-soft:#3a2018; --sabbia:#4a6b58;
-  --scelto-bg:#e8a33d; --scelto-ink:#11140f; --ombra:none; --arancio:#e8a33d; --su-arancio:#11140f; --verde:#5fae8a; --verde-ink:#86c9a6; --verde-soft:#183027;
+  --g1:#18221d; --g2:#0d1311; --g3:#0a0b0b; --bg:#101211; --surface:#181b1a; --surface-2:#212524; --ink:#f2f0ea; --ink-2:#bfc2bd; --ink-3:#979a95; --line:#2d312f; --track:#292d2b;
+  --teal:#cfa564; --teal-ink:#ddb878; --teal-soft:#2c261b; --rosso:#d9785a; --rosso-ink:#e8937a; --rosso-soft:#32211c; --sabbia:#8a7c60;
+  --scelto-bg:#a9c7b6; --scelto-ink:#101211; --ombra:none; --arancio:#cfa564; --su-arancio:#101211; --verde:#6fb08f; --verde-ink:#8fc6a8; --verde-soft:#1b2a23;
   color-scheme:dark; }
 
 *{box-sizing:border-box}
@@ -172,15 +172,6 @@ input[aria-invalid=true]{border-color:var(--rosso); background:var(--rosso-soft)
 .riga.estremo .val{font-weight:600; color:var(--ink)}
 .legenda{display:flex; flex-wrap:wrap; gap:14px; font-size:.8rem; color:var(--ink-2); margin:14px 0 0}
 .legenda i{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:6px}
-.schede{display:flex; gap:10px; margin-top:22px}
-.scheda-tab{flex:0 1 auto; min-width:0; padding:9px 14px; border:1px solid var(--ink-3); border-radius:999px; background:transparent; color:var(--ink); font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; transition:background .15s, color .15s}
-.scheda-tab:hover{background:var(--surface-2)}
-.scheda-tab:active{transform:translateY(1px)}
-.scheda-tab[aria-selected=true]{background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
-.pannello{margin-top:16px}
-.pannello.metodo{font-size:.84rem; color:var(--ink-2)}
-.pannello.metodo p{margin:6px 0}
-@media (max-width:520px){ .schede{gap:6px} .scheda-tab{flex:1 1 0; font-size:.68rem; letter-spacing:.04em; padding:9px 6px} }
 details.metodo{margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:.84rem; color:var(--ink-2)}
 details.metodo summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
 details.metodo p{margin:6px 0}
@@ -245,6 +236,21 @@ details.metodo p{margin:6px 0}
 .tabella.larga tr.tot td{border-top:2px solid var(--ink-3); background:var(--surface-2); padding-top:14px; padding-bottom:14px; font-weight:700; color:var(--ink)}
 .tabella.larga tr.vuoto td{border:0; padding:0; height:14px}
 
+.testa{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px}
+.testa .periodo{flex:0 0 auto; display:flex; flex-wrap:nowrap; gap:6px}
+.testa .periodo .segmento span{min-height:40px; font-size:.84rem; border-radius:999px; padding:6px 16px}
+#bilancio .cascata{margin-top:8px}
+.riga .zero{position:absolute; top:-5px; bottom:-5px; width:2px; margin-left:-1px; background:var(--ink-3)}
+.riga .seg.mio{background:var(--rosso)} .riga .seg.irpef{background:var(--verde)} .riga .seg.az{background:var(--teal)} .riga .seg.saldo{background:var(--ink)}
+.riga .val.giu{color:var(--rosso-ink)}
+.riga.estremo .nome b{font-weight:800}
+.gradino{border-left:3px solid var(--arancio); margin:14px 0 0} .gradino p{margin:0} .gradino p + p{margin-top:8px}
+.tabella td.pos{color:var(--verde-ink); font-weight:600}
+.tabella td.neg{color:var(--rosso-ink); font-weight:600}
+.tabella.fasce{min-width:720px} .tabella.fasce td.perche{text-align:left; white-space:normal; font-family:var(--f-body); color:var(--ink-2)}
+.tabella.fasce th:nth-child(4){text-align:left} .tabella.fasce tr.salto td{background:var(--surface-2); font-size:.8rem}
+#opzioni-anni{margin-bottom:18px}
+@media (max-width:520px){ #cascata .riga{grid-template-columns:minmax(0,1fr) 5.8em; gap:2px 10px; padding:4px 0} #cascata .riga .nome{grid-column:1/-1} #cascata .riga .nome span{display:inline; margin-left:6px} #cascata .riga .nome b{display:inline} }
 .grafico svg{display:block; width:100%; height:auto; touch-action:pan-y}
 .grafico text{font:500 11px var(--f-data); fill:var(--ink-3)}
 .grafico .asse{stroke:var(--line); stroke-width:1}
@@ -272,6 +278,7 @@ footer a{color:inherit} footer a:hover{color:var(--arancio)}
 footer .firma{margin-top:14px}
 @media (max-width:560px){ .solo-largo{display:none} }
 [hidden]{display:none !important}
+.solo-lettori{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
 /* BANNER A DUE LIVELLI: img/banner_sfondo.svg è il fondo del banner (continuo, anche dietro alla barra e al titolo);
    <img class="soggetto" src="img/banner_soggetto.svg"> è il soggetto. Colore di fondo e del testo: --banner-fondo, --banner-testo (nella pagina).
    Desktop: titolo e sottotitolo a sinistra, soggetto a destra.
@@ -423,40 +430,62 @@ footer .firma{margin-top:14px}
     <p class="confronto" id="rend"></p>
   </section>
 
-  <section class="scheda riga-sotto capitolo" id="confronto" data-titolo="Con o senza fondo">
-    <h2>Con il fondo o senza?</h2>
-    <p class="sottotitolo" id="sottotitolo-confronto"></p>
-    <button type="button" class="interruttore" id="cmp" aria-pressed="false">Conta anche il contributo del datore</button>
-    <ul class="opzioni" id="opzioni-confronto"></ul>
-    <div class="grafico" id="grafico-confronto"></div>
-    <p class="legenda"><span><i style="background:var(--verde)"></i>Nel fondo, con la deduzione (netto)</span><span><i style="background:var(--teal)"></i>Stessi soldi investiti fuori dal fondo</span><span><i style="background:var(--ink)"></i>Soldi tenuti in contanti</span></p>
-    <p class="grafico-info" id="confronto-info" aria-live="polite"></p>
-    <p class="confronto" id="nota-confronto"></p>
+  <section class="scheda riga-sotto capitolo" id="bilancio" data-titolo="Costo e guadagno">
+    <div class="testa">
+      <h2>Quanto ti costa, quanto ricevi</h2>
+      <fieldset class="segmenti periodo"><legend class="solo-lettori">Periodo</legend>
+        <label class="segmento"><input type="radio" name="periodo" value="1" checked><span>Primo anno</span></label>
+        <label class="segmento"><input type="radio" name="periodo" value="tot"><span>Tutti gli anni</span></label>
+      </fieldset>
+    </div>
+    <p class="sottotitolo" id="sottotitolo-bilancio"></p>
+    <div class="cascata" id="cascata"></div>
+    <ul class="opzioni" id="opzioni-bilancio"></ul>
+    <p class="confronto" id="nota-bilancio"></p>
+  </section>
+
+  <section class="scheda riga-sotto capitolo" id="conviene" data-titolo="Quanto versare">
+    <div class="testa">
+      <h2>Quanto conviene versare</h2>
+      <fieldset class="segmenti periodo"><legend class="solo-lettori">Vista</legend>
+        <label class="segmento"><input type="radio" name="vista" value="euro" checked><span>Versi e recuperi</span></label>
+        <label class="segmento"><input type="radio" name="vista" value="pct"><span>Rendimento</span></label>
+      </fieldset>
+    </div>
+    <p class="sottotitolo" id="sottotitolo-conviene"></p>
+    <div class="grafico" id="grafico-conviene"></div>
+    <p class="legenda" id="legenda-conviene"></p>
+    <p class="grafico-info" id="conviene-info" aria-live="polite"></p>
+    <div class="avviso lieve gradino" id="nota-conviene" hidden></div>
+    <ul class="opzioni" id="opzioni-conviene"></ul>
+    <h3 class="sotto">Fascia per fascia</h3>
+    <p class="sottotitolo">Fin dove ogni euro in più rende lo stesso: quando la percentuale cala, quell'euro ti rende meno. L'ultima colonna è l'IRPEF che recuperi in tutto arrivando alla fine della fascia.</p>
+    <div id="tabella-fasce"></div>
+    <p class="confronto">Primo anno, con la tua RAL e il contributo dell'azienda inserito. Conta solo la deducibilità: il contributo dell'azienda di solito richiede un tuo versamento minimo, che dipende dal contratto.</p>
   </section>
 
   <section class="scheda riga-sotto capitolo" id="spiegazione" data-titolo="Come cresce">
     <h2>Come cresce il fondo</h2>
-    <p class="sottotitolo" id="sottotitolo-grafico"></p>
+    <p class="sottotitolo">I versamenti si accumulano uno sopra l'altro; la linea è il valore del fondo: lo spazio tra le aree e la linea sono i rendimenti netti.</p>
     <div class="grafico" id="grafico"></div>
-    <p class="legenda"><span><i style="background:var(--teal)"></i>Versamenti (tuoi, datore, TFR)</span><span><i style="background:var(--verde)"></i>Rendimenti netti</span><span><i style="background:var(--ink)"></i>IRPEF risparmiata (cumulata)</span></p>
+    <p class="legenda" id="legenda-grafico"></p>
     <p class="grafico-info" id="grafico-info" aria-live="polite"></p>
-    <h3 class="sotto">IRPEF risparmiata ogni anno</h3>
-    <p class="sottotitolo">Quanto ti torna in tasca ogni anno grazie alla deduzione: cresce con lo stipendio finché il tuo versamento resta sotto il limite.</p>
-    <div class="grafico" id="grafico-irpef"></div>
-    <div class="schede" role="tablist" aria-label="Approfondimenti">
-      <button type="button" role="tab" class="scheda-tab" id="t-anni" aria-controls="p-anni" aria-selected="true">Anno per anno</button>
-      <button type="button" role="tab" class="scheda-tab" id="t-come" aria-controls="p-come" aria-selected="false">Come funziona il calcolo</button>
-    </div>
-    <div class="pannello" role="tabpanel" id="p-anni" aria-labelledby="t-anni"><div id="tabella"></div></div>
-    <div class="pannello metodo" role="tabpanel" id="p-come" aria-labelledby="t-come" hidden>
+  </section>
+
+  <section class="scheda riga-sotto capitolo" id="anni" data-titolo="Anno per anno">
+    <h2>Anno per anno</h2>
+    <p class="sottotitolo">Quanto versi tu, quanto mette l'azienda, quanta IRPEF recuperi e quanto guadagni su quello che versi (IRPEF recuperata più contributo dell'azienda, diviso il tuo versamento).</p>
+    <ul class="opzioni" id="opzioni-anni"></ul>
+    <div id="tabella"></div>
+    <details class="metodo"><summary>Come funziona il calcolo</summary>
       <p><b>Versamenti:</b> il tuo contributo e quello del datore (in % della RAL o in euro) più il TFR maturato, pari a circa il 6,91% della RAL. La RAL cresce ogni anno della percentuale indicata.</p>
+      <p><b>IRPEF recuperata:</b> il tuo contributo e quello del datore si deducono insieme fino a 5.164,57 € l'anno (il TFR non si deduce). Il risparmio è la differenza di netto con e senza deduzione, calcolata con lo stesso motore del simulatore busta paga: IRPEF, detrazioni, cuneo fiscale e addizionali del tuo comune.</p>
+      <p><b>Costo e guadagno:</b> il tuo versamento esce dalla busta, ma una parte ti torna come IRPEF recuperata e l'azienda aggiunge il suo contributo, che avresti solo aderendo al fondo. Il TFR non è nel conto: è tuo comunque, nel fondo o in azienda. Le cifre sono quelle versate, senza rendimenti.</p>
       <p><b>Rendimento:</b> rendimento lordo meno i costi del fondo, poi si toglie l'imposta sostitutiva: 20%, ridotta al 12,5% sulla parte in titoli di Stato. I versamenti rendono per metà anno.</p>
-      <p><b>Deducibilità:</b> il tuo contributo e quello del datore si deducono insieme fino a 5.164,57 € l'anno (il TFR non si deduce). Il risparmio è la differenza di netto con e senza deduzione, calcolata con lo stesso motore del simulatore busta paga: IRPEF, detrazioni, cuneo fiscale e addizionali del tuo comune.</p>
-      <p><b>Con il fondo o senza:</b> ogni anno confronto due strade per lo stesso importo lordo. Nel fondo versi tutto e il fisco ti restituisce l'IRPEF risparmiata; fuori dal fondo paghi l'IRPEF e ti restano in tasca meno soldi, che puoi tenere in contanti o investire con lo stesso rendimento e gli stessi costi (26% sul guadagno, 12,5% sui titoli di Stato, a fine periodo). Il fondo è mostrato netto della tassa sulla prestazione. Il TFR non è nel confronto: è tuo comunque, nel fondo o in azienda.</p>
       <p><b>Prestazione:</b> si paga il 15% sui contributi dedotti, su quelli del datore e sul TFR, ridotto di 0,30 punti per ogni anno di iscrizione oltre il 15°, fino al 9%. I rendimenti sono già stati tassati ogni anno.</p>
       <p><b>Euro di oggi:</b> il valore "di oggi" divide per l'inflazione. Il calcolo fiscale è fatto in euro di oggi: si assume che scaglioni e detrazioni crescano con l'inflazione, mentre il limite di deduzione resta fisso come in legge.</p>
       <p><b>Limiti:</b> non sono considerati il recupero del plafond non dedotto nei primi 5 anni di iscrizione, riscatti e anticipazioni, la rendita (che ha un'altra tassazione sui rendimenti) e il confronto con il TFR lasciato in azienda. Un montante già accumulato è tassato per intero alla prestazione.</p>
-    </div>
+    </details>
   </section>
   </div>
 
