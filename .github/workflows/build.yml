@@ -1,0 +1,36 @@
+# A ogni push su main che tocca un simulatore: prove e build, poi commit degli script rigenerati in docs/
+# (GitHub Pages pubblica docs/ dal branch main). Il commit dell'Action tocca solo docs/ e non la rilancia.
+name: Build dei simulatori
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Busta Paga/**"
+      - "CD CC/**"
+      - "Fondo Pensione/**"
+      - "scripts/build.sh"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24   # import.meta.main (prove in utils/) serve Node 24.2 o più
+      - name: Prove e build
+        run: sh scripts/build.sh
+      - name: Commit degli script rigenerati
+        run: |
+          if [ -z "$(git status --porcelain docs)" ]; then echo "docs/ già aggiornato"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs
+          git commit -m "Rigenera gli script delle dashboard"
+          git push
