@@ -109,12 +109,31 @@
     $("sottotitolo-bilancio").textContent = w > 0 ?
       quando + " versi " + eur.format(w) + ": il fisco te ne restituisce " + eur.format(irpef) + " e l'azienda ne aggiunge " + eur.format(d) + "." :
       "Inserisci un tuo contributo per vedere quanto ti costa e quanto ricevi.";
+    var rq = roiDi(r, stato.periodo === "tot");
     $("opzioni-bilancio").innerHTML = [
       ["Ti costa davvero", eur.format(w - irpef), "Il tuo versamento meno l'IRPEF recuperata", false],
       ["Entra nel fondo", eur.format(w + d + f), "Tu " + eur.format(w) + " · azienda " + eur.format(d) + (f > 0 ? " · TFR " + eur.format(f) : ""), false],
-      ["Su 100 € che versi", w > 0 ? "+" + eur.format((irpef + d) / w * 100) : "–", "Ti tornano tra IRPEF recuperata e contributo dell'azienda", true]
+      ["Su 100 € che versi", w > 0 ? "+" + eur.format((irpef + d) / w * 100) : "–", "Ti tornano tra IRPEF recuperata e contributo dell'azienda", true],
+      ["ROI", roiTesto(rq), "Versi " + eur.format(rq.w) + ", ottieni " + eur.format(rq.ottieni) + " tra fondo e IRPEF recuperata", false]
     ].map(voce).join("");
     $("nota-bilancio").textContent = "Cifre versate, senza rendimenti. Il TFR non è nel conto: è tuo comunque, nel fondo o in azienda.";
+  }
+
+  // ROI: quanto ottieni rispetto a quello che versi di tasca tua. Senza TFR e già accumulato: erano tuoi comunque.
+  // Tutti gli anni: netto finale + IRPEF recuperata. Primo anno: valore del fondo a fine anno + IRPEF recuperata − tassa sulla prestazione
+  // ponytail: nel primo anno i rendimenti includono quelli sul già accumulato e la tassa è l'aliquota finale
+  function roiDi(r, tot, lordo) {
+    var x = r.righe[0], w = tot ? r.versamenti.lavoratore : x.lavoratore;
+    return {w: w, ottieni: tot ? (lordo ? r.montante : r.nettoFinale) + r.risparmioIrpef - r.versamenti.tfr - r.punti[0].montante
+      : w + x.risparmio + x.datore + r.punti[1].rendimenti - (x.dedotto + x.datore) * r.aliquotaPrestazione};
+  }
+  function roiTesto(q) { return q.w > 0 ? (q.ottieni >= q.w ? "+" : "−") + pct.format(Math.abs(q.ottieni / q.w - 1) * 100) + "%" : "–"; }
+
+  function roi(r) {
+    var prima = roiDi(r, true, true), dopo = roiDi(r, true);
+    $("roi-prima").textContent = roiTesto(prima);
+    $("roi-dopo").textContent = roiTesto(dopo);
+    $("roi-sub").textContent = dopo.w > 0 ? "Versi " + eur.format(dopo.w) + ", ottieni " + eur.format(prima.ottieni) + " prima delle tasse, " + eur.format(dopo.ottieni) + " dopo" : "Inserisci un tuo contributo";
   }
 
   function voce(x) {
@@ -432,6 +451,7 @@
     ultimo = r; ultimiDati = v;
     $("opzioni").innerHTML = schede(r);
     bilancio(r);
+    roi(r);
     conviene(r, v);
     grafico(r);
     annuale(r);

@@ -6,8 +6,8 @@
 set -e
 cd "$(dirname "$0")/.."
 
-# la busta paga per prima: il fondo pensione usa il suo motore
-for simulatore in "Busta Paga" "CD CC" "Fondo Pensione"; do
+# la busta paga per prima: il fondo pensione usa il suo motore, il confronto usa quello del fondo
+for simulatore in "Busta Paga" "CD CC" "Fondo Pensione" "Fondo vs Investimento"; do
     # prove: console.assert non fa fallire node, quindi si cerca "Assertion failed" nell'output
     for prova in "$simulatore"/utils/*_function.js; do
         if ! uscita=$(node "$prova" 2>&1); then

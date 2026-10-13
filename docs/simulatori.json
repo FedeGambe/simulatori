@@ -32,5 +32,16 @@
         "url": "fondo-pensione/fondo-pensione.html",
         "img": "fondo-pensione/img/cover_verticale.svg",
         "colore": "#2f6b52"
+    },
+    {
+        "id": "fondo-vs-investimento",
+        "t": "Fondo pensione o investimento",
+        "d": "A parità di costo di tasca, confronta il fondo pensione con azioni o obbligazioni fuori dal fondo: importi e bilanciamento con i cursori, grafici e punto di pareggio.",
+        "tags": ["Previdenza", "Investimenti"],
+        "y": 2026,
+        "codice": "Fondo vs Investimento",
+        "url": "fondo-vs-investimento/fondo-vs-investimento.html",
+        "img": "fondo-vs-investimento/img/cover_verticale.svg",
+        "colore": "#8a4a7e"
     }
 ]

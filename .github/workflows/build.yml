@@ -9,6 +9,7 @@ on:
       - "Busta Paga/**"
       - "CD CC/**"
       - "Fondo Pensione/**"
+      - "Fondo vs Investimento/**"
       - "scripts/build.sh"
       - ".github/workflows/build.yml"
   workflow_dispatch:

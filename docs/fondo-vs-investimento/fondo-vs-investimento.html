@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fondo pensione o investimento</title>
+
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<meta name="description" content="Confronta a parità di costo di tasca il fondo pensione (deduzione IRPEF e contributo del datore) con un investimento in azioni o obbligazioni: importi e bilanciamento con i cursori.">
+<style>
+/* Identità del confronto (dalla copertina): prugna = fondo di pagina, viola = fondo pensione, giallo = investimento libero, terracotta = costo di tasca. Variabili --* , niente colori fissi. */
+:root{
+  --barra:60px; --g1:#f0e6d2; --g2:#e3d3df; --g3:#e8e0cc; --bg:#f0e6d2; --surface:#f7f0df; --surface-2:#e4d9bd; --ink:#11201a; --ink-2:#34473d; --ink-3:#5a6b60; --line:#d6caa8; --track:#dcd2b3;
+  --teal:#7b4a9c; --teal-ink:#5a2d7a; --teal-soft:#eadcf3; --rosso:#c4532d; --rosso-ink:#a8401f; --rosso-soft:#f6dfd4; --sabbia:#cbb994;
+  --scelto-bg:#5a2d52; --scelto-ink:#f4ecd8; --arancio:#f5c518; --su-arancio:#11140f; --verde:#2f6b52; --verde-ink:#1f4a39; --verde-soft:#dbe8df;
+  --libero:#e0ab00; --libero-ink:#7a5a00; --libero-soft:#fbf0c4;
+  --ombra:0 1px 2px rgba(17,32,26,.04), 0 8px 24px -12px rgba(17,32,26,.14);
+  --f-display:Georgia,"Times New Roman",serif;
+  --f-body:"Inter",system-ui,sans-serif;
+  --f-data:ui-monospace,Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --g1:#241a22; --g2:#150d14; --g3:#0a0b0b; --bg:#101211; --surface:#181b1a; --surface-2:#212524; --ink:#f2f0ea; --ink-2:#bfc2bd; --ink-3:#979a95; --line:#2d312f; --track:#292d2b;
+  --teal:#b58ad0; --teal-ink:#cfb0e3; --teal-soft:#2a2033; --rosso:#d9785a; --rosso-ink:#e8937a; --rosso-soft:#32211c; --sabbia:#8a7c60;
+  --scelto-bg:#d3b3c9; --scelto-ink:#101211; --ombra:none; --arancio:#f5c518; --su-arancio:#101211; --verde:#6fb08f; --verde-ink:#8fc6a8; --verde-soft:#1b2a23;
+  --libero:#f5c518; --libero-ink:#f7d65a; --libero-soft:#332c10;
+  color-scheme:dark; }
+
+*{box-sizing:border-box}
+body{margin:0; color:var(--ink); font:16px/1.55 var(--f-body); min-height:100vh; -webkit-font-smoothing:antialiased;
+  background:radial-gradient(900px 600px at 10% 0%,var(--g1),transparent 70%),radial-gradient(900px 700px at 100% 100%,var(--g2),transparent 70%),var(--g3); background-attachment:fixed}
+body::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:-1; opacity:.55;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E")}
+.pagina{max-width:1200px; margin:0 auto; padding:24px 16px 96px}
+h1,h2,h3,legend{font-family:var(--f-display); letter-spacing:-.03em}
+h2{font-size:1.05rem; font-weight:800; margin:0; line-height:1.2}
+.num{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+a{color:var(--teal-ink)}
+:focus-visible{outline:2px solid var(--teal); outline-offset:2px}
+button{font:inherit; color:inherit; cursor:pointer}
+@media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
+
+/* Barra */
+.barra{position:fixed; z-index:20; inset:0 0 auto; height:calc(var(--barra) + env(safe-area-inset-top,0px)); padding:env(safe-area-inset-top,0px) 20px 0;
+  display:flex; align-items:center; justify-content:flex-end; background:transparent; gap:16px; --colore-parte:var(--arancio); transition:background .35s, box-shadow .35s}
+.barra.compatta{background:color-mix(in srgb, var(--bg) 60%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 1px 0 var(--line)}
+.dove{flex:1; min-width:0; opacity:0; transform:translateY(-6px); transition:opacity .25s, transform .25s; pointer-events:none}
+.barra.compatta .dove{opacity:1; transform:none; pointer-events:auto}
+.dove .progetto{display:block; width:max-content; max-width:100%; font:600 .68rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-3); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.dove .progetto:hover{color:var(--ink)}
+.posizione{font:700 1rem/1.3 var(--f-display); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; position:relative; padding-left:16px; min-height:1.3em}
+.posizione::before{content:""; position:absolute; left:0; top:.4em; width:.55em; height:.55em; border-radius:50%; background:var(--colore-parte)}
+.azioni{display:flex; gap:8px; flex:none; margin-left:auto}
+.avanzamento{position:absolute; left:0; bottom:0; width:100%; height:3px; background:var(--colore-parte);
+  transform-origin:left; transform:scaleX(var(--avanzamento,0)); opacity:0; transition:opacity .25s}
+.barra.compatta .avanzamento{opacity:1}
+.barra:not(.compatta) .bottone-barra{color:var(--banner-testo); border-color:var(--banner-testo)}
+.barra:not(.compatta) .bottone-barra:hover{background:var(--banner-testo); color:var(--banner-fondo)}
+.barra:not(.compatta) .bottone-barra svg path{fill:var(--banner-testo)}
+.bottone-barra{font:600 .8rem/1 var(--f-data); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:none; border:1px solid var(--ink); border-radius:999px;
+  padding:8px 12px; cursor:pointer; text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
+.bottone-barra:hover{background:var(--ink); color:var(--bg)}
+.firma{display:flex; align-items:center; gap:12px; color:var(--ink); text-decoration:none; font:600 .9rem/1 var(--f-data)}
+
+.intro{color:var(--ink-2); margin:12px 0 14px; font-size:1.02rem}
+.dati-modello{display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none}
+.dati-modello li{font-size:.82rem; color:var(--ink-2); background:var(--surface-2); border-radius:999px; padding:4px 12px}
+.dati-modello b{font-family:var(--f-data); font-weight:600; color:var(--ink)}
+
+/* Preset */
+.pulsante{min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:var(--surface);
+  font-size:.9rem; font-weight:600; display:inline-flex; align-items:center; gap:8px; transition:border-color .15s, background .15s}
+.pulsante:hover{border-color:var(--ink-3)}
+.pulsante .punto{width:8px; height:8px; border-radius:50%}
+.pulsante.leggero{border-color:transparent; background:transparent; color:var(--ink-2)}
+.pulsante.leggero:hover{background:var(--surface-2)}
+.scheda{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px; box-shadow:var(--ombra)}
+.scheda:hover{border-color:var(--ink-3)}
+.layout{display:grid; gap:16px; grid-template-columns:minmax(0,1fr)}
+
+/* Form */
+form{display:grid; gap:20px}
+fieldset{border:0; margin:0; padding:0; min-width:0}
+.scheda.unica{padding:24px; min-width:0}
+.controlli{display:grid; gap:24px; grid-template-columns:minmax(0,1fr)}
+@media (min-width:760px){
+  .controlli{grid-template-columns:repeat(2,minmax(0,1fr)); grid-template-areas:"a b" "c b" "d b"; grid-template-rows:auto auto 1fr; gap:28px 36px}
+  .controlli .gruppo:nth-child(1){grid-area:a}
+  .controlli{position:relative}
+  .controlli::before{content:""; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--line)}
+  .controlli .gruppo:nth-child(2){grid-area:b}
+  .controlli .gruppo:nth-child(3){grid-area:c; border-top:1px solid var(--line); padding-top:24px}
+  .controlli .gruppo:nth-child(4){grid-area:d; border-top:1px solid var(--line); padding-top:24px}
+}
+@media (max-width:759px){ .controlli .gruppo + .gruppo{border-top:1px solid var(--line); padding-top:20px} }
+.gruppo{display:flex; flex-direction:column; min-width:0}
+.gtitolo{display:flex; align-items:center; gap:10px; font-size:1.02rem; margin:0 0 16px}
+.passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; font:700 .82rem var(--f-data); flex:none; background:var(--arancio); color:var(--su-arancio)}
+.campi{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; flex:1; align-content:start}
+.etichetta,.campo > legend{display:block; font:600 .88rem var(--f-body); letter-spacing:0; color:var(--ink-2); margin:0 0 7px; padding:0}
+.aiuto{font-size:.8rem; color:var(--ink-3); margin:6px 0 0}
+.aiuto:empty{display:none}
+.errore-campo{font-size:.8rem; color:var(--rosso-ink); font-weight:600; margin:6px 0 0}
+.coppia{display:grid; grid-template-columns:minmax(0,1fr); gap:12px}
+.coppia{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+
+.segmenti{display:flex; flex-wrap:wrap; gap:6px}
+.segmento{position:relative; flex:1 1 auto}
+.segmento input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer}
+.segmento span{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:44px; height:100%; padding:6px 12px;
+  border:1px solid var(--line); border-radius:8px; background:var(--bg); font-size:.9rem; line-height:1.2; transition:background .15s, border-color .15s, color .15s}
+.segmento:hover span{border-color:var(--ink-3)}
+.segmento input:checked + span{background:var(--scelto-bg); border-color:var(--scelto-bg); color:var(--scelto-ink); font-weight:600}
+.segmento input:focus-visible + span{outline:2px solid var(--teal); outline-offset:2px}
+
+select,input[type=number],input[type=text]{width:100%; font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:0 12px; min-height:44px}
+select{appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size:5px 5px; background-repeat:no-repeat; padding-right:36px}
+input[type=number]{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+input[aria-invalid=true]{border-color:var(--rosso); background:var(--rosso-soft)}
+.con-unita{position:relative}
+.con-unita input{padding-right:76px}
+.con-unita .unita{position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:.82rem; color:var(--ink-3); pointer-events:none}
+.con-unita.corto input{padding-right:58px}
+.contatore{display:grid; grid-template-columns:44px minmax(0,1fr) 44px; gap:6px}
+.contatore input{text-align:center; padding:0 4px; -moz-appearance:textfield; appearance:textfield}
+.contatore input::-webkit-inner-spin-button,.contatore input::-webkit-outer-spin-button{-webkit-appearance:none; margin:0}
+.contatore button{border:1px solid var(--line); background:var(--surface-2); border-radius:8px; font-size:1.2rem; line-height:1}
+.contatore button:hover:not(:disabled){border-color:var(--ink-3)}
+.interruttore{align-self:flex-start; min-height:40px; padding:0 16px; border-radius:999px; font:600 .88rem/1 var(--f-body);
+  color:var(--ink); background:transparent; border:1px solid var(--ink-3); display:inline-flex; align-items:center; gap:8px; text-align:left;
+  transition:background .15s, color .15s, border-color .15s, transform .05s}
+.interruttore::before{content:""; width:14px; height:14px; border-radius:4px; border:2px solid currentColor; box-sizing:border-box; flex:none}
+.interruttore:hover{background:var(--surface-2); border-color:var(--ink)}
+.interruttore:active{transform:translateY(1px)}
+.interruttore[aria-pressed=true]{background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.interruttore[aria-pressed=true]::before{background:currentColor; box-shadow:inset 0 0 0 2px var(--scelto-bg)}
+
+/* Risultato */
+.risultato{display:flex; flex-direction:column; min-width:0}
+.risultato .delta{font:400 .78rem/1.4 var(--f-body); color:var(--ink-2); margin:4px 0 0}
+.kpi{font:800 clamp(2.2rem,5vw,2.9rem)/1.05 var(--f-display); letter-spacing:-.03em; color:var(--teal-ink); margin:10px 0 2px; font-variant-numeric:tabular-nums}
+.kpi-sub{font:600 .88rem var(--f-data); color:var(--ink-2); margin:0}
+.opzioni{list-style:none; padding:0; margin:16px 0 0; display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.opzioni li{display:flex; flex-direction:column; gap:2px; padding:10px 14px; border-radius:10px; background:var(--surface-2); font-size:.85rem; border:1px solid transparent}
+.opzioni li b{font:800 1.1rem var(--f-display); font-variant-numeric:tabular-nums}
+.opzioni li small{font:.72rem/1.4 var(--f-body); color:var(--ink-3)}
+.opzioni li.best{background:var(--verde-soft); border-color:var(--verde)}
+.opzioni li.best > span{color:var(--verde-ink); font-weight:700}
+.confronto{font-size:.76rem; color:var(--ink-3); margin:auto 0 0; padding-top:12px}
+.inattivo{opacity:.4; transition:opacity .2s}
+.avviso{background:var(--rosso-soft); color:var(--rosso-ink); border-radius:8px; padding:10px 14px; font-size:.88rem; font-weight:600; margin:12px 0 0}
+.avviso.lieve{background:var(--surface-2); color:var(--ink-2); font-weight:500; font-size:.8rem}
+
+/* Cascata */
+.riga-sotto{margin-top:16px}
+#spiegazione{padding:26px 28px}
+@media (max-width:520px){ #spiegazione{padding:20px 16px} }
+.sottotitolo{font-size:.86rem; color:var(--ink-3); margin:4px 0 12px}
+.cascata{display:grid; gap:4px}
+.riga{display:grid; grid-template-columns:minmax(0,12em) minmax(0,1fr) 6.2em; gap:10px; align-items:center; min-height:31px}
+.riga .nome{font-size:.86rem; line-height:1.2; min-width:0}
+.riga .nome b{display:block; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .nome span{display:block; font-size:.76rem; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.riga .pista{position:relative; height:18px}
+.riga .pista::before{content:""; position:absolute; inset:50% 0 auto; height:1px; background:var(--line)}
+.riga .seg{position:absolute; top:0; bottom:0; border-radius:3px; min-width:2px; transition:left .3s, width .3s}
+.riga .seg.su{background:var(--verde)} .riga .seg.giu{background:var(--rosso)} .riga .seg.tot{background:var(--teal)}
+.riga .val{font:500 .8rem var(--f-data); text-align:right; white-space:nowrap}
+.riga .val.su{color:var(--verde-ink)} .riga .val.giu{color:var(--rosso-ink)}
+.riga.estremo{border-top:1px dashed var(--line); padding-top:4px}
+.riga.estremo .val{font-weight:600; color:var(--ink)}
+.legenda{display:flex; flex-wrap:wrap; gap:14px; font-size:.8rem; color:var(--ink-2); margin:14px 0 0}
+.legenda i{display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-1px; margin-right:6px}
+details.metodo{margin-top:14px; border-top:1px solid var(--line); padding-top:10px; font-size:.84rem; color:var(--ink-2)}
+details.metodo summary{cursor:pointer; font-weight:600; min-height:32px; display:flex; align-items:center}
+details.metodo p{margin:6px 0}
+.tabella{width:100%; border-collapse:collapse; margin:8px 0; font-size:.84rem}
+.tabella th,.tabella td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:right}
+.tabella th:first-child,.tabella td:first-child{text-align:left; font-weight:500}
+.tabella thead th{font:600 .72rem var(--f-data); letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3)}
+.tabella td{font-family:var(--f-data); font-variant-numeric:tabular-nums}
+
+/* Famiglia comprimibile, altre voci */
+.famiglia summary{cursor:pointer; list-style:none; min-height:44px; margin-bottom:0; font:800 1.02rem/1.2 var(--f-display); letter-spacing:-.03em}
+.famiglia summary::-webkit-details-marker{display:none}
+.famiglia summary::after{content:"+"; margin-left:auto; font:600 1.2rem var(--f-data); color:var(--ink-3)}
+.famiglia[open] summary{margin-bottom:16px}
+.famiglia[open] summary::after{content:"−"}
+.voci{display:grid; gap:8px; margin-bottom:6px}
+.voci:empty{display:none}
+.voce{display:grid; grid-template-columns:minmax(0,1fr) 6em 6.5em 44px; gap:6px}
+@media (max-width:520px){ .voce{grid-template-columns:minmax(0,1fr) 6.5em 44px} .voce .v-d{grid-column:1/-1} }
+.voce button{border:1px solid var(--line); background:var(--surface-2); border-radius:8px; font-size:1.2rem; line-height:1}
+.voce input,.voce select{padding-left:8px}
+.voce select{padding-right:26px; background-position:calc(100% - 14px) 50%, calc(100% - 9px) 50%}
+
+.valore-unita{display:grid; grid-template-columns:minmax(0,1fr) 6.5em; gap:6px}
+.valore-unita select{padding-left:8px; padding-right:26px; background-position:calc(100% - 14px) 50%, calc(100% - 9px) 50%}
+.tabella .sez th{text-align:left; padding:16px 8px 4px; font:800 .95rem var(--f-display); letter-spacing:-.02em; color:var(--teal-ink); border-bottom:2px solid var(--line)}
+.tabella thead th small{font:400 .7rem var(--f-body); text-transform:none; letter-spacing:0; color:var(--ink-3)}
+.tabella tr.tot td{font-weight:700; color:var(--ink)}
+
+/* Dati comprimibili e invio */
+.dati > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:14px; min-height:44px}
+.dati > summary::-webkit-details-marker{display:none}
+.dati > summary::after{content:"Comprimi"; flex:none; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--ink-3); border-radius:999px; padding:9px 14px; margin-left:auto}
+.dati:not([open]) > summary::after{content:"Modifica"; background:var(--scelto-bg); color:var(--scelto-ink); border-color:var(--scelto-bg)}
+.dati > summary h2{font-size:1.15rem; flex:none}
+.dati .riepilogo{display:none; min-width:0; color:var(--ink-2); font-size:.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.dati:not([open]) .riepilogo{display:block}
+.dati[open] > summary{margin-bottom:22px}
+.dati{margin-top:28px}
+.invia{width:100%; min-height:56px; border:0; border-radius:12px; background:var(--scelto-bg); color:var(--scelto-ink); font:800 1.05rem var(--f-display); letter-spacing:-.01em; transition:transform .05s, filter .15s}
+.invia:hover{filter:brightness(1.12)}
+.invia:active{transform:translateY(1px)}
+#esito > .scheda:first-child{margin-top:16px}
+
+.kpi-riga{display:flex; flex-wrap:wrap; align-items:center; gap:16px 28px}
+.roi{margin-left:auto; padding:10px 14px; border-radius:10px; background:var(--teal-soft); border:1px solid var(--teal); color:var(--teal-ink)}
+.roi h3{margin:0; font:700 .8rem var(--f-display)}
+.roi p{margin:0}
+.roi .coppia{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; font:600 .72rem var(--f-data)}
+.roi .coppia span{display:flex; flex-direction:column; flex:1 1 110px; padding:6px 12px; border-radius:8px; background:color-mix(in srgb,var(--arancio) 40%,transparent); color:color-mix(in srgb,var(--teal-ink) 45%,#000); border:1px solid var(--teal)}
+.roi .coppia b{font:800 1.4rem/1.2 var(--f-display); font-variant-numeric:tabular-nums}
+:root[data-theme="dark"] .roi .coppia span{color:color-mix(in srgb,var(--teal-ink) 60%,#fff)}
+.roi #roi-sub{font:500 .74rem/1.4 var(--f-body)}
+.kpi-mesi{font:500 .84rem var(--f-body); color:var(--ink-3); margin:4px 0 0}
+.scorri{overflow-x:auto; margin:8px 0; -webkit-overflow-scrolling:touch}
+.tabella.larga{max-width:none; min-width:760px; margin:0}
+.tabella.larga td,.tabella.larga th{white-space:nowrap; padding:7px 10px}
+.tabella.larga thead th{white-space:normal; vertical-align:bottom}
+.tabella tr.agg td{background:var(--surface-2)}
+.nota{font-size:.82rem; color:var(--ink-3); margin:6px 0}
+
+.ripristina{border:1px solid var(--rosso); background:var(--rosso-soft); color:var(--rosso-ink); border-radius:999px; padding:9px 12px; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; transition:background .15s, color .15s}
+.ripristina:hover{background:var(--rosso); color:#fff}
+.dati[open] .ripr-s{display:none}
+.dati > summary .ripr-s{margin-left:auto}
+.dati:not([open]) > summary::after{margin-left:0}
+.azioni-form{display:flex; justify-content:center; gap:12px}
+.azioni-form button{flex:0 0 220px; min-height:48px; padding:0 12px; border-radius:999px; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase}
+.azioni-form .invia{border:1px solid var(--scelto-bg)}
+@media (max-width:520px){ .azioni-form button{flex:1 1 0} .dati > summary{flex-wrap:wrap} .dati:not([open]) > summary .riepilogo{order:5; flex:1 0 100%; white-space:normal} }
+.tabella.larga tr.tot td{border-top:2px solid var(--ink-3); background:var(--surface-2); padding-top:14px; padding-bottom:14px; font-weight:700; color:var(--ink)}
+.tabella.larga tr.vuoto td{border:0; padding:0; height:14px}
+
+.testa{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px}
+.testa .periodo{flex:0 0 auto; display:flex; flex-wrap:nowrap; gap:6px}
+.testa .periodo .segmento span{min-height:40px; font-size:.84rem; border-radius:999px; padding:6px 16px}
+#bilancio .cascata{margin-top:8px}
+.riga .zero{position:absolute; top:-5px; bottom:-5px; width:2px; margin-left:-1px; background:var(--ink-3)}
+.riga .seg.mio{background:var(--rosso)} .riga .seg.irpef{background:var(--verde)} .riga .seg.az{background:var(--teal)} .riga .seg.saldo{background:var(--ink)}
+.riga .val.giu{color:var(--rosso-ink)}
+.riga.estremo .nome b{font-weight:800}
+.gradino{border-left:3px solid var(--arancio); margin:14px 0 0} .gradino p{margin:0} .gradino p + p{margin-top:8px}
+.tabella td.pos{color:var(--verde-ink); font-weight:600}
+.tabella td.neg{color:var(--rosso-ink); font-weight:600}
+.tabella.fasce{min-width:720px} .tabella.fasce td.perche{text-align:left; white-space:normal; font-family:var(--f-body); color:var(--ink-2)}
+.tabella.fasce th:nth-child(4){text-align:left} .tabella.fasce tr.salto td{background:var(--surface-2); font-size:.8rem}
+#opzioni-anni{margin-bottom:18px}
+@media (max-width:520px){ #cascata .riga{grid-template-columns:minmax(0,1fr) 5.8em; gap:2px 10px; padding:4px 0} #cascata .riga .nome{grid-column:1/-1} #cascata .riga .nome span{display:inline; margin-left:6px} #cascata .riga .nome b{display:inline} }
+.grafico svg{display:block; width:100%; height:auto; touch-action:pan-y}
+.grafico text{font:500 11px var(--f-data); fill:var(--ink-3)}
+.grafico .asse{stroke:var(--line); stroke-width:1}
+.grafico-info{min-height:3.2em; margin:10px 0 0; font:500 .84rem/1.5 var(--f-data); color:var(--ink-2)}
+.grafico-info b{color:var(--ink)}
+.sotto{font:800 1rem var(--f-display); letter-spacing:-.02em; margin:26px 0 2px}
+.scorri.alta{max-height:440px; overflow:auto}
+.scorri.alta thead th{position:sticky; top:0; background:var(--surface); z-index:1}
+
+/* Barra mobile */
+.barra-mobile{position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); z-index:10;
+  display:flex; align-items:center; gap:12px; padding:10px 10px 10px 16px; border-radius:14px;
+  background:var(--ink); color:var(--bg); box-shadow:0 10px 30px -10px rgba(0,0,0,.4);
+  transform:translateY(160%); transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+.barra-mobile.visibile{transform:none}
+.barra-mobile .etic{font-size:.8rem; opacity:.8}
+.barra-mobile strong{font:800 1.3rem var(--f-display); font-variant-numeric:tabular-nums}
+.barra-mobile .mdelta{font:500 .8rem var(--f-data); opacity:.85}
+.barra-mobile a{margin-left:auto; color:var(--bg); background:color-mix(in srgb, var(--bg) 16%, transparent); border-radius:10px; padding:0 14px;
+  min-height:44px; display:inline-flex; align-items:center; text-decoration:none; font-weight:600; font-size:.88rem}
+@media (min-width:1000px){ .barra-mobile{display:none} }
+
+footer{margin-top:48px; padding-top:18px; border-top:3px solid var(--ink); color:var(--ink-3); font:600 .78rem/1.6 var(--f-data); text-transform:uppercase; letter-spacing:.06em}
+footer a{color:inherit} footer a:hover{color:var(--arancio)}
+footer .firma{margin-top:14px}
+@media (max-width:560px){ .solo-largo{display:none} }
+[hidden]{display:none !important}
+.solo-lettori{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+/* BANNER A DUE LIVELLI: img/banner_sfondo.svg è il fondo del banner (continuo, anche dietro alla barra e al titolo);
+   <img class="soggetto" src="img/banner_soggetto.svg"> è il soggetto. Colore di fondo e del testo: --banner-fondo, --banner-testo (nella pagina).
+   Desktop: titolo e sottotitolo a sinistra, soggetto a destra.
+   Telefono (fino a 700px): solo il titolo prima della grafica, poi il soggetto con il sottotitolo sopra la sua parte bassa, su una sfumatura. */
+.banner{position:relative; overflow:hidden; padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0;
+  background:var(--banner-fondo) url("img/banner_sfondo.svg") 50% 50% / cover no-repeat; border-bottom:3px solid var(--ink)}
+.banner .soggetto{position:absolute; z-index:0; top:calc(var(--barra) + 10px); bottom:18px; right:max(16px, calc(50vw - 600px)); left:auto;
+  width:min(46%, 560px); height:calc(100% - var(--barra) - 28px); max-width:none; opacity:1; -webkit-mask-image:none; mask-image:none; object-fit:contain; object-position:100% 0}
+.banner .dentro{position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
+.banner picture{display:contents}
+/* strisce a tutta larghezza (classe "largo"): su desktop il soggetto è ruotato di 90° (banner_soggetto_ruotato.svg, base a destra)
+   e occupa tutta l'altezza del banner, largo metà schermo (ritagliato sopra e sotto), allineato al bordo destro; su telefono resta orizzontale sotto il titolo */
+@media (min-width:701px){
+  .banner .soggetto.largo{top:0; bottom:0; right:0; width:50vw; height:100%; object-fit:cover; object-position:100% 50%}  /* largo metà schermo, ritagliato sopra e sotto */
+}
+.banner h1{margin:0; padding:0; border:0; color:var(--banner-testo); font-size:clamp(1.9rem,4.6vw,3.2rem); font-weight:800; line-height:1.05; max-width:16ch; text-wrap:balance}
+.banner p{margin:10px 0 0; color:var(--banner-testo); font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase; max-width:52ch}
+@media (max-width:700px){
+  .banner{display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto auto}
+  .banner .dentro{display:contents}
+  .banner h1{grid-row:1; grid-column:1; position:relative; z-index:2; padding:22px 16px 16px; max-width:none}
+  .banner .soggetto{grid-row:2; grid-column:1; position:relative; inset:auto; width:100%; height:min(44vw, 240px); box-sizing:border-box;
+    padding:0 16px 18px; object-position:50% 0}
+  .banner p{grid-row:3; grid-column:1; position:relative; z-index:2; margin:-48px 0 0; padding:34px 16px 18px; max-width:none;
+    background:linear-gradient(to bottom, transparent, color-mix(in srgb, var(--banner-fondo) 86%, transparent) 34px)}
+  .banner .soggetto.largo{object-fit:cover; object-position:50% 100%; padding:0}  /* strisce a tutta larghezza */
+  .banner::after{display:none}
+}
+/* /BANNER A DUE LIVELLI */
+:root{--banner-fondo:#5a2d52; --banner-testo:#f4ecd8}  /* colore di fondo di banner_sfondo.svg e colore del titolo sopra */
+.banner h1 em{color:#e8a33d; font-style:italic}
+/* FONT MOBILE (telefono, fino a 700px): gerarchia titolo > titoli di sezione > testo > etichette > note */
+@media (max-width:700px){
+  h1, .banner h1{font-size:clamp(1.9rem,8.5vw,2.25rem)}
+  h2, .sezione > legend, .gtitolo, .risultati h2{font-size:1.25rem}
+  h3{font-size:1.05rem}
+  .intro{font-size:1rem}
+  .etichetta, .campo > legend{font-size:.9rem}
+}
+/* /FONT MOBILE */
+
+/* Confronto: griglia, cursori, verdetto, barre, grafici */
+.griglia{display:grid; grid-template-columns:minmax(0,1fr); gap:20px; align-items:start; margin-top:18px}
+@media (min-width:980px){
+  .griglia{grid-template-columns:minmax(0,1fr)}
+  .esiti.scorre{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #perche{grid-column:1/-1}
+  .esiti{position:sticky; top:calc(var(--barra) + 12px); max-height:calc(100vh - var(--barra) - 24px); overflow:auto; scrollbar-width:thin; padding-right:2px}
+}
+.esiti{display:grid; grid-template-columns:minmax(0,1fr); gap:16px; min-width:0}
+.sezione > legend{display:flex; align-items:center; gap:10px; font-size:1.1rem; font-weight:800; padding:0; margin-bottom:18px; float:left; width:100%}
+.sezione > legend + *{clear:both}
+#profilo{min-width:0}
+.esiti.scorre{position:static; max-height:none; overflow:visible}
+.sezione.dati{margin-top:0; min-width:0}
+.dati > summary .passo{display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%; background:var(--arancio); color:var(--su-arancio); font:700 .82rem var(--f-data)}
+.dati > summary::after{margin-left:auto}
+.dati[open] > summary{margin-bottom:18px}
+.dati > summary .riepilogo{flex:1 1 0}
+.dati[open] > summary .riepilogo{display:none}
+.sezione > legend .passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--arancio); color:var(--su-arancio); font:700 .82rem var(--f-data)}
+.campi{display:grid; grid-template-columns:minmax(0,1fr); gap:18px 22px}
+#dati{margin-top:22px; scroll-margin-top:calc(var(--barra) + 12px)}
+#dati .titolo-gruppo{font-size:.82rem}
+#dati .titolo-sez{grid-column:1/-1; margin:0; display:flex; align-items:center; gap:12px; font:800 1.02rem var(--f-display)}
+#dati .titolo-sez .passo,#dati .titolo-gruppo .passo{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--arancio); color:var(--su-arancio); font:700 .82rem var(--f-data)}
+#dati .azioni-form{margin-top:26px}
+#risultati{margin-top:18px}
+.largo-tutto{margin-bottom:20px}
+.largo-tutto .scheda{padding:22px}
+.riga-conf{display:grid; gap:20px; align-items:start; grid-template-columns:minmax(0,1fr); transition:grid-template-columns .35s}
+@media (prefers-reduced-motion:reduce){ .riga-conf{transition:none} }
+.riga-conf .scheda{padding:22px}
+.comp{display:grid; grid-template-columns:minmax(0,1fr); gap:18px 40px; align-items:center}
+.comp h2{margin-top:0}
+.comp-slider{margin:0}
+@media (min-width:900px){
+  .comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  #blocco-risultato{display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:0 36px; align-items:center; transition:grid-template-columns .35s}
+  #riga-conf.mosso #blocco-risultato{grid-template-columns:minmax(0,3fr) minmax(0,4fr)}
+  #riga-conf.mosso .combinazioni{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #blocco-risultato > .sottotitolo{grid-column:1/-1}
+}
+.combinazioni{margin-top:0}
+.torna{border:1px solid var(--rosso); background:var(--rosso-soft); color:var(--rosso-ink); border-radius:999px; padding:9px 12px; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; transition:background .15s, color .15s}
+.torna:hover{background:var(--rosso); color:#fff}
+.combinazioni{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-top:18px}
+.combinazioni .tua{margin:0; padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2)}
+.combinazioni .tua.migliore{border-color:var(--verde)}
+#scala-tab{margin:16px 0 12px}
+#scala-tab .segmento{flex:0 0 auto}
+#scala-tab .segmento span{min-height:30px; padding:3px 12px; font-size:.78rem; border-radius:999px}
+#bil-ottimo{margin-top:6px; padding:5px 10px; font-size:.66rem}
+#bil-ottimo:not([hidden]){display:block; margin-left:auto}
+.ipotesi{border:1px solid var(--line); border-radius:12px; padding:14px 18px}
+.ipotesi > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:12px; min-height:44px}
+.ipotesi > summary::-webkit-details-marker{display:none}
+.ipotesi > summary h3{margin:0; font:800 1.02rem var(--f-display); flex:none}
+.ipotesi > summary .passo{display:inline-grid; place-items:center; flex:none; width:26px; height:26px; border-radius:50%; background:var(--arancio); color:var(--su-arancio); font:700 .82rem var(--f-data)}
+.ipotesi > summary .riep-ip{display:block; min-width:0; flex:1 1 0; color:var(--ink-2); font-size:.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ipotesi[open] > summary .riep-ip{display:none}
+.ipotesi > summary::after{content:"Apri"; flex:none; margin-left:auto; font:600 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; border:1px solid var(--ink-3); border-radius:999px; padding:9px 14px}
+.ipotesi[open] > summary::after{content:"Comprimi"}
+.ipotesi[open] > summary{margin-bottom:16px}
+.due .gruppo .aiuto{grid-column:1/-1; margin:0}
+.due .gruppo.tre{grid-template-columns:repeat(2,minmax(0,1fr))}
+.gruppo .etichetta{min-height:2.7em; display:flex; align-items:flex-end; gap:6px}
+.con-unita input#acc{padding-right:150px}
+.seg-unita{position:absolute; right:7px; top:8px; bottom:8px; display:flex; gap:2px; padding:2px; border-radius:7px; background:color-mix(in srgb, var(--ink-3) 24%, transparent)}
+.seg-unita label{display:block}
+.seg-unita input{position:absolute; opacity:0; pointer-events:none}
+.seg-unita span{display:grid; place-items:center; height:100%; padding:0 8px; border-radius:5px; font:600 .68rem var(--f-data); color:var(--ink-2); cursor:pointer; white-space:nowrap}
+.seg-unita input:checked + span{background:color-mix(in srgb, var(--teal) 38%, transparent); color:var(--ink)}
+.seg-unita input:focus-visible + span{outline:2px solid var(--ink); outline-offset:1px}
+.info-box{padding:10px 14px; border-radius:10px; background:var(--surface-2); border-left:3px solid var(--arancio); color:var(--ink-2); font-size:.86rem}
+.info{flex:none; width:16px; height:16px; border-radius:50%; border:1px solid var(--ink-3); background:transparent; color:var(--ink-2); font:700 .62rem var(--f-data); line-height:1; cursor:pointer; padding:0}
+.info:hover,.info[aria-expanded="true"]{background:var(--arancio); border-color:var(--arancio); color:var(--su-arancio)}
+@media (max-width:520px){ .due .gruppo.tre{grid-template-columns:minmax(0,1fr)} }
+.due .gruppo{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px; align-content:start}
+.due .gruppo .titolo-gruppo{grid-column:1/-1; margin:0}
+.ipotesi .due{display:grid; grid-template-columns:minmax(0,1fr); gap:22px; margin:18px 0}
+.ipotesi .gruppo{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px; align-content:start}
+.ipotesi .gruppo .titolo-gruppo{grid-column:1/-1; margin:0}
+.ipotesi .eco{margin-bottom:12px}
+@media (min-width:760px){ .due{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:36px}
+.ipotesi .due{grid-template-columns:repeat(2,minmax(0,1fr)); gap:36px} }
+@media (max-width:520px){ .ipotesi > summary{flex-wrap:wrap} .ipotesi:not([open]) > summary .riep-ip{order:5; flex:1 0 100%; white-space:normal} }
+@media (min-width:600px){ .campi{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (min-width:1000px){ .campi{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.campi .largo{grid-column:1/-1}
+.titolo-gruppo{grid-column:1/-1; margin:6px 0 -6px; font:700 .78rem var(--f-data); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); display:flex; align-items:center; gap:8px}
+.titolo-gruppo i{width:10px; height:10px; border-radius:50%}
+.esempi{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:22px 0 0}
+.esempi .titolo{font-size:.88rem; font-weight:600; color:var(--ink-2)}
+.esempi .segmenti{flex-wrap:nowrap}
+.esempi .segmento span{border-radius:999px; padding:6px 16px; font-size:.88rem}
+.esempi .spinta{margin-left:auto; display:flex; gap:4px}
+@media (max-width:700px){ .esempi .spinta{margin-left:0} .esempi .segmenti{flex-wrap:wrap} }
+.cursore{display:grid; grid-template-columns:minmax(0,1fr) 9.5em; gap:6px 16px; align-items:center}
+.cursore.solo{grid-template-columns:minmax(0,1fr) auto}
+input[type=range]{width:100%; min-height:44px; margin:0; accent-color:var(--scelto-bg)}
+.cursore.f input[type=range]{accent-color:var(--teal)}
+.cursore.l input[type=range]{accent-color:var(--libero)}
+#bil{appearance:none; -webkit-appearance:none; background:transparent; --fondo:50%}
+#bil::-webkit-slider-runnable-track{height:8px; border-radius:4px; background:linear-gradient(90deg,var(--teal) var(--fondo),var(--libero) var(--fondo))}
+#bil::-moz-range-track{height:8px; border-radius:4px; background:linear-gradient(90deg,var(--teal) var(--fondo),var(--libero) var(--fondo))}
+#bil::-webkit-slider-thumb{-webkit-appearance:none; width:22px; height:22px; margin-top:-7px; border-radius:50%; background:var(--surface); border:3px solid var(--ink)}
+#bil::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--surface); border:3px solid var(--ink)}
+.cursore output{font:600 .9rem var(--f-data); text-align:right; white-space:nowrap; color:var(--ink-2)}
+.estremi{display:flex; justify-content:space-between; font-size:.78rem; color:var(--ink-3); margin-top:-6px}
+.estremi b{font-weight:700}
+.costo-box{margin:18px 0 0; padding:10px 14px; border-radius:10px; background:var(--surface-2); border-left:3px solid var(--rosso); font-size:.88rem; color:var(--ink-2)}
+.cursore + .aiuto{margin-top:0}
+.esiti .scheda{padding:20px}
+.esiti h2{font-size:1.15rem}
+.verdetto{display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 12px; margin:12px 0 4px; padding:10px 16px; border-radius:12px; font:800 1.15rem var(--f-display); letter-spacing:-.02em}
+.verdetto small{font:600 .8rem var(--f-data); letter-spacing:0}
+.verdetto.fondo{background:var(--teal-soft); color:var(--teal-ink); border:1px solid var(--teal)}
+.verdetto.libero{background:var(--libero-soft); color:var(--libero-ink); border:1px solid var(--libero)}
+.verdetto.pari{background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line)}
+.confr{display:grid; gap:8px; margin:10px 0 4px}
+.cf-riga{display:grid; grid-template-columns:minmax(0,1fr) 12em; gap:4px 10px; align-items:center; font-size:.88rem}
+.cf-nome{grid-column:1/-1; text-align:left}
+.cf-pista{display:flex; height:24px; border-radius:5px; background:var(--track); overflow:hidden}
+.cf-pista i{display:block; height:100%; border-radius:5px; transition:width .3s}
+.cf-pista i.d{background:repeating-linear-gradient(135deg,var(--teal) 0 2px,transparent 2px 7px); border-radius:0 5px 5px 0}
+.cf-pista i.f{background:var(--teal)} .cf-pista i.l{background:var(--libero)}
+.cf-val{text-align:right; font-size:1rem}
+.cf-riga.best .cf-nome{font-weight:700}
+.tua{margin-top:16px; padding-top:14px; border-top:1px solid var(--line)}
+.tabella td small{display:block; font:400 .72rem var(--f-data); color:var(--ink-3)}
+.cf-val small{display:block; white-space:nowrap; font:400 .72rem var(--f-data); color:var(--ink-3)}
+.quote{list-style:none; margin:8px 0 6px; padding:0; display:grid; gap:8px}
+.quote li{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:2px 12px; font-size:.88rem; padding:10px 12px; border-radius:10px; border:1px solid transparent}
+.quote li.f{color:var(--teal-ink); background:color-mix(in srgb, var(--teal) 16%, transparent); border-color:color-mix(in srgb, var(--teal) 40%, transparent)}
+.quote li.l{color:var(--libero-ink); background:color-mix(in srgb, var(--libero) 16%, transparent); border-color:color-mix(in srgb, var(--libero) 40%, transparent)}
+.quote b{font-weight:800; text-align:right}
+.riga-netto{display:flex; flex-wrap:wrap; align-items:baseline; gap:0 10px; margin-top:22px}
+.tua .riga-netto .kpi{margin:0}
+.tua .kpi-sub{font:400 .88rem var(--f-body); color:var(--ink-2)}
+.quote .imp{text-align:right}
+.quote small{font:400 .76rem var(--f-data); color:inherit; opacity:.8}
+.tua .etic{margin:0; font-size:.84rem; color:var(--ink-2); font-weight:600}
+.tua .kpi{font-size:1.65rem; margin:8px 0 2px; color:var(--scelto-bg)}
+:root[data-theme="dark"] .tua .kpi{color:var(--ink)}
+.opzioni li.best{background:var(--verde-soft); border-color:var(--verde)}
+.opzioni{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.sottotitolo{font-size:.86rem; color:var(--ink-3); margin:4px 0 12px}
+#grafico-bil svg{cursor:pointer}
+.scorri{overflow-x:auto; margin:8px 0}
+.tabella th{font-size:.7rem}
+.tabella td.pos{color:var(--verde-ink); font-weight:600}
+.tabella td.neg{color:var(--rosso-ink); font-weight:600}
+.tabella tr.tot td{font-weight:700; color:var(--ink); background:var(--surface-2)}
+@media (max-width:520px){ .cf-riga{grid-template-columns:minmax(0,1fr)} .cf-val{text-align:left} }
+</style>
+<script>try{document.documentElement.dataset.theme=localStorage.theme||"dark"}catch{document.documentElement.dataset.theme="dark"}</script>
+</head>
+<body>
+<header class="barra" id="barra">
+  <div class="dove">
+    <a class="progetto" href="#">Fondo pensione o investimento</a>
+    <div class="posizione" id="barra-capitolo" aria-live="polite"></div>
+  </div>
+  <nav class="azioni" aria-label="Navigazione">
+    <a class="bottone-barra" href="../">← Simulatori</a>  <a class="bottone-barra" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="16" height="16" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>← Progetti</span></a>
+    <button class="bottone-barra" id="tema" type="button" aria-label="Cambia tema chiaro/scuro">Tema</button>
+  </nav>
+  <div class="avanzamento"></div>
+</header>
+<section class="banner">
+  <img class="soggetto" src="img/banner_soggetto.svg" alt="">
+  <div class="dentro">
+    <h1>Fondo pensione o <em>investimento</em>?</h1>
+    <p>Stesso importo mensile, due strade, 2026</p>
+  </div>
+</section>
+<div class="pagina">
+  <p class="intro">Hai dei risparmi da mettere da parte: li versi nel fondo pensione, dove si deducono e il datore aggiunge il suo contributo ma restano bloccati, oppure li investi in azioni o obbligazioni, liberi ma senza sconti fiscali? Scegli quanto metti da parte ogni mese e muovi il cursore del bilanciamento: il confronto mostra il netto finale di ogni combinazione, e quanto rende ogni 100 € che ti escono davvero di tasca, dopo l'IRPEF recuperata.</p>
+  <ul class="dati-modello" id="dati-modello"></ul>
+
+  <div class="esempi" role="group" aria-label="Azioni sulla pagina">
+    <span class="titolo">Ripartire da zero o condividere</span>
+    <span class="spinta">
+      <button type="button" class="pulsante leggero" id="copia">Copia link</button>
+    </span>
+  </div>
+
+
+  <details class="scheda dati capitolo" id="dati" data-titolo="Dati" open>
+    <summary><h2>Inserisci i dati</h2><span class="riepilogo" id="riepilogo"></span><button type="button" class="ripristina ripr-s">Ripristina</button></summary>
+    <form id="profilo" novalidate>
+      <div class="campi">
+        <div class="due largo">
+        <div class="gruppo"><h3 class="titolo-sez"><span class="passo">1</span>Chi sei</h3>
+        <div class="campo"><label class="etichetta" for="eta">Età oggi</label><div class="con-unita corto"><input type="number" id="eta" name="eta" inputmode="decimal" step="1" aria-describedby="eta-e"><span class="unita">anni</span></div><p class="errore-campo" id="eta-e" role="alert" hidden></p></div>
+        <div class="campo"><label class="etichetta" for="pens">Età di pensionamento</label><div class="con-unita corto"><input type="number" id="pens" name="pens" inputmode="decimal" step="1" aria-describedby="pens-e"><span class="unita">anni</span></div><p class="errore-campo" id="pens-e" role="alert" hidden></p></div>
+        <div class="campo"><label class="etichetta" for="ral">RAL</label><div class="con-unita corto"><input type="number" id="ral" name="ral" inputmode="decimal" step="500" aria-describedby="ral-e"><span class="unita">€</span></div><p class="errore-campo" id="ral-e" role="alert" hidden></p></div></div>
+
+        <div class="gruppo tre"><h3 class="titolo-sez"><span class="passo">2</span>Quanto metti da parte</h3>
+        <div class="campo"><label class="etichetta" for="acc">Importo da investire ogni mese</label>
+          <div class="con-unita"><input type="number" id="acc" name="acc" inputmode="decimal" step="any" aria-describedby="acc-e acc-aiuto">
+            <div class="seg-unita" role="radiogroup" aria-label="Unità dell'importo"><label><input type="radio" name="acc-u" value="e" checked><span>€ al mese</span></label><label><input type="radio" name="acc-u" value="p"><span>% della RAL</span></label></div></div>
+          <p class="aiuto" id="acc-aiuto"></p><p class="errore-campo" id="acc-e" role="alert" hidden></p></div>
+        <div class="campo"><label class="etichetta" for="dat">Contributo del datore <button type="button" class="info" id="info-btn" aria-expanded="false" aria-controls="info-datore" aria-label="Come funziona il contributo del datore">i</button></label>
+          <div class="con-unita"><input type="number" id="dat" name="dat" inputmode="decimal" step="0.1" aria-describedby="dat-e"><span class="unita">% della RAL</span></div>
+          <p class="aiuto" id="dat-aiuto"></p><p class="errore-campo" id="dat-e" role="alert" hidden></p></div>
+        <p class="aiuto info-box" id="info-datore" hidden></p></div>
+        </div>
+
+        <details class="ipotesi largo" id="ipotesi"><summary><span class="passo">3</span><h3>Ipotesi di rendimento</h3><span class="riep-ip" id="riep-ip"></span></summary>
+          <div class="campo largo"><span class="etichetta" id="et-profilo">Profilo di investimento (imposta rendimento e titoli di Stato di entrambi)</span>
+            <div class="segmenti" role="radiogroup" aria-labelledby="et-profilo">
+              <label class="segmento"><input type="radio" name="profilo" value="azioni"><span>Azionario</span></label>
+              <label class="segmento"><input type="radio" name="profilo" value="bilanciato" checked><span>Bilanciato 50/50</span></label>
+              <label class="segmento"><input type="radio" name="profilo" value="obbligazioni"><span>Obbligazionario</span></label>
+            </div></div>
+          <div class="due">
+            <div class="gruppo"><p class="titolo-gruppo"><i style="background:var(--teal)"></i>Fondo pensione</p>
+              <div class="campo"><label class="etichetta" for="rgf">Rendimento lordo</label><div class="con-unita corto"><input type="number" id="rgf" name="rgf" inputmode="decimal" step="0.1" aria-describedby="rgf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="rgf-e" role="alert" hidden></p></div>
+              <div class="campo"><label class="etichetta" for="ctf">Costi del fondo (ISC)</label><div class="con-unita corto"><input type="number" id="ctf" name="ctf" inputmode="decimal" step="0.1" aria-describedby="ctf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="ctf-e" role="alert" hidden></p></div>
+              <div class="campo"><label class="etichetta" for="tsf">Quota in titoli di Stato</label><div class="con-unita corto"><input type="number" id="tsf" name="tsf" inputmode="decimal" step="5" aria-describedby="tsf-e"><span class="unita">%</span></div><p class="errore-campo" id="tsf-e" role="alert" hidden></p></div></div>
+            <div class="gruppo"><p class="titolo-gruppo"><i style="background:var(--libero)"></i>Investimento fuori dal fondo</p>
+              <div class="campo"><label class="etichetta" for="rgl">Rendimento lordo</label><div class="con-unita corto"><input type="number" id="rgl" name="rgl" inputmode="decimal" step="0.1" aria-describedby="rgl-e"><span class="unita">% anno</span></div><p class="errore-campo" id="rgl-e" role="alert" hidden></p></div>
+              <div class="campo"><label class="etichetta" for="ctl">Costi (TER dell'ETF)</label><div class="con-unita corto"><input type="number" id="ctl" name="ctl" inputmode="decimal" step="0.05" aria-describedby="ctl-e"><span class="unita">% anno</span></div><p class="errore-campo" id="ctl-e" role="alert" hidden></p></div>
+              <div class="campo"><label class="etichetta" for="tsl">Quota in titoli di Stato</label><div class="con-unita corto"><input type="number" id="tsl" name="tsl" inputmode="decimal" step="5" aria-describedby="tsl-e"><span class="unita">%</span></div><p class="errore-campo" id="tsl-e" role="alert" hidden></p></div></div>
+          </div>
+          <div class="gruppo eco"><p class="titolo-gruppo">Economia</p>
+            <div class="campo"><label class="etichetta" for="inf">Adeguamento all'inflazione</label><div class="con-unita corto"><input type="number" id="inf" name="inf" inputmode="decimal" step="0.1" aria-describedby="inf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="inf-e" role="alert" hidden></p></div>
+            <div class="campo"><label class="etichetta" for="cr">Crescita della retribuzione</label><div class="con-unita corto"><input type="number" id="cr" name="cr" inputmode="decimal" step="0.1" aria-describedby="cr-e"><span class="unita">% anno</span></div><p class="errore-campo" id="cr-e" role="alert" hidden></p></div></div>
+          <p class="aiuto">Sono ipotesi, non previsioni: le azioni rendono di più in media ma oscillano molto, il fondo e le obbligazioni meno. Sui titoli di Stato l'imposta sui rendimenti è del 12,5% invece del 20% (fondo) o del 26% (fuori).</p>
+        </details>
+      </div>
+      <div class="azioni-form"><button type="button" class="ripristina">Ripristina</button><button type="submit" class="invia">Calcola il confronto</button></div>
+    </form>
+  </details>
+
+  <div id="risultati" hidden>
+  <div class="riga-conf" id="riga-conf">
+    <section class="scheda risultato capitolo" id="risultato" data-titolo="Chi conviene">
+      <h2>Quanto conviene</h2>
+      <div id="avviso"></div>
+      <div id="blocco-risultato" aria-live="polite"></div>
+    </section>
+    <section class="scheda capitolo comp" id="composizione" data-titolo="Composizione">
+      <div class="comp-testo">
+        <h2>Prova un'altra suddivisione</h2>
+        <p class="aiuto" id="bil-aiuto">Quanto dell'importo mensile va nel fondo pensione e quanto in azioni o obbligazioni fuori dal fondo (soldi tuoi, già tassati, che riprendi quando vuoi).</p>
+        <p class="costo-box" id="costo-aiuto" aria-live="polite"></p>
+        <p class="aiuto" id="bil-nota"></p>
+      </div>
+      <div class="comp-slider campo">
+        <label class="etichetta" for="bil">Bilanciamento tra fondo e investimento</label>
+        <div class="cursore solo"><input type="range" id="bil" min="0" max="100" step="1" aria-describedby="bil-aiuto bil-e"><output id="bil-out" for="bil">–</output></div>
+        <div class="estremi"><span>Tutto fuori dal fondo</span><span>Tutto nel fondo</span></div>
+        <p class="errore-campo" id="bil-e" role="alert" hidden></p>
+        <button type="button" class="torna" id="bil-ottimo" hidden>Torna alla migliore</button>
+      </div>
+    </section>
+  </div>
+  <div class="griglia">
+    <aside class="esiti scorre" aria-label="Grafici">
+      <section class="scheda capitolo" id="bilanciamento" data-titolo="Bilanciamento">
+        <h2>Come dividere i soldi</h2>
+        <p class="gruppotitolo" id="sottotitolo-bil"></p>
+        <div class="grafico" id="grafico-bil"></div>
+        <p class="legenda" id="legenda-bil"></p>
+        <p class="grafico-info" id="bil-info" aria-live="polite"></p>
+        <ul class="opzioni" id="opzioni-bil"></ul>
+        <p class="confronto" id="nota-bil"></p>
+      </section>
+
+      <section class="scheda capitolo" id="spiegazione" data-titolo="Come cresce">
+        <h2>Come cresce nel tempo</h2>
+        <p class="gruppotitolo">Valore netto anno per anno, come se uscissi quell'anno: per il fondo con la tassa sulla prestazione, per l'investimento con l'imposta sul guadagno.</p>
+        <div class="grafico" id="grafico"></div>
+        <p class="legenda" id="legenda-grafico"></p>
+        <p class="grafico-info" id="grafico-info" aria-live="polite"></p>
+      </section>
+
+      <section class="scheda capitolo" id="perche" data-titolo="Da dove arriva">
+        <h2>Da dove arriva il netto</h2>
+        <div class="segmenti" id="scala-tab" role="radiogroup" aria-label="Periodo del conto">
+          <label class="segmento"><input type="radio" name="scala-tab" value="m"><span>Al mese</span></label>
+          <label class="segmento"><input type="radio" name="scala-tab" value="a"><span>All'anno</span></label>
+          <label class="segmento"><input type="radio" name="scala-tab" value="t" checked><span>In tutto</span></label>
+        </div>
+        <div id="tabella"></div>
+        <p class="confronto" id="nota-tabella"></p>
+        <details class="metodo"><summary>Come funziona il calcolo</summary>
+          <p><b>Costo di tasca:</b> nel fondo è quello che versi meno l'IRPEF che recuperi (deduzione fino a 5.164,57 € l'anno, addizionali comprese, con lo stesso motore del simulatore busta paga, calcolata per un residente a Modena); fuori dal fondo è quello che investi. Le due strade pure partono dallo stesso importo mensile; nel fondo costa meno di tasca, e il confronto è sul netto ogni 100 € di costo.</p>
+          <p><b>Fondo pensione:</b> contributo del datore in più (solo se versi nel fondo almeno lo 0,5% della RAL, soglia tipica dei fondi di categoria), rendimento lordo meno i costi, imposta del 20% (12,5% sui titoli di Stato) ogni anno sul risultato, poi alla fine il 15% (fino al 9% con gli anni di iscrizione) sui contributi dedotti e su quelli del datore.</p>
+          <p><b>Fuori dal fondo:</b> rendimento lordo meno i costi e il bollo dello 0,2% l'anno sul conto titoli; imposta del 26% (12,5% sui titoli di Stato) solo sul guadagno, pagata alla fine.</p>
+          <p><b>Grafico del bilanciamento:</b> l'importo mensile resta uguale e cambia solo la quota che va nel fondo. A 0% non c'è il contributo del datore, che si ha solo versando.</p>
+          <p><b>Punto di pareggio:</b> il rendimento lordo dell'investimento libero che lo porta alla pari con il fondo, a parità di costo.</p>
+          <p><b>Limiti:</b> rendimenti costanti (le azioni oscillano, e un cattivo anno vicino alla pensione pesa), importi costanti in euro, TFR escluso (è tuo comunque), niente recupero del plafond non dedotto, rendita e anticipazioni. I soldi nel fondo si riprendono solo alla pensione o in casi previsti; quelli investiti fuori, quando vuoi.</p>
+        </details>
+      </section>
+    </aside>
+  </div>
+  </div>
+
+  <footer><span id="piede">Stima indicativa 2026 su dati normativi pubblici e rendimenti ipotetici: non è consulenza finanziaria o fiscale. Il fondo pensione è vincolato fino alla pensione, gli investimenti fuori dal fondo possono perdere valore. Nessun dato lascia il browser.</span><p><a class="firma" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="28" height="28" aria-hidden="true"><path fill="var(--arancio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>Federico Gamberini</span></a></p></footer>
+</div>
+
+<div class="barra-mobile" id="barra-mobile">
+  <div><div class="etic">Netto a fine periodo</div><strong id="mob-p">–</strong> <span class="mdelta" id="mob-delta"></span></div>
+  <a href="#risultato">Vedi il confronto</a>
+</div>
+
+<script src="../busta-paga/comuni.js"></script>
+<script src="../busta-paga/script.js"></script>
+<script src="../fondo-pensione/script.js"></script>
+<script src="script.js"></script>
+<script src="dashboard.js"></script>
+<script>
+(function () {
+  var barra = document.getElementById("barra"), banner = document.querySelector(".banner");
+  var capitoli = [].slice.call(document.querySelectorAll(".capitolo")), inCoda = false;
+  function aggiornaBarra() {
+    inCoda = false;
+    var y = scrollY, hb = barra.offsetHeight, max = document.documentElement.scrollHeight - innerHeight, cap = null;
+    barra.classList.toggle("compatta", y > banner.offsetHeight - hb * 2);
+    var vis = capitoli.filter(function (c) { return c.getClientRects().length; });
+    vis.forEach(function (c) { if (c.getBoundingClientRect().top <= hb + 40) cap = c; });
+    if (y >= max - 2) cap = vis[vis.length - 1];   // in fondo l'ultimo non arriva in cima
+    document.getElementById("barra-capitolo").textContent = cap ? cap.dataset.titolo : "";
+    barra.style.setProperty("--avanzamento", max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
+  }
+  addEventListener("scroll", function () { if (!inCoda) { inCoda = true; requestAnimationFrame(aggiornaBarra); } }, {passive: true});
+  addEventListener("resize", aggiornaBarra);
+  aggiornaBarra();
+})();
+document.getElementById("tema").addEventListener("click", () => {
+  const r = document.documentElement;
+  r.dataset.theme = r.dataset.theme === "dark" ? "light" : "dark";
+  try { localStorage.theme = r.dataset.theme } catch {}
+});
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@
 # Si attiva una volta per clone: git config core.hooksPath .githooks
 cd "$(git rev-parse --show-toplevel)"
 
-git diff --cached --name-only | grep -qE '^(Busta Paga|CD CC|Fondo Pensione)/|^scripts/build\.sh$' || exit 0
+git diff --cached --name-only | grep -qE '^(Busta Paga|CD CC|Fondo Pensione|Fondo vs Investimento)/|^scripts/build\.sh$' || exit 0
 
 sh scripts/build.sh || { echo "Commit fermato: correggi le prove o rilancia con git commit --no-verify"; exit 1; }
-git add docs/busta-paga/script.js docs/busta-paga/comuni.js docs/cd-cc/script.js docs/fondo-pensione/script.js
+git add docs/busta-paga/script.js docs/busta-paga/comuni.js docs/cd-cc/script.js docs/fondo-pensione/script.js docs/fondo-vs-investimento/script.js
