@@ -308,7 +308,7 @@
       if (!perc) { $("cv-v").setAttribute("cx", X(q.x)); $("cv-v").setAttribute("cy", Y(q.x)); }
       $("conviene-info").innerHTML = "<b>Versando " + eur.format(q.x) + " l'anno</b> · " + (perc ?
         (q.x > 0 ? "ti torna il " + pct.format(media) + "% (" + eur.format(q.irpef) + " di IRPEF)" : "nessun versamento") + " · su ogni euro in più ti torna il " + pct.format(ultimo) + "%" :
-        "IRPEF recuperata " + eur.format(q.irpef) + " · ti costa davvero " + eur.format(q.costo) + (q.x > 0 ? " · ogni 100 € ti costano " + Math.round(q.costo / q.x * 100) + " €" : "")) +
+        "IRPEF recuperata " + eur.format(q.irpef) + " · ti costa davvero " + eur.format(q.costo) + (q.x > 0 ? " · ogni 100 € ti costano " + Math.round(q.costo / q.x * 100) + " € (risparmi il " + pct.format((1 - q.costo / q.x) * 100) + "%)" : "")) +
         gradini.filter(function (g) { return g.segno < 0 && g.recupero && q.x >= g.x && q.x < g.recupero; })
           .map(function () { return " · <b>qui hai perso la maggiorazione di " + eur.format(m.importo) + "</b>"; }).join("");
     }
