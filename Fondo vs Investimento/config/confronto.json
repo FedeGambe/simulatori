@@ -4,7 +4,7 @@
   "minimoDatore": 0.5,
   "profili": [
     { "id": "azioni", "nome": "Azionario", "rendimento": 6.5, "titoliStato": 0 },
-    { "id": "bilanciato", "nome": "Bilanciato 50/50", "rendimento": 5, "titoliStato": 25 },
+    { "id": "bilanciato", "nome": "Bilanciato", "rendimento": 5, "titoliStato": 50 },
     { "id": "obbligazioni", "nome": "Obbligazionario", "rendimento": 3, "titoliStato": 60 }
   ],
   "fonte": "Bollo sul conto titoli: 0,20% annuo sul valore (DPR 642/1972, all. A). Il fondo pensione ne è esente. Rendimenti dei profili: ipotesi di lungo periodo, non previsioni. Le imposte sono quelle di config/fondo.json del fondo pensione"

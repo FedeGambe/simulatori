@@ -17,14 +17,14 @@
     dat: [2, 0, 15, "Contributo del datore"],
     rgf: [5, -5, 15, "Rendimento del fondo"],
     ctf: [1, 0, 5, "Costi del fondo"],
-    tsf: [25, 0, 100, "Quota in titoli di Stato del fondo"],
+    tsf: [50, 0, 100, "Quota in titoli di Stato del fondo"],
     rgl: [5, -5, 15, "Rendimento dell'investimento"],
     ctl: [0.25, 0, 5, "Costi dell'investimento"],
-    tsl: [25, 0, 100, "Quota in titoli di Stato dell'investimento"],
+    tsl: [50, 0, 100, "Quota in titoli di Stato dell'investimento"],
     inf: [0, 0, 10, "Adeguamento all'inflazione"],
     cr: [2, -2, 10, "Crescita della retribuzione"]
   };
-  var PROFILO = "bilanciato", COMUNE_PREDEFINITO = "F257";
+  var PF = "bilanciato", PL = "bilanciato", COMUNE_PREDEFINITO = "F257";
   var ultimo = null;       // ultimo risultato valido {r, p, curva, quota}, per ridisegnare i grafici se cambia la larghezza
   var W = 800, limite = 0, accUnita = "e";   // accUnita: l'importo è scritto in € al mese ("e") o in % della RAL ("p")
   var toccato = false;     // false: il cursore segue la suddivisione migliore; true: l'ha scelta chi usa la pagina
@@ -59,6 +59,14 @@
       ok = false;
     }
     if (ok) v.accM = accUnita === "p" ? v.ral * v.acc / 1200 : v.acc;
+    var fe = $("fpc-e"), ft = String($("fpc").value).replace(",", ".").trim(), fn = parseFloat(ft);
+    v.fpc = null;   // facoltativo: % della RAL versata nel fondo
+    fe.hidden = true; $("fpc").setAttribute("aria-invalid", false);
+    if (ok && ft !== "") {
+      var msg = isNaN(fn) || fn < 0 || fn > 100 ? "Quota nel fondo: inserisci un valore tra 0 e 100." :
+        v.ral * fn / 100 > v.accM * 12 + 0.005 ? "Quota nel fondo: " + eur2.format(v.ral * fn / 100) + " l'anno superano l'importo che metti da parte (" + eur2.format(v.accM * 12) + ")." : "";
+      if (msg) { $("fpc").setAttribute("aria-invalid", true); fe.hidden = false; fe.textContent = msg; ok = false; } else v.fpc = fn;
+    }
     v.comune = COMUNE_PREDEFINITO;   // comune fisso: pesa poco (solo l'addizionale comunale sull'IRPEF recuperata)
     return ok ? v : null;
   }
@@ -224,15 +232,20 @@
   }
 
   // 6. da dove arriva il netto: le tre colonne
-  function tabella(r, p) {
+  function tabella(r, p, curva) {
     var cols = [["Tutto nel fondo", r.tuttoFondo], ["Tutto fuori", r.tuttoLibero], ["La tua scelta", r.tuo]];
     var scala = (document.querySelector("input[name=scala-tab]:checked") || {}).value || "t";
     var div = scala === "m" ? r.anni * 12 : scala === "a" ? r.anni : 1;   // il conto di tutto il periodo, diviso per anni o mesi
     var m = function (x) { return eur.format(x / div); };
+    // IRPEF persa: quanta ne recuperi in meno rispetto al massimo tra suddivisione migliore e le tre colonne
+    var migliore = curva.reduce(function (a, c) { return c.netto > a.netto ? c : a; });
+    var maxIrpef = Math.max(migliore.irpef, r.tuttoFondo.irpef, r.tuttoLibero.irpef, r.tuo.irpef);
     var righe = [
       ["Versi " + (scala === "m" ? "al mese" : scala === "a" ? "all'anno" : "in tutto"), function (x) { return m(x.versato); }],
       ["− IRPEF recuperata", function (x) { return x.irpef > 0 ? "−" + m(x.irpef) : "–"; }, "pos"],
       ["= Ti costa di tasca", function (x) { return m(x.costo); }, "tot"],
+      ["IRPEF non recuperata (oltre il limite di deduzione, stima)", function (x) { return x.irpefPersa > 0.5 ? m(x.irpefPersa) : "–"; }, "neg", function (c) { return c.irpefPersa > 0.5; }],
+      ["IRPEF persa rispetto alla suddivisione che ne recupera di più", function (x) { return maxIrpef - x.irpef > 0.5 ? m(maxIrpef - x.irpef) : "–"; }, "neg", function (c) { return maxIrpef - c.irpef > 0.5; }],
       ["+ Contributo del datore", function (x) { return x.datore > 0 ? "+" + m(x.datore) : "–"; }, "pos"],
       ["+ IRPEF reinvestita fuori", function (x) { return x.irpef > 0 ? "+" + m(x.irpef) : "–"; }, "pos"],
       ["+ Rendimenti netti", function (x) { return (x.rendimenti >= 0 ? "+" : "−") + m(Math.abs(x.rendimenti)); }, "pos"],
@@ -241,7 +254,8 @@
       ["Pari a, in euro di oggi", function (x) { return m(x.nettoReale); }],
       ["Ogni 100 € di costo", function (x) { return eur.format(x.perCento); }, "tot"]
     ];
-    if (scala !== "t") righe = righe.slice(0, 5);   // rendimenti, imposta e netto hanno senso solo su tutto il periodo: al mese e all'anno restano i flussi
+    if (scala !== "t") righe = righe.slice(0, 7);   // rendimenti, imposta e netto hanno senso solo su tutto il periodo: al mese e all'anno restano i flussi
+    righe = righe.filter(function (x) { return !x[3] || cols.some(function (c) { return x[3](c[1]); }); });   // la riga facoltativa c'è solo se qualcuno perde IRPEF
     $("tabella").innerHTML = '<div class="scorri"><table class="tabella"><thead><tr><th></th>' + cols.map(function (c) { return "<th>" + c[0] + "</th>"; }).join("") + "</tr></thead><tbody>" +
       righe.map(function (x) {
         return '<tr class="' + (x[2] === "tot" ? "tot" : "") + '"><td>' + x[0] + "</td>" + cols.map(function (c) { return '<td class="' + (x[2] === "pos" || x[2] === "neg" ? x[2] : "") + '">' + x[1](c[1]) + "</td>"; }).join("") + "</tr>";
@@ -264,7 +278,13 @@
       if (r.tuttoFondo) {
         curva = Confronto.curvaBilanciamento(p, 100);
         migliore = curva.reduce(function (a, c) { return c.netto > a.netto ? c : a; });
-        if (!toccato) {   // finché non muovi il cursore, mostro la suddivisione migliore
+        if (v.fpc !== null) {   // quota nel fondo scelta in % della RAL: la suddivisione parte da lì
+          toccato = true;
+          v.bil = Math.min(100, v.ral * v.fpc / 1200 / v.accM * 100);
+          imposta("bil", v.bil);
+          p = parametri(v);
+          r = Confronto.simulaConfronto(p);
+        } else if (!toccato) {   // finché non muovi il cursore, mostro la suddivisione migliore
           v.bil = Math.round(migliore.quota * 100);
           imposta("bil", v.bil);
           p = parametri(v);
@@ -280,8 +300,8 @@
     box.classList.remove("inattivo");
     $("avviso").innerHTML = "";
     $("riepilogo").textContent = v.eta + "→" + v.pens + " anni · RAL " + eur.format(v.ral) + " · " + eur.format(v.accM) + " al mese · " +
-      (PROFILO ? Confronto.config.profili.filter(function (x) { return x.id === PROFILO; })[0].nome : "Profilo personalizzato");
-    $("riep-ip").textContent = (PROFILO ? Confronto.config.profili.filter(function (x) { return x.id === PROFILO; })[0].nome : "Personalizzato") + " · fondo " + pct.format(v.rgf) + "% (costi " + pct.format(v.ctf) + "%) · fuori " + pct.format(v.rgl) + "% (costi " + pct.format(v.ctl) + "%)";
+      "fondo " + nomeP(PF) + " · fuori " + nomeP(PL);
+    $("riep-ip").textContent = "fondo " + nomeP(PF) + ", fuori " + nomeP(PL) + " · fondo " + pct.format(v.rgf) + "% (costi " + pct.format(v.ctf) + "%) · fuori " + pct.format(v.rgl) + "% (costi " + pct.format(v.ctl) + "%)";
     var minimo = Math.round(v.ral * Confronto.config.minimoDatore / 100);
     $("acc-aiuto").textContent = "= " + (accUnita === "p" ? eur2.format(v.accM) + " al mese" : pct.format(v.accM * 12 / v.ral * 100) + "% della RAL") + " · " + eur.format(v.accM * 12) + " l'anno";
     $("dat-aiuto").textContent = "= " + eur.format(v.ral * v.dat / 100) + " l'anno";
@@ -306,14 +326,16 @@
       verdetto(r, p, migliore);
       graficoBilanciamento(r, p, curva, quota);
       graficoCrescita(r, p);
-      tabella(r, p);
+      tabella(r, p, curva);
     }
     $("sottotitolo-bil").textContent = "Lo stesso importo mensile" + (curva ? " (" + eur.format((p.versaFondo + p.versaLibero) / 12) + ")" : "") + ", diviso in modo diverso tra fondo e investimento: il netto a " + p.pensione + " anni.";
     try {
       var h = new URLSearchParams();
-      Object.keys(CAMPI).forEach(function (k) { if (v[k] !== CAMPI[k][0] && (k !== "bil" || toccato)) h.set(k, v[k]); });
+      Object.keys(CAMPI).forEach(function (k) { if (v[k] !== CAMPI[k][0] && (k !== "bil" || (toccato && v.fpc === null))) h.set(k, v[k]); });
       if (accUnita === "p") h.set("accu", "p");
-      if (PROFILO !== "bilanciato") h.set("pf", PROFILO || "");
+      if (v.fpc !== null) h.set("fpc", v.fpc);
+      if (PF !== "bilanciato") h.set("pf", PF);
+      if (PL !== "bilanciato") h.set("pl", PL);
       history.replaceState(null, "", location.pathname + location.search + (h.toString() ? "#" + h : ""));
     } catch (e) {}
   }
@@ -337,6 +359,7 @@
   // clic sul grafico: sposto il cursore del bilanciamento
   function impostaQuota(q) {
     toccato = true;
+    $("fpc").value = "";
     imposta("bil", Math.round(q * 100));
     aggiorna();
   }
@@ -350,21 +373,32 @@
     $("dati").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
   }
 
-  function profilo(id) {
+  function nomeP(id) {
+    var pr = Confronto.config.profili.filter(function (x) { return x.id === id; })[0];
+    return pr ? pr.nome : "personalizzato";
+  }
+  // tipo "f" (fondo) o "l" (fuori dal fondo): imposta rendimento e titoli di Stato di quella strada
+  function profilo(tipo, id) {
     var pr = Confronto.config.profili.filter(function (x) { return x.id === id; })[0];
     if (!pr) return;
-    PROFILO = id;
-    ["rgf", "rgl"].forEach(function (k) { imposta(k, pr.rendimento); });
-    ["tsf", "tsl"].forEach(function (k) { imposta(k, pr.titoliStato); });
+    if (tipo === "f") PF = id; else PL = id;
+    imposta("rg" + tipo, pr.rendimento);
+    imposta("ts" + tipo, pr.titoliStato);
     mostraProfilo();
   }
   function mostraProfilo() {
-    [].forEach.call(document.querySelectorAll('input[name="profilo"]'), function (r) { r.checked = r.value === PROFILO; });
+    [["pf", PF], ["pl", PL]].forEach(function (x) {
+      [].forEach.call(document.querySelectorAll('input[name="' + x[0] + '"]'), function (r) { r.checked = r.value === x[1]; });
+      var fisso = x[1] === "azioni" || x[1] === "obbligazioni";
+      $("quota-" + x[0][1]).hidden = fisso;
+      $("riga-" + x[0][1]).classList.toggle("compatto", !fisso);   // la quota in titoli di Stato si modifica solo se il profilo non è fisso
+    });
   }
 
   function ripristina() {
     Object.keys(CAMPI).forEach(function (k) { imposta(k, CAMPI[k][0]); });
-    profilo("bilanciato");
+    profilo("f", "bilanciato"); profilo("l", "bilanciato");
+    $("fpc").value = "";
     impostaUnita("e");
     toccato = false;
     aggiorna();
@@ -376,20 +410,23 @@
     if (e.target.name === "acc-u") cambiaUnita();
     if (/-r$/.test(id)) imposta(id.slice(0, -2), e.target.value);
     else if ($(id + "-r")) $(id + "-r").value = e.target.value;
-    if (["rgf", "rgl", "tsf", "tsl"].indexOf(id) >= 0) { PROFILO = ""; mostraProfilo(); }
+    if (["rgf"].indexOf(id) >= 0) { PF = ""; mostraProfilo(); }
+    if (["rgl"].indexOf(id) >= 0) { PL = ""; mostraProfilo(); }
     aggiorna();
   });
-  [].forEach.call(document.querySelectorAll('input[name="profilo"]'), function (el) {
-    el.addEventListener("change", function () { profilo(el.value); aggiorna(); });
+  [["pf", "f"], ["pl", "l"]].forEach(function (x) {
+    [].forEach.call(document.querySelectorAll('input[name="' + x[0] + '"]'), function (el) {
+      el.addEventListener("change", function () { profilo(x[1], el.value); aggiorna(); });
+    });
   });
   $("info-btn").addEventListener("click", function () {
     var apri = $("info-datore").hidden;
     $("info-datore").hidden = !apri;
     $("info-btn").setAttribute("aria-expanded", apri);
   });
-  document.querySelectorAll("input[name=scala-tab]").forEach(function (el) { el.addEventListener("change", function () { if (ultimo) tabella(ultimo.r, ultimo.p); }); });
-  $("bil").addEventListener("input", function () { toccato = true; aggiorna(); });
-  $("bil-ottimo").addEventListener("click", function () { toccato = false; aggiorna(); });
+  document.querySelectorAll("input[name=scala-tab]").forEach(function (el) { el.addEventListener("change", function () { if (ultimo) tabella(ultimo.r, ultimo.p, ultimo.curva); }); });
+  $("bil").addEventListener("input", function () { toccato = true; $("fpc").value = ""; aggiorna(); });
+  $("bil-ottimo").addEventListener("click", function () { toccato = false; $("fpc").value = ""; aggiorna(); });
   $("profilo").addEventListener("submit", function (e) { e.preventDefault(); calcola(); });
   [].forEach.call(document.querySelectorAll(".ripristina"), function (b) { b.addEventListener("click", function (e) { e.preventDefault(); ripristina(); }); });
   $("copia").addEventListener("click", function () {
@@ -408,9 +445,11 @@
   Object.keys(CAMPI).forEach(function (k) { imposta(k, CAMPI[k][0]); });
   try {
     var h = new URLSearchParams(location.hash.slice(1));
-    if (h.has("pf")) { PROFILO = h.get("pf"); if (PROFILO) profilo(PROFILO); mostraProfilo(); }
+    if (h.has("pf")) { PF = h.get("pf"); if (PF) profilo("f", PF); }
+    if (h.has("pl")) { PL = h.get("pl"); if (PL) profilo("l", PL); }
     h.forEach(function (val, k) {
       if (k === "accu" && val === "p") { impostaUnita("p"); }
+      else if (k === "fpc") { $("fpc").value = val; }
       else if (CAMPI[k]) { imposta(k, val); if (k === "bil") toccato = true; }
     });
   } catch (e) {}

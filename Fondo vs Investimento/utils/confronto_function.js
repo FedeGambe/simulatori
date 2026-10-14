@@ -59,7 +59,9 @@ function esito(p, w, i, deflatore) {
     const lordo = (f ? f.montante : 0) + (l ? l.punti.at(-1).valore : 0);
     const imposta = (f ? f.imposta : 0) + (l ? l.punti.at(-1).valore - l.netto : 0);
     const netto = lordo - imposta, costo = versato - irpef;
-    return { w, i, netto, nettoReale: netto / deflatore, costo, perCento: costo > 0 ? netto / costo * 100 : 0, versato, irpef, datore, rendimenti: lordo - versato - datore - irpef, imposta };
+    // stima dell'IRPEF non recuperata: versamenti oltre il limite di deduzione, all'aliquota media recuperata sulla parte dedotta
+    const irpefPersa = f ? f.righe.reduce((s, x) => s + (x.dedotto > 0 ? Math.max(0, x.lavoratore - x.dedotto) * x.risparmio / x.dedotto : 0), 0) : 0;
+    return { w, i, netto, irpefPersa, nettoReale: netto / deflatore, costo, perCento: costo > 0 ? netto / costo * 100 : 0, versato, irpef, datore, rendimenti: lordo - versato - datore - irpef, imposta };
 }
 
 export function simulaConfronto(p, cfg = config, fiscale = fondoCfg) {
@@ -128,7 +130,7 @@ export function curvaBilanciamento(p, passi = 10) {
     for (let k = 0; k <= passi; k++) {
         const quota = k / passi;
         const r = esito(p, tot * quota, tot * (1 - quota), deflatore);
-        out.push({ quota, w: r.w, i: r.i, netto: r.netto, nettoReale: r.nettoReale, costo: r.costo, perCento: r.perCento });
+        out.push({ quota, w: r.w, i: r.i, netto: r.netto, nettoReale: r.nettoReale, costo: r.costo, perCento: r.perCento, irpef: r.irpef });
     }
     return out;
 }

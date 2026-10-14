@@ -2,7 +2,7 @@
 (function () {
 "use strict";
 var simulaFondo = window.Fondo.simulaFondo;
-const config = {"anno":2026,"bolloTitoli":0.002,"minimoDatore":0.5,"profili":[{"id":"azioni","nome":"Azionario","rendimento":6.5,"titoliStato":0},{"id":"bilanciato","nome":"Bilanciato 50/50","rendimento":5,"titoliStato":25},{"id":"obbligazioni","nome":"Obbligazionario","rendimento":3,"titoliStato":60}],"fonte":"Bollo sul conto titoli: 0,20% annuo sul valore (DPR 642/1972, all. A). Il fondo pensione ne è esente. Rendimenti dei profili: ipotesi di lungo periodo, non previsioni. Le imposte sono quelle di config/fondo.json del fondo pensione"};
+const config = {"anno":2026,"bolloTitoli":0.002,"minimoDatore":0.5,"profili":[{"id":"azioni","nome":"Azionario","rendimento":6.5,"titoliStato":0},{"id":"bilanciato","nome":"Bilanciato","rendimento":5,"titoliStato":50},{"id":"obbligazioni","nome":"Obbligazionario","rendimento":3,"titoliStato":60}],"fonte":"Bollo sul conto titoli: 0,20% annuo sul valore (DPR 642/1972, all. A). Il fondo pensione ne è esente. Rendimenti dei profili: ipotesi di lungo periodo, non previsioni. Le imposte sono quelle di config/fondo.json del fondo pensione"};
 const fondoCfg = {"anno":2026,"tfr":{"quotaAnnua":0.0691,"fonte":"Art. 2120 c.c.: retribuzione / 13,5, meno lo 0,50% di contributo INPS"},"imposta":{"rendimenti":0.2,"rendimentiTitoliStato":0.125,"rendimentiLiberi":0.26,"fonte":"D.Lgs. 252/2005 art. 17: 20% sul risultato netto annuo del fondo, 12,5% sulla parte in titoli di Stato. Investimento libero: 26% sul guadagno, 12,5% sui titoli di Stato"},"prestazione":{"aliquota":0.15,"minima":0.09,"dopoAnni":15,"riduzionePerAnno":0.003,"fonte":"D.Lgs. 252/2005 art. 11 c. 6: 15% ridotto di 0,30 punti per ogni anno oltre il 15°, fino al 9%"}};
 
 // Stessi soldi messi da parte, due strade: versare nel fondo pensione (deduzione IRPEF, contributo del datore, tassa 20%/12,5% sui rendimenti
@@ -59,7 +59,9 @@ function esito(p, w, i, deflatore) {
     const lordo = (f ? f.montante : 0) + (l ? l.punti.at(-1).valore : 0);
     const imposta = (f ? f.imposta : 0) + (l ? l.punti.at(-1).valore - l.netto : 0);
     const netto = lordo - imposta, costo = versato - irpef;
-    return { w, i, netto, nettoReale: netto / deflatore, costo, perCento: costo > 0 ? netto / costo * 100 : 0, versato, irpef, datore, rendimenti: lordo - versato - datore - irpef, imposta };
+    // stima dell'IRPEF non recuperata: versamenti oltre il limite di deduzione, all'aliquota media recuperata sulla parte dedotta
+    const irpefPersa = f ? f.righe.reduce((s, x) => s + (x.dedotto > 0 ? Math.max(0, x.lavoratore - x.dedotto) * x.risparmio / x.dedotto : 0), 0) : 0;
+    return { w, i, netto, irpefPersa, nettoReale: netto / deflatore, costo, perCento: costo > 0 ? netto / costo * 100 : 0, versato, irpef, datore, rendimenti: lordo - versato - datore - irpef, imposta };
 }
 
 function simulaConfronto(p, cfg = config, fiscale = fondoCfg) {
@@ -128,7 +130,7 @@ function curvaBilanciamento(p, passi = 10) {
     for (let k = 0; k <= passi; k++) {
         const quota = k / passi;
         const r = esito(p, tot * quota, tot * (1 - quota), deflatore);
-        out.push({ quota, w: r.w, i: r.i, netto: r.netto, nettoReale: r.nettoReale, costo: r.costo, perCento: r.perCento });
+        out.push({ quota, w: r.w, i: r.i, netto: r.netto, nettoReale: r.nettoReale, costo: r.costo, perCento: r.perCento, irpef: r.irpef });
     }
     return out;
 }

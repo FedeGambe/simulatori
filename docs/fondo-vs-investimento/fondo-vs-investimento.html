@@ -110,6 +110,19 @@ fieldset{border:0; margin:0; padding:0; min-width:0}
 .segmento input{position:absolute; opacity:0; inset:0; margin:0; cursor:pointer}
 .segmento span{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:44px; height:100%; padding:6px 12px;
   border:1px solid var(--line); border-radius:8px; background:var(--bg); font-size:.9rem; line-height:1.2; transition:background .15s, border-color .15s, color .15s}
+.profilo-riga{display:grid; grid-template-columns:minmax(0,1fr); gap:10px; align-items:start}
+.profilo-riga.compatto{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.profilo-riga .segmenti{container-type:inline-size; flex-wrap:nowrap}
+.profilo-riga .segmento{flex:1 1 0; min-width:0}
+.profilo-riga .segmento span{padding:6px 4px; white-space:nowrap}
+.profilo-riga i{font-style:normal}
+.profilo-riga .b{display:inline}
+.profilo-riga .l{display:none}
+@container (min-width:380px){ .profilo-riga .l{display:inline} .profilo-riga .b{display:none} }
+.profilo-riga .campo{margin:0; display:flex; flex-direction:column; gap:0}
+.profilo-riga .campo .etichetta{order:2; display:block; min-height:0; line-height:1.2; margin:4px 0 0; font-size:.72rem; font-weight:400; color:var(--ink-3)}
+.profilo-riga .errore-campo{order:3}
+@media (max-width:420px){ .profilo-riga.compatto{grid-template-columns:minmax(0,1fr)} }
 .segmento:hover span{border-color:var(--ink-3)}
 .segmento input:checked + span{background:var(--scelto-bg); border-color:var(--scelto-bg); color:var(--scelto-ink); font-weight:600}
 .segmento input:focus-visible + span{outline:2px solid var(--teal); outline-offset:2px}
@@ -414,7 +427,7 @@ footer .firma{margin-top:14px}
 .ipotesi .gruppo .titolo-gruppo{grid-column:1/-1; margin:0}
 .ipotesi .eco{margin-bottom:12px}
 @media (min-width:760px){ .due{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:36px}
-.ipotesi .due{grid-template-columns:repeat(2,minmax(0,1fr)); gap:36px} }
+.ipotesi .due{grid-template-columns:repeat(3,minmax(0,1fr)); gap:28px} }
 @media (max-width:520px){ .ipotesi > summary{flex-wrap:wrap} .ipotesi:not([open]) > summary .riep-ip{order:5; flex:1 0 100%; white-space:normal} }
 @media (min-width:600px){ .campi{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (min-width:1000px){ .campi{grid-template-columns:repeat(4,minmax(0,1fr))} }
@@ -533,32 +546,47 @@ input[type=range]{width:100%; min-height:44px; margin:0; accent-color:var(--scel
           <div class="con-unita"><input type="number" id="acc" name="acc" inputmode="decimal" step="any" aria-describedby="acc-e acc-aiuto">
             <div class="seg-unita" role="radiogroup" aria-label="Unità dell'importo"><label><input type="radio" name="acc-u" value="e" checked><span>€ al mese</span></label><label><input type="radio" name="acc-u" value="p"><span>% della RAL</span></label></div></div>
           <p class="aiuto" id="acc-aiuto"></p><p class="errore-campo" id="acc-e" role="alert" hidden></p></div>
+        <div class="campo"><label class="etichetta" for="fpc">Di cui nel fondo pensione (facoltativo)</label>
+          <div class="con-unita corto"><input type="number" id="fpc" name="fpc" inputmode="decimal" step="0.1" placeholder="es. 3" aria-describedby="fpc-e fpc-aiuto"><span class="unita">% della RAL</span></div>
+          <p class="aiuto" id="fpc-aiuto">Se lo indichi, la suddivisione parte da qui e vedi «La tua combinazione».</p><p class="errore-campo" id="fpc-e" role="alert" hidden></p></div>
         <div class="campo"><label class="etichetta" for="dat">Contributo del datore <button type="button" class="info" id="info-btn" aria-expanded="false" aria-controls="info-datore" aria-label="Come funziona il contributo del datore">i</button></label>
           <div class="con-unita"><input type="number" id="dat" name="dat" inputmode="decimal" step="0.1" aria-describedby="dat-e"><span class="unita">% della RAL</span></div>
           <p class="aiuto" id="dat-aiuto"></p><p class="errore-campo" id="dat-e" role="alert" hidden></p></div>
         <p class="aiuto info-box" id="info-datore" hidden></p></div>
         </div>
 
-        <details class="ipotesi largo" id="ipotesi"><summary><span class="passo">3</span><h3>Ipotesi di rendimento</h3><span class="riep-ip" id="riep-ip"></span></summary>
-          <div class="campo largo"><span class="etichetta" id="et-profilo">Profilo di investimento (imposta rendimento e titoli di Stato di entrambi)</span>
-            <div class="segmenti" role="radiogroup" aria-labelledby="et-profilo">
-              <label class="segmento"><input type="radio" name="profilo" value="azioni"><span>Azionario</span></label>
-              <label class="segmento"><input type="radio" name="profilo" value="bilanciato" checked><span>Bilanciato 50/50</span></label>
-              <label class="segmento"><input type="radio" name="profilo" value="obbligazioni"><span>Obbligazionario</span></label>
-            </div></div>
+        <div class="gruppo largo"><h3 class="titolo-sez"><span class="passo">3</span>Profilo di investimento</h3>
+          <div class="due">
+          <div class="campo"><span class="etichetta" id="et-pf">Fondo pensione</span>
+            <div class="profilo-riga" id="riga-f">
+            <div class="segmenti" role="radiogroup" aria-labelledby="et-pf">
+              <label class="segmento"><input type="radio" name="pf" value="azioni"><span><i class="l">Azionario</i><i class="b">Azi.</i></span></label>
+              <label class="segmento"><input type="radio" name="pf" value="bilanciato" checked><span><i class="l">Bilanciato</i><i class="b">Bil.</i></span></label>
+              <label class="segmento"><input type="radio" name="pf" value="obbligazioni"><span><i class="l">Obbligazionario</i><i class="b">Obb.</i></span></label>
+            </div>
+            <div class="campo" id="quota-f" hidden><label class="etichetta" for="tsf">Quota in titoli di Stato</label><div class="con-unita corto"><input type="number" id="tsf" name="tsf" inputmode="decimal" step="5" aria-describedby="tsf-e"><span class="unita">%</span></div><p class="errore-campo" id="tsf-e" role="alert" hidden></p></div></div></div>
+          <div class="campo"><span class="etichetta" id="et-pl">Investimento fuori dal fondo</span>
+            <div class="profilo-riga" id="riga-l">
+            <div class="segmenti" role="radiogroup" aria-labelledby="et-pl">
+              <label class="segmento"><input type="radio" name="pl" value="azioni"><span><i class="l">Azionario</i><i class="b">Azi.</i></span></label>
+              <label class="segmento"><input type="radio" name="pl" value="bilanciato" checked><span><i class="l">Bilanciato</i><i class="b">Bil.</i></span></label>
+              <label class="segmento"><input type="radio" name="pl" value="obbligazioni"><span><i class="l">Obbligazionario</i><i class="b">Obb.</i></span></label>
+            </div>
+            <div class="campo" id="quota-l" hidden><label class="etichetta" for="tsl">Quota in titoli di Stato</label><div class="con-unita corto"><input type="number" id="tsl" name="tsl" inputmode="decimal" step="5" aria-describedby="tsl-e"><span class="unita">%</span></div><p class="errore-campo" id="tsl-e" role="alert" hidden></p></div></div></div>
+          </div></div>
+
+        <details class="ipotesi largo" id="ipotesi"><summary><span class="passo">4</span><h3>Ipotesi di rendimento</h3><span class="riep-ip" id="riep-ip"></span></summary>
           <div class="due">
             <div class="gruppo"><p class="titolo-gruppo"><i style="background:var(--teal)"></i>Fondo pensione</p>
               <div class="campo"><label class="etichetta" for="rgf">Rendimento lordo</label><div class="con-unita corto"><input type="number" id="rgf" name="rgf" inputmode="decimal" step="0.1" aria-describedby="rgf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="rgf-e" role="alert" hidden></p></div>
-              <div class="campo"><label class="etichetta" for="ctf">Costi del fondo (ISC)</label><div class="con-unita corto"><input type="number" id="ctf" name="ctf" inputmode="decimal" step="0.1" aria-describedby="ctf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="ctf-e" role="alert" hidden></p></div>
-              <div class="campo"><label class="etichetta" for="tsf">Quota in titoli di Stato</label><div class="con-unita corto"><input type="number" id="tsf" name="tsf" inputmode="decimal" step="5" aria-describedby="tsf-e"><span class="unita">%</span></div><p class="errore-campo" id="tsf-e" role="alert" hidden></p></div></div>
+              <div class="campo"><label class="etichetta" for="ctf">Costi del fondo (ISC)</label><div class="con-unita corto"><input type="number" id="ctf" name="ctf" inputmode="decimal" step="0.1" aria-describedby="ctf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="ctf-e" role="alert" hidden></p></div></div>
             <div class="gruppo"><p class="titolo-gruppo"><i style="background:var(--libero)"></i>Investimento fuori dal fondo</p>
               <div class="campo"><label class="etichetta" for="rgl">Rendimento lordo</label><div class="con-unita corto"><input type="number" id="rgl" name="rgl" inputmode="decimal" step="0.1" aria-describedby="rgl-e"><span class="unita">% anno</span></div><p class="errore-campo" id="rgl-e" role="alert" hidden></p></div>
-              <div class="campo"><label class="etichetta" for="ctl">Costi (TER dell'ETF)</label><div class="con-unita corto"><input type="number" id="ctl" name="ctl" inputmode="decimal" step="0.05" aria-describedby="ctl-e"><span class="unita">% anno</span></div><p class="errore-campo" id="ctl-e" role="alert" hidden></p></div>
-              <div class="campo"><label class="etichetta" for="tsl">Quota in titoli di Stato</label><div class="con-unita corto"><input type="number" id="tsl" name="tsl" inputmode="decimal" step="5" aria-describedby="tsl-e"><span class="unita">%</span></div><p class="errore-campo" id="tsl-e" role="alert" hidden></p></div></div>
-          </div>
+              <div class="campo"><label class="etichetta" for="ctl">Costi (TER dell'ETF)</label><div class="con-unita corto"><input type="number" id="ctl" name="ctl" inputmode="decimal" step="0.05" aria-describedby="ctl-e"><span class="unita">% anno</span></div><p class="errore-campo" id="ctl-e" role="alert" hidden></p></div></div>
           <div class="gruppo eco"><p class="titolo-gruppo">Economia</p>
             <div class="campo"><label class="etichetta" for="inf">Adeguamento all'inflazione</label><div class="con-unita corto"><input type="number" id="inf" name="inf" inputmode="decimal" step="0.1" aria-describedby="inf-e"><span class="unita">% anno</span></div><p class="errore-campo" id="inf-e" role="alert" hidden></p></div>
             <div class="campo"><label class="etichetta" for="cr">Crescita della retribuzione</label><div class="con-unita corto"><input type="number" id="cr" name="cr" inputmode="decimal" step="0.1" aria-describedby="cr-e"><span class="unita">% anno</span></div><p class="errore-campo" id="cr-e" role="alert" hidden></p></div></div>
+          </div>
           <p class="aiuto">Sono ipotesi, non previsioni: le azioni rendono di più in media ma oscillano molto, il fondo e le obbligazioni meno. Sui titoli di Stato l'imposta sui rendimenti è del 12,5% invece del 20% (fondo) o del 26% (fuori).</p>
         </details>
       </div>
