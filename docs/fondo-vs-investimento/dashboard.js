@@ -147,7 +147,7 @@
       '<defs><clipPath id="cp-f"><rect x="0" y="0" width="' + X(quota) + '" height="' + H + '"/></clipPath><clipPath id="cp-l"><rect x="' + X(quota) + '" y="0" width="' + W + '" height="' + H + '"/></clipPath></defs>' +
       '<path d="' + area + '" fill="var(--teal)" opacity=".3" clip-path="url(#cp-f)"/><path d="' + area + '" fill="var(--libero)" opacity=".3" clip-path="url(#cp-l)"/>' +
       '<line x1="' + X(quota) + '" x2="' + X(quota) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 3"/>' +
-      '<polyline points="' + punti.join(" ") + '" fill="none" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>' +
+      '<polyline points="' + punti.join(" ") + '" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>' +
       '<line id="bl-l" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ink-3)" stroke-width="1" style="display:none"/>' +
       '<circle id="bl-p" r="5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2" style="display:none"/>' +
       '<circle cx="' + X(migliore.quota) + '" cy="' + Y(migliore.netto) + '" r="6" fill="var(--verde)" stroke="var(--ink)" stroke-width="2"/>' +
@@ -205,10 +205,10 @@
       assi(W, H, cima, s, xs) +
       area(function (q) { return q.fondo; }, function () { return 0; }, "var(--teal)", ".5") +
       area(function (q) { return q.totale; }, function (q) { return q.fondo; }, "var(--libero)", ".5") +
-      tratto(function (q) { return q.costo; }, "var(--rosso)", 2.5, "2 5") +
-      tratto(function (q, k) { return tf[k].netto; }, "var(--teal-ink)", 2.5, "7 5") +
-      tratto(function (q, k) { return tl[k].netto; }, "var(--libero-ink)", 2.5, "7 5") +
-      tratto(function (q) { return q.totale; }, "var(--ink)", 3.5) +
+      tratto(function (q) { return q.costo; }, "var(--rosso)", 1.5, "2 4") +
+      tratto(function (q, k) { return tf[k].netto; }, "var(--teal-ink)", 1.5, "5 4") +
+      tratto(function (q, k) { return tl[k].netto; }, "var(--libero-ink)", 1.5, "5 4") +
+      tratto(function (q) { return q.totale; }, "var(--ink)", 2) +
       '<line id="cr-l" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ink)" stroke-width="1"/><circle id="cr-m" r="5" fill="var(--ink)" stroke="var(--bg)" stroke-width="2"/>' +
       '<text x="' + (W - R) + '" y="' + (H - 1) + '" text-anchor="end">età</text></svg>';
     $("legenda-grafico").innerHTML = '<span><i style="background:var(--teal);opacity:.6"></i>Parte nel fondo</span><span><i style="background:var(--libero);opacity:.6"></i>Parte investita fuori</span>' +

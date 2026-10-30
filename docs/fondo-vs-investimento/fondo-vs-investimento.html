@@ -559,6 +559,29 @@ footer a:hover,.firma:hover{color:var(--marchio)}
 .pagina button,.dati > summary::after{text-transform:none; letter-spacing:0; font-family:var(--f-body)}
 .ripristina,.torna{color:var(--ink-2); border-color:var(--line); background:var(--surface)}
 @media (max-width:560px){ .barra .dove{display:none} }  /* telefono: in barra solo i pulsanti */
+
+/* === COLORI DELLA COVER (prugna, giallo, lilla, crema) ===
+   giallo/oro = parte nel fondo · lilla = parte investita fuori · prugna = interfaccia e valori principali ·
+   verde = guadagni e scelta migliore · rosso = costi. Titoli in Georgia come il sito. */
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f4f0f3; --ink:#221a20; --ink-2:#4a3f47; --ink-3:#7a6e76; --line:#e7e0e5; --track:#ece6ea;
+  --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#e3f0dc; --rosso:#c0392b; --rosso-ink:#b0301f; --rosso-soft:#f8e1dc;
+  --blu:#5a2d52; --blu-ink:#5a2d52; --blu-soft:#f3e8f0; --marchio:#c0392b;
+  --cat1:#d9a80f; --cat1-ink:#8a6a00; --cat1-soft:#fbf1cf; --cat2:#9a68bd; --cat2-ink:#6b3f8c; --cat2-soft:#efe4f6;
+}
+:root[data-theme="dark"]{
+  --bg:#150f14; --surface:#1d151b; --surface-2:#281d25; --ink:#f4eef2; --ink-2:#d2c6ce; --ink-3:#9e9099; --line:#362a33; --track:#30252d;
+  --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#17281b; --rosso:#e5604a; --rosso-ink:#f08571; --rosso-soft:#35201b;
+  --blu:#d7a8cc; --blu-ink:#e6c2dd; --blu-soft:#2c1d29; --marchio:#f08571;
+  --cat1:#f5c518; --cat1-ink:#f8d65a; --cat1-soft:#2e2610; --cat2:#b58ad0; --cat2-ink:#d0b0e6; --cat2-soft:#271d30;
+}
+:root,:root[data-theme]{--f-display:Georgia,"Times New Roman",serif}
+h1,h2,legend,.gtitolo,.titolo-sez,.testata h1{font-family:var(--f-display); letter-spacing:-.02em}
+.testata h1{font-weight:800}
+.testata h1 em{font-style:italic; color:var(--blu)}
+.kpi{font-family:var(--f-display)}
+/* passi numerati: giallo della cover, numero prugna */
+.passo,.sezione > legend .passo,.dati > summary .passo,.ipotesi > summary .passo,#dati .titolo-sez .passo,#dati .titolo-gruppo .passo{background:#f5c518; color:#3a1c35; font-weight:700}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.theme||"light"}catch{document.documentElement.dataset.theme="light"}</script>
 </head>
@@ -728,11 +751,11 @@ footer a:hover,.firma:hover{color:var(--marchio)}
   <a href="#risultato">Vedi il confronto</a>
 </div>
 
-<script src="../busta-paga/comuni.js"></script>
-<script src="../busta-paga/script.js"></script>
-<script src="../fondo-pensione/script.js"></script>
-<script src="script.js"></script>
-<script src="dashboard.js"></script>
+<script src="../busta-paga/comuni.js?v=2"></script>
+<script src="../busta-paga/script.js?v=2"></script>
+<script src="../fondo-pensione/script.js?v=2"></script>
+<script src="script.js?v=2"></script>
+<script src="dashboard.js?v=2"></script>
 <script>
 (function () {
   var barra = document.getElementById("barra");
