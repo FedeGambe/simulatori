@@ -373,6 +373,32 @@ footer a:hover,.firma:hover{color:var(--marchio)}
 .pagina button,.dati > summary::after{text-transform:none; letter-spacing:0; font-family:var(--f-body)}
 .ripristina,.torna{color:var(--ink-2); border-color:var(--line); background:var(--surface)}
 @media (max-width:560px){ .barra .dove{display:none} }  /* telefono: in barra solo i pulsanti */
+
+/* === COLORI DELLA COVER (azzurro, blu, blu notte) ===
+   verde = entrate · rosso = trattenute · blu della cover = netto, interfaccia e voce principale. Titoli in Georgia come il sito. */
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#eef3f7; --ink:#14212c; --ink-2:#3c4a57; --ink-3:#6b7a87; --line:#e1e7ec; --track:#e8edf2;
+  --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#e3f0dc; --rosso:#c0392b; --rosso-ink:#b0301f; --rosso-soft:#f8e1dc;
+  --blu:#1d5f8f; --blu-ink:#1d5f8f; --blu-soft:#e1eef8; --marchio:#c0392b;
+  --cover:#3d8fc4; --cover-scuro:#0a2e4f;
+}
+:root[data-theme="dark"]{
+  --bg:#0c151e; --surface:#12202b; --surface-2:#1a2b38; --ink:#eef4f9; --ink-2:#c4d2de; --ink-3:#8ea2b3; --line:#253645; --track:#213140;
+  --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#17281b; --rosso:#e5604a; --rosso-ink:#f08571; --rosso-soft:#35201b;
+  --blu:#6db3e0; --blu-ink:#8cc6ec; --blu-soft:#132a3b; --marchio:#f08571;
+  --cover:#6db3e0; --cover-scuro:#0a2e4f;
+}
+:root,:root[data-theme]{--f-display:Georgia,"Times New Roman",serif}
+h1,h2,legend,.gtitolo,.titolo-sez,.testata h1{font-family:var(--f-display); letter-spacing:-.02em}
+.testata h1{font-weight:800}
+.testata h1 em{font-style:italic; color:var(--blu)}
+.kpi{font-family:var(--f-display); color:var(--blu-ink)}
+/* passi numerati: azzurro della cover, numero bianco (blu notte nel tema scuro) */
+.passo,.sezione > legend .passo,.dati > summary .passo,.ipotesi > summary .passo,#dati .titolo-sez .passo,#dati .titolo-gruppo .passo{background:var(--cover); color:#fff; font-weight:700}
+:root[data-theme="dark"] .passo,:root[data-theme="dark"] #dati .titolo-sez .passo,:root[data-theme="dark"] #dati .titolo-gruppo .passo{color:var(--cover-scuro)}
+/* voce principale (netto annuo): blu della cover */
+.opzioni li.best{background:var(--blu-soft); border-color:var(--blu)}
+.opzioni li.best > span{color:var(--blu-ink)}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.theme||"light"}catch{document.documentElement.dataset.theme="light"}</script>
 </head>
@@ -536,9 +562,9 @@ footer a:hover,.firma:hover{color:var(--marchio)}
   <a href="#risultato">Vedi perché</a>
 </div>
 
-<script src="comuni.js"></script>
-<script src="script.js"></script>
-<script src="dashboard.js"></script>
+<script src="comuni.js?v=2"></script>
+<script src="script.js?v=2"></script>
+<script src="dashboard.js?v=2"></script>
 <script>
 (function () {
   var barra = document.getElementById("barra");
