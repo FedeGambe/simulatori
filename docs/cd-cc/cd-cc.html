@@ -417,6 +417,85 @@ footer a:hover,.firma:hover{color:var(--marchio)}
 .pagina button,.dati > summary::after{text-transform:none; letter-spacing:0; font-family:var(--f-body)}
 .ripristina,.torna{color:var(--ink-2); border-color:var(--line); background:var(--surface)}
 @media (max-width:560px){ .barra .dove{display:none} }  /* telefono: in barra solo i pulsanti */
+
+/* === COLORI DELLA COVER (senape, crema, ruggine, nero) ===
+   verde = guadagni e scelta migliore · rosso = imposte e spese · nero/senape = interfaccia. Titoli in Georgia come il sito. */
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f6f1e4; --ink:#1f1b14; --ink-2:#4a4332; --ink-3:#7a7260; --line:#e8e0cc; --track:#efe8d6;
+  --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#e3f0dc; --rosso:#c0392b; --rosso-ink:#b0301f; --rosso-soft:#f8e1dc;
+  --blu:#1f1b14; --blu-ink:#1f1b14; --blu-soft:#f6efd9; --marchio:#a8301a;
+  --cat1:#c98a12; --cat2:#a8301a; --cat4:#1f1b14;
+}
+:root[data-theme="dark"]{
+  --bg:#14110a; --surface:#1d1910; --surface-2:#292317; --ink:#f6efd9; --ink-2:#cfc6a8; --ink-3:#a39b80; --line:#383020; --track:#332c1c;
+  --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#1d2b1c; --rosso:#e5604a; --rosso-ink:#f08571; --rosso-soft:#3a1f18;
+  --blu:#e8b923; --blu-ink:#f0c94a; --blu-soft:#2a2210; --marchio:#ee7a62;
+  --cat1:#e8b923; --cat2:#d9533a; --cat4:#f6efd9;
+}
+:root,:root[data-theme]{--f-display:Georgia,"Times New Roman",serif; --teal:var(--cat1); --arancio:var(--cat2); --sabbia:var(--cat4)}
+h1,h2,legend,.gtitolo,.titolo-sez,.testata h1{font-family:var(--f-display); letter-spacing:-.02em}
+.testata h1{font-weight:800}
+.testata h1 em{font-style:italic}
+/* passi numerati: cerchio nero, numero senape (al contrario nel tema scuro) */
+.passo,.sezione > legend .passo,.dati > summary .passo,.ipotesi > summary .passo,#dati .titolo-sez .passo,#dati .titolo-gruppo .passo{background:#e8b923; color:#14110a}
+/* riquadro del rendimento: sfumatura gialla della cover (il verde resta sulla voce migliore) */
+.risultato,.risultato.su,.risultato.giu{--esito:#c98a12; --esito-soft:#fbf0cc}
+:root[data-theme="dark"] .risultato{--esito:#e8b923; --esito-soft:#2e2610}
+#vincitore{color:var(--verde-ink)}
+/* voci del rendimento: tutte alte uguali, lo spazio in più va tra una e l'altra */
+.rendimenti .opzioni{display:flex; flex-direction:column; justify-content:space-between; gap:10px}
+.rendimenti .opzioni li{flex:none; min-height:108px; justify-content:center}
+.rendimenti .opzioni li.compatta{min-height:0; padding:10px 16px}  /* hanno meno informazioni: più basse */
+.opzioni li.compatta b{font-size:1.05rem}
+.opzioni li.compatta em{font:400 .85rem var(--f-body); font-style:normal; color:var(--ink-3); margin-left:6px}
+/* voce migliore: gialla come la cover */
+.opzioni li.best{background:#fbf0cc; border-color:#c98a12}
+.opzioni li.best > span{color:#8a5d00}
+:root[data-theme="dark"] .opzioni li.best{background:#2e2610; border-color:#e8b923}
+:root[data-theme="dark"] .opzioni li.best > span{color:#f0c94a}
+#vincitore{color:var(--ink)}
+/* sezione Suddivisione richiudibile: aperta = attiva */
+.sudd{display:block}
+.sudd > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px 16px; flex-wrap:wrap}
+.sudd > summary::-webkit-details-marker{display:none}
+.sudd > summary .gtitolo{margin:0}
+.sudd > summary .apri{font-size:.85rem; color:var(--ink-3)}
+.sudd > summary::after{content:"+"; margin-left:auto; font:400 1.5rem/1 var(--f-body); color:var(--ink-2)}
+.sudd[open] > summary::after{content:"−"}
+.sudd[open] > summary .apri{display:none}
+.sudd[open] > summary{margin-bottom:16px}
+/* grafico del punto di pareggio */
+.pareggio{margin-top:6px}
+.pareggio svg{display:block; width:100%; height:auto; overflow:visible; font-family:var(--f-body)}
+.pareggio .asse{stroke:var(--line); stroke-width:1}
+.pareggio .zero{stroke:var(--ink-3); stroke-width:1}
+.pareggio .linea{fill:none; stroke:var(--ink-2); stroke-width:2; stroke-linejoin:round}
+.pareggio .area-cd{fill:#c98a12; opacity:.4}
+.pareggio .area-cc{fill:var(--ink); opacity:.16}
+.pareggio .soglia{stroke:var(--ink); stroke-width:1; stroke-dasharray:4 4}
+.pareggio .tu{stroke:#a8301a; stroke-width:2}
+.pareggio .punto-tu{fill:#a8301a}
+.pareggio text{font-size:12px; fill:var(--ink-3)}
+.pareggio text.forte{fill:var(--ink); font-weight:600}
+.pareggio text.zona{font-size:13px; font-weight:600; fill:var(--ink-2)}
+.pareggio text.rosso{fill:#a8301a; font-weight:600}
+:root[data-theme="dark"] .pareggio .area-cd{fill:#e8b923; opacity:.35}
+:root[data-theme="dark"] .pareggio .tu{stroke:#ee7a62} :root[data-theme="dark"] .pareggio .punto-tu{fill:#ee7a62}
+:root[data-theme="dark"] .pareggio text.rosso{fill:#ee7a62}
+.pareggio svg{touch-action:pan-y}
+.pareggio .h-linea{stroke:var(--ink-3); stroke-width:1}
+.pareggio .h-punto{fill:var(--ink); stroke:var(--surface); stroke-width:2}
+.pareggio .h-fondo{fill:var(--surface); stroke:var(--line)}
+.pareggio text.h-testo{fill:var(--ink); font-weight:600}
+.zone{display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 0; padding:0; font-size:.86rem}
+.zone span{padding:5px 12px; border-radius:999px; background:var(--surface-2); color:var(--ink-2)}
+.zone span.cd{background:#fbf0cc; color:#8a5d00}
+:root[data-theme="dark"] .zone span.cd{background:#2e2610; color:#f0c94a}
+.zone b{font-weight:600}
+.zone span.tu{background:none; border:1px solid #a8301a; color:#a8301a}
+:root[data-theme="dark"] .zone span.tu{border-color:#ee7a62; color:#ee7a62}
+/* alone del colore della scheda dietro le scritte del grafico, così restano leggibili sopra linee e aree */
+.pareggio text{paint-order:stroke; stroke:var(--surface); stroke-width:4px; stroke-linejoin:round}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.theme||"light"}catch{document.documentElement.dataset.theme="light"}</script>
 </head>
@@ -475,22 +554,21 @@ footer a:hover,.firma:hover{color:var(--marchio)}
 <p class="aiuto">Tasso lordo annuo.</p>
 </div>
 <button type="button" class="interruttore" id="diversi" aria-pressed="false">Tassi diversi per CC e CD</button></div>
-      <div class="gruppo"><h2 class="gtitolo"><span class="passo">3</span>Suddivisione</h2>
+      <details class="gruppo sudd" id="sudd"><summary><h2 class="gtitolo"><span class="passo">3</span>Suddivisione</h2><span class="apri">Dividi il capitale tra CC e CD</span></summary>
         <div class="g3">
           <div class="g3-testo">
             <div class="campi">
               <p class="aiuto">Dividi il capitale tra conto corrente e conto deposito: parti dalla suddivisione migliore e puoi modificarla.</p>
-              <div class="campo" id="dividi-on" hidden>
+              <div class="campo" id="dividi-on">
 <label class="etichetta" for="quotaCC">Parte della giacenza nel conto corrente</label>
 <div class="con-unita"><input type="number" id="quotaCC" name="quotaCC" inputmode="decimal" step="100" value="5000" aria-describedby="quotaCC-e"><span class="unita">€</span></div>
 <p class="aiuto" id="aiuto-quota">Il resto va nel conto deposito.</p><p class="errore-campo" id="quotaCC-e" role="alert" hidden></p>
 <button type="button" class="testo" id="usa-migliore">Usa la suddivisione migliore</button></div>
             </div>
-            <button type="button" class="interruttore" id="dividi" aria-pressed="false">Suddividi il capitale</button>
           </div>
           <figure class="torta" id="torta" aria-live="polite"></figure>
         </div>
-      </div>
+      </details>
     </div>
     </fieldset>
   </form>
@@ -515,6 +593,13 @@ footer a:hover,.firma:hover{color:var(--marchio)}
 <p>Il bollo del CD supera quello fisso del CC oltre circa 17.100 € (34,20 / 0,2%).</p></details>
   </section>
 
+  <section class="scheda riga-sotto capitolo" id="sez-pareggio" data-titolo="Quando conviene">
+    <h2>Quando conviene il CC e quando il CD</h2>
+    <p class="sottotitolo">Tutta la giacenza in un solo conto, con i tuoi tassi e la tua durata: sopra lo zero il conto deposito rende di più, sotto il conto corrente.</p>
+    <div class="pareggio" id="pareggio"></div>
+    <p class="zone" id="zone"></p>
+  </section>
+
   <footer><span id="piede">Stima indicativa: interesse semplice, tassi e giacenza costanti. Non è consulenza fiscale. Nessun dato lascia il browser.</span><p><a class="firma" href="https://progetti.federicogamberini.it/"><svg viewBox="0 0 341.61 344.35" width="28" height="28" aria-hidden="true"><path fill="var(--marchio)" d="M305.77,314.84c-1.08-1.67-1.77-2.62-2.34-3.65c-3.02-5.39-5.94-10.83-9.02-16.18c-17.29-30.05-43.07-48.09-77.1-54.5 c-17.79-3.35-35.74-5.17-53.8-6.14c-21.84-1.18-43.73-1.99-65.32-6c-9.5-1.76-18.94-3.73-27.98-7.29 c-8.04-3.16-15.26-7.61-21.27-13.87c-13.08-13.63-15.82-29.73-10.89-47.44c2.89-10.41,8.84-18.71,17.92-24.85 c10.62-7.18,21.95-12.65,34.39-15.81c2.06-0.52,4.09-1.18,6.13-1.81c0.3-0.09,0.56-0.34,1.29-0.81 c-9.36-6.59-18.86-12.66-27.69-21.06c10.9-3.7,21.14-6.76,31.45-9.97c0.99,1.14,1.81,2.04,2.59,2.97 c13.91,16.46,31.6,23.71,53.08,22.12c16.35-1.21,30.14-7.47,40.84-20.05c6.12-7.19,10.46-15.41,13.36-24.36 c1.45-4.47,2.43-9.1,3.59-13.66c0.36-1.4,0.63-2.83,1-4.55c18.56-6.79,37.16-13.59,56.5-20.67c-0.23,2.67-0.22,4.76-0.61,6.76 c-8.53,44.01-33.56,73.26-77.08,85.81c-16.26,4.69-32.94,6.71-49.81,7.55c-15.23,0.76-30.52,1.1-45.49,4.59 c-7.02,1.64-13.98,3.55-20.22,7.22c-3.33,1.96-6.64,4.34-9.17,7.23c-7.64,8.72-5.53,19.97,4.64,25.58 c6.25,3.45,13.13,5.38,20.15,6.33c10.45,1.41,20.95,2.44,31.45,3.35c14.2,1.23,28.42,2.13,42.62,3.29 c13.31,1.09,26.63,2.08,39.89,3.6c15.86,1.82,31.55,4.74,46.46,10.71c32.06,12.85,49.3,37.31,54.57,70.78 c2.14,13.57,1.06,27.09-2.51,40.38C307.06,311.7,306.51,312.88,305.77,314.84z"/></svg><span>Federico Gamberini</span></a></p></footer>
 </div>
 
@@ -524,8 +609,8 @@ footer a:hover,.firma:hover{color:var(--marchio)}
   <a href="#risultato">Vedi perché</a>
 </div>
 
-<script src="script.js"></script>
-<script src="dashboard.js"></script>
+<script src="script.js?v=7"></script>
+<script src="dashboard.js?v=7"></script>
 <script>
 (function () {
   var barra = document.getElementById("barra");
