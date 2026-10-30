@@ -1,9 +1,13 @@
 [
     {
         "id": "cd-cc",
+        "categoria": "finanza",
         "t": "Conto deposito o conto corrente",
         "d": "Confronta il rendimento netto dopo imposta sugli interessi e bollo, anche dividendo la giacenza tra i due conti.",
-        "tags": ["Finanza", "Conti"],
+        "tags": [
+            "Finanza",
+            "Conti"
+        ],
         "y": 2026,
         "codice": "CD CC",
         "url": "cd-cc/cd-cc.html",
@@ -13,9 +17,13 @@
     },
     {
         "id": "busta-paga",
+        "categoria": "imposte",
         "t": "Busta paga: dalla RAL al netto",
         "d": "Calcola netto annuo e mensile da RAL: contributi INPS, IRPEF, detrazioni, cuneo fiscale L. 207/2024 e addizionali del tuo comune.",
-        "tags": ["Lavoro", "Imposte"],
+        "tags": [
+            "Lavoro",
+            "Imposte"
+        ],
         "y": 2026,
         "codice": "Busta Paga",
         "url": "busta-paga/busta-paga.html",
@@ -24,9 +32,13 @@
     },
     {
         "id": "fondo-pensione",
+        "categoria": "imposte",
         "t": "Fondo pensione: crescita e deducibilità",
         "d": "Vedi come cresce il fondo anno per anno, quanta IRPEF risparmi con la deduzione dei contributi e quanto resta dopo la tassa sulla prestazione.",
-        "tags": ["Previdenza", "Imposte"],
+        "tags": [
+            "Previdenza",
+            "Imposte"
+        ],
         "y": 2026,
         "codice": "Fondo Pensione",
         "url": "fondo-pensione/fondo-pensione.html",
@@ -35,9 +47,13 @@
     },
     {
         "id": "fondo-vs-investimento",
+        "categoria": "finanza",
         "t": "Fondo pensione o investimento",
         "d": "A parità di costo di tasca, confronta il fondo pensione con azioni o obbligazioni fuori dal fondo: importi e bilanciamento con i cursori, grafici e punto di pareggio.",
-        "tags": ["Previdenza", "Investimenti"],
+        "tags": [
+            "Previdenza",
+            "Investimenti"
+        ],
         "y": 2026,
         "codice": "Fondo vs Investimento",
         "url": "fondo-vs-investimento/fondo-vs-investimento.html",

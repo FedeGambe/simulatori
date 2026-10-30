@@ -8,8 +8,7 @@
 <meta name="description" content="Simulatori interattivi: scegli, imposta i parametri e vedi il risultato.">
 <style>
 :root{
-  --barra:60px; --g1:#ffffff;--g2:#f6e9d9;--g3:#fbfaf7;--bg:#fbfaf7;--ink:#1c1b19;--mute:#6b665c;--card:#ffffff;--line:#e6e0d4;--acc:#d9482b;
-  --banner:#9f221b; --sulbanner:#f0e6d2;
+  --barra:60px; --g1:#ffffff;--g2:#f6e9d9;--g3:#fbfaf7;--bg:#fbfaf7;--ink:#34312c;--mute:#7a7468;--card:#ffffff;--line:#e8e2d7;--acc:#d9482b;
 }
 :root[data-theme=dark]{
   --g1:#241009;--g2:#071c23;--g3:#050504;--bg:#14130f;--ink:#efe9dc;--mute:#9a9486;--card:#1c1a15;--line:#33302a;--acc:#ff6a45;
@@ -37,120 +36,92 @@ a{color:inherit;text-decoration:none}
 .bottone-barra{font:600 .8rem/1 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid var(--ink);border-radius:999px;
   padding:8px 12px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
 .bottone-barra:hover{background:var(--ink);color:var(--bg)}
-.barra:not(.compatta) .bottone-barra{color:var(--sulbanner);border-color:var(--sulbanner)}
-.barra:not(.compatta) .bottone-barra:hover{background:var(--sulbanner);color:var(--banner)}
 @media (prefers-reduced-motion:reduce){.barra,.dove{transition:none}}
 
-/* Banner piccolo con la cover dei simulatori */
-.banner{position:relative;background:var(--banner);padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0;overflow:hidden;border-bottom:3px solid #14110a}
-.banner img{position:absolute;right:0;top:0;height:100%;width:auto;max-width:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
-.banner .dentro{position:relative;padding-top:28px;padding-bottom:30px}
-.banner h1{margin:0;color:var(--sulbanner);font:800 clamp(1.9rem,4.6vw,3.2rem)/1.05 Georgia,"Times New Roman",serif;letter-spacing:-.03em}
-.banner h1 em{font-style:italic;color:#e8b923}
-.banner p{margin:10px 0 0;color:var(--sulbanner);font:600 .8rem/1.3 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase}
+/* Titolo della pagina, come nel sito dei progetti */
+.hero{padding:calc(var(--barra) + 56px) 0 40px;border-bottom:1px solid var(--line)}
+.hero h1{font:800 clamp(2.4rem,6vw,4.4rem)/.95 Georgia,"Times New Roman",serif;letter-spacing:-.04em;margin:0}
+.hero h1 em{color:var(--acc);font-style:italic}
+.hero p{color:var(--mute);font-size:1.1rem;line-height:1.55;margin:24px 0 0}
+@media(max-width:700px){.hero{padding:calc(var(--barra) + 28px) 0 28px}.hero p{font-size:1rem;margin-top:16px}}
 
-/* Card, come nel sito dei progetti */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px;padding:32px 0 64px}
-.card{position:relative;aspect-ratio:5/7;min-width:0;color:#fff;background:#14161f;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 40px -22px #000a;
-  transition:transform .25s;opacity:0;transform:translateY(16px);animation:in .6s forwards}
-.card:hover{transform:translateY(-6px)}
-@keyframes in{to{opacity:1;transform:none}}
-.cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom;transition:transform .6s}
-.card:hover .cover{transform:scale(1.04)}
-.body{position:relative;z-index:1;padding:20px 20px 0;display:flex;flex-direction:column;gap:10px}
-.meta{display:flex;justify-content:space-between;font:600 .72rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.07em;color:#ffffffbb}
-.card.light .body,.card.light .meta,.card.light p{color:#111;transition:color .3s}
-.card.light:hover .body,.card.light:hover .meta,.card.light:hover p,.card.light:focus-within .body,.card.light:focus-within .meta,.card.light:focus-within p{color:#fff}
-.card h2{font:700 1.6rem/1.1 Georgia,serif;margin:0;letter-spacing:-.01em}
-.card p{margin:0;color:#ffffffd9;font-size:.92rem}
-.foot{z-index:1;position:absolute;left:0;right:0;bottom:0;padding:48px 20px 18px;background:linear-gradient(transparent,#000d)}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.tags span{font:600 .7rem/1 ui-monospace,Consolas,monospace;border:1px solid #ffffff55;padding:5px 8px;border-radius:999px;color:#fffd}
-.card::after{content:"";position:absolute;inset:0;background:#000;opacity:0;transition:opacity .3s;pointer-events:none}
-.links{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;gap:12px;opacity:0;transition:opacity .3s}
-.card:hover::after,.card:focus-within::after{opacity:.72}
-.card:hover .links,.card:focus-within .links{opacity:1}
-.links a{min-width:110px;text-align:center;padding:12px 18px;border:1.5px solid #fff;font:700 .8rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em;border-radius:4px}
-.links a.main{background:#fff;color:#14161f}
-.links .wip{min-width:110px;text-align:center;padding:12px 18px;border:1.5px dashed #fff;font:700 .8rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em;border-radius:4px;color:#fff;cursor:default}
-.links a:hover{background:var(--col,var(--acc));border-color:var(--col,var(--acc));color:#fff}
-@media(hover:none){.links{opacity:1;inset:auto 0 70px 0}.card::after{display:none}}
+/* Card, come nel sito dei progetti: soggetto in alto, fondo della cover sotto il testo, tutta la card apre il simulatore */
+/* Gruppi per categoria ("categoria" in simulatori.json) */
+#gruppi{padding-bottom:64px}
+.gruppo{padding-top:36px}
+.gruppo>header{display:flex;align-items:baseline;gap:14px;padding-bottom:10px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.gruppo h2{font:700 1.6rem/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.02em;margin:0}
+.gruppo>header span{font:600 .72rem/1.3 ui-monospace,Consolas,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.gruppo>p{margin:0 0 22px;color:var(--mute);font-size:.98rem;line-height:1.55}
+/* Card orizzontali: soggetto a sinistra, testo a destra */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(460px,100%),1fr));gap:24px}
+.card{position:relative;display:flex;min-width:0;min-height:200px;color:#fff;background:#14161f var(--sfondo,none) 50% 100%/cover no-repeat;border-radius:8px;overflow:hidden;
+  box-shadow:inset 0 0 0 2000px #0000;transition:box-shadow .3s}
+/* al passaggio del mouse la card si scurisce (ombra interna, sotto i testi) e compare la descrizione */
+.card:hover,.card:focus-within{box-shadow:inset 0 0 0 2000px #0000008c}
+.card{--media:38%;isolation:isolate}
+.card .media{position:absolute;z-index:-1;inset:0 auto 0 0;width:var(--media);overflow:hidden;padding:22px 8px 22px 26px;display:flex;align-items:center}
+.card .soggetto{width:100%;height:100%;min-height:0;min-width:0;object-fit:contain;object-position:50% 50%;transition:opacity .3s}
+.card .media:has(.largo){padding:0}
+.card .soggetto.largo{object-fit:cover}  /* strisce a tutta larghezza */
+/* al passaggio: la grafica si scurisce e il testo si allarga a tutta la card */
+@media(hover:hover){
+  .card:is(:hover,:focus-within) .soggetto{opacity:.18}
+  .card:is(:hover,:focus-within) .testo{margin-left:0;padding:24px 30px 22px}
+}
+.card .testo{display:flex;flex-direction:column;gap:8px;padding:20px 20px 18px;flex:1;min-width:0;margin-left:var(--media);transition:margin-left .35s,padding .35s;background:linear-gradient(90deg,#0000,#00000047)}
+.meta{display:flex;justify-content:space-between;gap:12px;font:600 .7rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.08em;color:#ffffffb3}
+.meta b{color:#fff;font-weight:700}
+.card h3{font:700 1.3rem/1.15 Georgia,"Times New Roman",serif;letter-spacing:-.01em;margin:2px 0 0}
+.card h3 a::after{content:"";position:absolute;inset:0;z-index:1}  /* tutta la card cliccabile */
+.card h3 a:focus-visible{outline:none}
+.card:has(h3 a:focus-visible){outline:2px solid var(--ink);outline-offset:3px}
+.card p{margin:0;color:#ffffffd9;font-size:.92rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  max-height:0;opacity:0;transition:max-height .35s,opacity .3s}
+.card:hover p,.card:focus-within p{max-height:4.5em;opacity:1}
+@media(hover:none){.card p{max-height:none;opacity:1}}  /* touch: descrizione sempre visibile */
+.card .piede{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:8px}
+.codice{position:relative;z-index:2;flex:none;font:600 .7rem/1 ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.06em;color:#fff;
+  border:1px solid #ffffff73;border-radius:999px;padding:6px 10px}
+.codice:hover{background:#fff;color:#14161f;border-color:#fff}
+/* cover chiara ("chiara": true in simulatori.json): testo scuro, niente velo */
+.card.chiara{color:#111}
+.card.chiara .testo{background:none}
+.card.chiara .meta{color:#111111a6}
+.card.chiara .meta b{color:#111}
+.card.chiara p{color:#111111d0}
+.card.chiara .codice{color:#111;border-color:#11111166}
+.card.chiara .codice:hover{background:#111;color:#fff;border-color:#111}
+/* scurita, anche la cover chiara torna a testo bianco */
+@media(hover:hover){
+  .card.chiara:is(:hover,:focus-within){color:#fff}
+  .card.chiara:is(:hover,:focus-within) .meta{color:#ffffffb3}
+  .card.chiara:is(:hover,:focus-within) .meta b{color:#fff}
+  .card.chiara:is(:hover,:focus-within) p{color:#ffffffd9}
+  .card.chiara:is(:hover,:focus-within) .codice{color:#fff;border-color:#ffffff73}
+  .card.chiara:is(:hover,:focus-within) .codice:hover{background:#fff;color:#14161f;border-color:#fff}
+}
 .empty{padding:40px 0;text-align:center;color:var(--mute)}
-footer{border-top:3px solid var(--ink);padding:28px 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font:600 .8rem/1 ui-monospace,Consolas,monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
+footer{border-top:2px solid var(--ink);padding:28px 0 48px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font:600 .8rem/1 ui-monospace,Consolas,monospace;color:var(--mute);text-transform:uppercase;letter-spacing:.06em}
 footer a:hover{color:var(--acc)}
-.card .soggetto{display:none}
-.card:has(.soggetto){background:#14161f var(--sfondo,none) 50% 100%/cover no-repeat}
-.card:has(.soggetto) .cover{display:none}
-.vai{display:none}
-/* Cover a due livelli (docs/img/cover_sfondo.svg come fondo della card, cover_soggetto.svg come soggetto).
-   Desktop: testi in alto, il soggetto occupa la metà bassa della card. */
-@media(min-width:701px){
-  .card .soggetto{display:block;position:absolute;left:0;right:0;top:50%;bottom:0;width:100%;height:50%;box-sizing:border-box;padding:0 20px 64px;
-    object-fit:contain;object-position:50% 0;transition:transform .6s}  /* parte da metà card, con margine in basso (sopra i tag) */
-  .card .soggetto.largo{object-fit:cover;object-position:50% 100%;padding:0}
-  .card:hover .soggetto{transform:scale(1.04)}
-}
-/* Telefono: card orizzontali; titolo, poi il soggetto, con descrizione e tag sopra la sua parte bassa su una sfumatura;
-   niente pulsanti: tutta la card apre la pagina */
+/* Telefono: card in riga, miniatura a sinistra */
 @media(max-width:700px){
-  .grid{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:12px}
-  .card{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto auto auto;aspect-ratio:auto;height:auto;--velo:#000000b3}
-  .card.light{--velo:#fffaeb99}
-  .card:hover{transform:none}
-  .card .body{display:contents}
-  .card .meta{grid-row:1;position:relative;z-index:1;padding:16px 16px 0}
-  .card h2{grid-row:2;position:relative;z-index:1;padding:8px 16px 0;font-size:1.35rem}
-  .card .soggetto{grid-row:3;display:block;width:100%;height:160px;box-sizing:border-box;margin-top:12px;padding-bottom:18px;object-fit:contain;object-position:50% 0}
-  .card .soggetto.largo{object-fit:cover;object-position:50% 100%;padding-bottom:0}
-  .card:has(.soggetto.largo){grid-template-rows:auto auto 106px auto auto}  /* strisce a tutta larghezza: fino al bordo inferiore della card */
-  .card .soggetto.largo{grid-row:3/6;grid-column:1;height:100%;min-height:150px;align-self:stretch}
-  .card:has(.soggetto.largo) p{margin-top:0}
-  .card .meta,.card h2,.card .soggetto,.card p,.foot{grid-column:1}
-  .card p{grid-row:4;position:relative;z-index:1;margin-top:-56px;padding:40px 16px 0;font-size:.88rem;line-height:1.45;
-    background:linear-gradient(transparent,var(--velo) 40px);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .card:not(:has(.soggetto)) p{margin-top:0;padding-top:12px;background:none}
-  .foot{grid-row:5;position:relative;z-index:1;padding:10px 16px 16px;background:var(--velo)}
-  .card:not(:has(.soggetto)) .foot{background:none}
-  .foot .tags{flex-wrap:nowrap;overflow:hidden;mask-image:linear-gradient(90deg,#000 85%,transparent)}
-  .foot .tags span{flex:none;white-space:nowrap}
-  .card.light .tags span{color:#111;border-color:#11111166}
-  .card::after,.links{display:none}
-  .vai{display:block;position:absolute;inset:0;z-index:3}
+  .gruppo{padding-top:28px}
+  .gruppo h2{font-size:1.35rem}
+  .grid{gap:12px}
+  .card{min-height:0}
+  .card{--media:112px}
+  .card .media{padding:14px 0 14px 12px}
+  .card .media:has(.largo){padding:0}
+  .card .testo{padding:12px 14px;gap:6px;background:linear-gradient(90deg,#0000,#00000038)}
+  .card h3{font-size:1.1rem}
+  .card p{font-size:.86rem}
+  .card .piede{padding-top:4px}
 }
-@media(prefers-reduced-motion:reduce){.card{animation:none;opacity:1;transform:none}html{scroll-behavior:auto}}
-/* BANNER A DUE LIVELLI: img/banner_sfondo.svg è il fondo del banner (continuo, anche dietro alla barra e al titolo);
-   <img class="soggetto" src="img/banner_soggetto.svg"> è il soggetto. Colore di fondo e del testo: --banner-fondo, --banner-testo (nella pagina).
-   Desktop: titolo e sottotitolo a sinistra, soggetto a destra.
-   Telefono (fino a 700px): solo il titolo prima della grafica, poi il soggetto con il sottotitolo sopra la sua parte bassa, su una sfumatura. */
-.banner{position:relative; overflow:hidden; padding:calc(var(--barra) + env(safe-area-inset-top,0px)) 0 0;
-  background:var(--banner-fondo) url("img/banner_sfondo.svg") 50% 50% / cover no-repeat; border-bottom:3px solid var(--ink)}
-.banner .soggetto{position:absolute; z-index:0; top:calc(var(--barra) + 10px); bottom:18px; right:max(16px, calc(50vw - 600px)); left:auto;
-  width:min(46%, 560px); height:calc(100% - var(--barra) - 28px); max-width:none; opacity:1; -webkit-mask-image:none; mask-image:none; object-fit:contain; object-position:100% 0}
-.banner .dentro{position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:28px 16px 30px}
-.banner picture{display:contents}
-/* strisce a tutta larghezza (classe "largo"): su desktop il soggetto è ruotato di 90° (banner_soggetto_ruotato.svg, base a destra)
-   e occupa tutta l'altezza del banner, largo metà schermo (ritagliato sopra e sotto), allineato al bordo destro; su telefono resta orizzontale sotto il titolo */
-@media (min-width:701px){
-  .banner .soggetto.largo{top:0; bottom:0; right:0; width:50vw; height:100%; object-fit:cover; object-position:100% 50%}  /* largo metà schermo, ritagliato sopra e sotto */
-}
-.banner h1{margin:0; padding:0; border:0; color:var(--banner-testo); font-size:clamp(1.9rem,4.6vw,3.2rem); font-weight:800; line-height:1.05; max-width:16ch; text-wrap:balance}
-.banner p{margin:10px 0 0; color:var(--banner-testo); font:600 .8rem/1.3 var(--f-data); letter-spacing:.08em; text-transform:uppercase; max-width:52ch}
-@media (max-width:700px){
-  .banner{display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto auto}
-  .banner .dentro{display:contents}
-  .banner h1{grid-row:1; grid-column:1; position:relative; z-index:2; padding:22px 16px 16px; max-width:none}
-  .banner .soggetto{grid-row:2; grid-column:1; position:relative; inset:auto; width:100%; height:min(44vw, 240px); box-sizing:border-box;
-    padding:0 16px 18px; object-position:50% 0}
-  .banner p{grid-row:3; grid-column:1; position:relative; z-index:2; margin:-48px 0 0; padding:34px 16px 18px; max-width:none;
-    background:linear-gradient(to bottom, transparent, color-mix(in srgb, var(--banner-fondo) 86%, transparent) 34px)}
-  .banner .soggetto.largo{object-fit:cover; object-position:50% 100%; padding:0}  /* strisce a tutta larghezza */
-  .banner::after{display:none}
-}
-/* /BANNER A DUE LIVELLI */
-.banner{--banner-fondo:#b3261e; --banner-testo:var(--sulbanner)}
+@media(prefers-reduced-motion:reduce){.card,.card .soggetto,.card p,.card .testo{transition:none}html{scroll-behavior:auto}}
 /* FONT MOBILE (telefono, fino a 700px): gerarchia titolo > titoli di sezione > testo > etichette > note */
 @media (max-width:700px){
-  h1, .banner h1{font-size:clamp(1.9rem,8.5vw,2.25rem)}
+  h1{font-size:clamp(1.9rem,8.5vw,2.25rem)}
   h2, .sezione > legend, .gtitolo, .risultati h2{font-size:1.25rem}
   h3{font-size:1.05rem}
   .intro{font-size:1rem}
@@ -172,16 +143,12 @@ footer a:hover{color:var(--acc)}
   </nav>
 </header>
 
-<section class="banner" id="banner">
-  <img class="soggetto" src="img/banner_soggetto.svg" alt="">
-  <div class="wrap dentro">
-    <h1>Simulatori, <em>per decidere meglio</em></h1>
-    <p>Scegli un simulatore, imposta i parametri e vedi il risultato</p>
-  </div>
-</section>
-
 <div class="wrap">
-  <main class="grid" id="grid"></main>
+  <section class="hero">
+    <h1>Simulatori, <em>per decidere meglio</em></h1>
+    <p>Conti, stipendio e previdenza con le regole fiscali del 2026: imposti i tuoi numeri e risultati e grafici si aggiornano subito. Tutto resta nel browser, nessun dato viene inviato o salvato.</p>
+  </section>
+  <main id="gruppi"></main>
   <p class="empty" id="vuoto" hidden>Nessun simulatore disponibile.</p>
   <footer>
     <span>© <span id="anno"></span> Federico Gamberini</span>
@@ -192,27 +159,39 @@ footer a:hover{color:var(--acc)}
 <script>
 const $ = s => document.querySelector(s);
 // simulatori.json: una voce per simulatore; ogni simulatore sta nella sua cartella (url relativo)
-fetch("simulatori.json").then(r => r.json()).then(S => {
-  $("#grid").innerHTML = S.map((s, i) => `
- <article class="card${s.chiara ? " light" : ""}" style="animation-delay:${i * 80}ms;${s.colore ? `--col:${s.colore};` : ""}--sfondo:url(${s.img.replace('cover_verticale','cover_sfondo')})">
-  <img class="cover" src="${s.img}" alt="" loading="lazy">
-  ${s.img.endsWith("cover_verticale.svg")?`<img class="soggetto" onload="this.classList.toggle('largo',this.naturalWidth/this.naturalHeight>2.6)" src="${s.img.replace("cover_verticale","cover_soggetto")}" alt="" loading="lazy">`:""}
-  ${s.wip ? "" : `<a class="vai" href="${s.url}" aria-label="${s.t}"></a>`}
-  <div class="body">
-   <div class="meta"><span>N° ${String(i + 1).padStart(2, "0")}</span><span>${s.y}</span></div>
-   <h2>${s.t}</h2><p>${s.d}</p>
+// categoria: gruppo della pagina, nell'ordine di GRUPPI (se manca, va in fondo in "Altri")
+const GRUPPI = [
+  {k: "finanza", t: "Finanza", d: "Dove mettere i soldi: rendimento netto di conto deposito e conto corrente, e fondo pensione contro un investimento libero a parità di costo."},
+  {k: "imposte", t: "Imposte", d: "Quanto pesano tasse e contributi: dalla RAL allo stipendio netto, e quanta IRPEF si risparmia deducendo i versamenti al fondo pensione."},
+];
+fetch("simulatori.json", {cache: "no-cache"}).then(r => r.json()).then(S => {
+  const codice = s => `https://github.com/FedeGambe/simulatori/tree/main/${encodeURIComponent(s.codice)}`;
+  const card = s => {
+    const img = n => s.img.replace("cover_verticale", n);
+    return `
+ <article class="card${s.chiara ? " chiara" : ""}" style="--sfondo:url('${img("cover_sfondo")}')">
+  <div class="media"><img class="soggetto" src="${img("cover_soggetto")}" alt="" loading="lazy" onload="this.classList.toggle('largo',this.naturalWidth/this.naturalHeight>2.6)"></div>
+  <div class="testo">
+   <div class="meta"><b>${s.wip ? "Work in progress" : s.tags.join(" · ")}</b><span>${s.y}</span></div>
+   <h3><a href="${s.wip ? codice(s) : s.url}">${s.t}</a></h3>
+   <p>${s.d}</p>
+   <div class="piede"><span></span>${s.wip ? "" : `<a class="codice" href="${codice(s)}">Codice</a>`}</div>
   </div>
-  <div class="foot"><div class="tags">${(s.wip ? ["Work in progress"] : []).concat(s.tags).map(t => `<span>${t}</span>`).join("")}</div></div>
-  <div class="links">${s.wip ? `<span class="wip">Work in progress</span>` : `<a class="main" href="${s.url}">Apri →</a>`}<a href="https://github.com/FedeGambe/simulatori/tree/main/${encodeURIComponent(s.codice)}">Codice</a></div>
- </article>`).join("");
+ </article>`};
+  const gr = [...GRUPPI, {k: "", t: "Altri", d: ""}]
+    .map(g => ({...g, s: S.filter(s => g.k ? s.categoria === g.k : !GRUPPI.some(x => x.k === s.categoria))})).filter(g => g.s.length);
+  $("#gruppi").innerHTML = gr.map(g => `<section class="gruppo">
+   <header><h2>${g.t}</h2><span>${g.s.length} ${g.s.length === 1 ? "simulatore" : "simulatori"}</span></header>
+   ${g.d ? `<p>${g.d}</p>` : ""}
+   <div class="grid">${g.s.map(card).join("")}</div></section>`).join("");
   $("#vuoto").hidden = S.length > 0;
 }).catch(() => { $("#vuoto").textContent = "Impossibile caricare i simulatori."; $("#vuoto").hidden = false; });
 
 $("#anno").textContent = new Date().getFullYear();
 
-const barra = $("#barra"), banner = $("#banner");
-function aggiornaBarra() { barra.classList.toggle("compatta", scrollY > banner.offsetHeight - barra.offsetHeight * 2); }
-addEventListener("scroll", aggiornaBarra, {passive: true}); addEventListener("resize", aggiornaBarra); aggiornaBarra();
+const barra = $("#barra");
+function aggiornaBarra() { barra.classList.toggle("compatta", scrollY > 24); }
+addEventListener("scroll", aggiornaBarra, {passive: true}); aggiornaBarra();
 
 $("#tema").onclick = () => {
   const r = document.documentElement, d = r.dataset.theme === "dark" ? "light" : "dark";
