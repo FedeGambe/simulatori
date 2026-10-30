@@ -303,10 +303,10 @@
     if (perc) {
       var gradinoMarg = [];
       marg.forEach(function (t) { gradinoMarg.push([t.da, t.v], [t.a, t.v]); });
-      html += poli(gradinoMarg, "var(--teal)", 2.5, "6 4") +
-        poli(punti.filter(function (q) { return q.x > 0; }).map(function (q) { return [q.x, q.irpef / q.x * 100]; }), "var(--verde)", 3.5);
+      html += poli(gradinoMarg, "var(--teal)", 1.5, "5 4") +
+        poli(punti.filter(function (q) { return q.x > 0; }).map(function (q) { return [q.x, q.irpef / q.x * 100]; }), "var(--verde)", 2);
     } else {
-      html += poli(serie("x"), "var(--rosso)", 3) + poli(serie("costo"), "var(--ink)", 2.5, "6 4") + poli(serie("irpef"), "var(--verde)", 3.5);
+      html += poli(serie("x"), "var(--rosso)", 2) + poli(serie("costo"), "var(--ink)", 1.5, "5 4") + poli(serie("irpef"), "var(--verde)", 2);
     }
     html += '<line id="cv-l" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ink)" stroke-width="1"/>' +
       (perc ? "" : '<circle id="cv-v" r="5" fill="var(--rosso)" stroke="var(--ink)" stroke-width="2"/>') +

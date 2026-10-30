@@ -390,6 +390,32 @@ footer a:hover,.firma:hover{color:var(--marchio)}
 .pagina button,.dati > summary::after{text-transform:none; letter-spacing:0; font-family:var(--f-body)}
 .ripristina,.torna{color:var(--ink-2); border-color:var(--line); background:var(--surface)}
 @media (max-width:560px){ .barra .dove{display:none} }  /* telefono: in barra solo i pulsanti */
+
+/* === COLORI DELLA COVER (verde bosco, oro, corallo, crema) ===
+   verde = guadagni · rosso = quanto versi/costi · verde bosco della cover = interfaccia e valore principale ·
+   oro = contributo dell'azienda · corallo e bruno = altre serie dei grafici. Titoli in Georgia come il sito. */
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f1f3ee; --ink:#18221c; --ink-2:#3e4a42; --ink-3:#6d7a70; --line:#e2e6df; --track:#e9ece5;
+  --verde:#2f7d3a; --verde-ink:#1f6a2c; --verde-soft:#e3f0dc; --rosso:#c0392b; --rosso-ink:#b0301f; --rosso-soft:#f8e1dc;
+  --blu:#2f6b52; --blu-ink:#1f4a39; --blu-soft:#e4efe8; --marchio:#c0392b;
+  --cat1:#e8a33d; --cat1-ink:#8a5a10; --cat1-soft:#fbefd9; --cat2:#f09a78; --cat2-ink:#a8482a; --cat2-soft:#fbe5dc; --cat3:#5a4a22; --cat4:#a89b78;
+}
+:root[data-theme="dark"]{
+  --bg:#0e1712; --surface:#142019; --surface-2:#1c2b22; --ink:#eef4ef; --ink-2:#c5d3c9; --ink-3:#8fa596; --line:#263a2e; --track:#22332a;
+  --verde:#5fbf6b; --verde-ink:#86d890; --verde-soft:#17281b; --rosso:#e5604a; --rosso-ink:#f08571; --rosso-soft:#35201b;
+  --blu:#6fbf98; --blu-ink:#8fd3b0; --blu-soft:#16271f; --marchio:#f08571;
+  --cat1:#f0b65a; --cat1-ink:#f5c97f; --cat1-soft:#2e2412; --cat2:#f4ad90; --cat2-ink:#f7c2ad; --cat2-soft:#33211a; --cat3:#c9b27a; --cat4:#8f8466;
+}
+:root,:root[data-theme]{--f-display:Georgia,"Times New Roman",serif; --sabbia:var(--cat4)}
+h1,h2,legend,.gtitolo,.titolo-sez,.testata h1{font-family:var(--f-display); letter-spacing:-.02em}
+.testata h1{font-weight:800}
+.testata h1 em{font-style:italic; color:var(--blu)}
+.kpi{font-family:var(--f-display); color:var(--blu-ink)}
+/* ROI: riquadro verde bosco con i due valori su fondo chiaro */
+.roi{background:var(--blu-soft); border-color:var(--blu); color:var(--blu-ink)}
+.roi .coppia span{background:var(--surface); color:var(--blu-ink); border-color:color-mix(in srgb,var(--blu) 45%,var(--line))}
+/* passi numerati: oro della cover, numero verde bosco */
+.passo,.sezione > legend .passo,.dati > summary .passo,.ipotesi > summary .passo,#dati .titolo-sez .passo,#dati .titolo-gruppo .passo{background:var(--cat1); color:#1f4a39; font-weight:700}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.theme||"light"}catch{document.documentElement.dataset.theme="light"}</script>
 </head>
@@ -575,10 +601,10 @@ footer a:hover,.firma:hover{color:var(--marchio)}
   <a href="#risultato">Vedi il fondo</a>
 </div>
 
-<script src="../busta-paga/comuni.js"></script>
-<script src="../busta-paga/script.js"></script>
-<script src="script.js"></script>
-<script src="dashboard.js"></script>
+<script src="../busta-paga/comuni.js?v=2"></script>
+<script src="../busta-paga/script.js?v=2"></script>
+<script src="script.js?v=2"></script>
+<script src="dashboard.js?v=3"></script>
 <script>
 (function () {
   var barra = document.getElementById("barra");
