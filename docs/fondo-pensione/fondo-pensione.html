@@ -53,9 +53,6 @@ button{font:inherit; color:inherit; cursor:pointer}
 .avanzamento{position:absolute; left:0; bottom:0; width:100%; height:3px; background:var(--colore-parte);
   transform-origin:left; transform:scaleX(var(--avanzamento,0)); opacity:0; transition:opacity .25s}
 .barra.compatta .avanzamento{opacity:1}
-.barra:not(.compatta) .bottone-barra{color:var(--banner-testo); border-color:var(--banner-testo)}
-.barra:not(.compatta) .bottone-barra:hover{background:var(--banner-testo); color:var(--banner-fondo)}
-.barra:not(.compatta) .bottone-barra svg path{fill:var(--banner-testo)}
 .bottone-barra{font:600 .8rem/1 var(--f-data); letter-spacing:.08em; text-transform:uppercase; color:var(--ink); background:none; border:1px solid var(--ink); border-radius:999px;
   padding:8px 12px; cursor:pointer; text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; gap:8px}
 .bottone-barra:hover{background:var(--ink); color:var(--bg)}
@@ -363,14 +360,8 @@ h2,h3,.gtitolo,.titolo-sez{font-weight:600}
 a{color:var(--blu-ink)}
 :focus-visible,.segmento input:focus-visible + span{outline-color:var(--blu)}
 input[type=range]{accent-color:var(--blu)}
-/* barra in alto sempre piena */
-.barra,.barra.compatta{background:color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); box-shadow:none; border-bottom:1px solid var(--line)}
-.bottone-barra,.barra:not(.compatta) .bottone-barra{font:500 .85rem/1 var(--f-body); letter-spacing:0; text-transform:none; color:var(--ink-2); background:var(--surface); border:1px solid var(--line); border-radius:8px}
-.bottone-barra:hover,.barra:not(.compatta) .bottone-barra:hover{color:var(--ink); background:var(--surface); border-color:var(--ink-3)}
-.barra .bottone-barra svg path,.barra:not(.compatta) .bottone-barra svg path{fill:var(--marchio)}
 .avanzamento{background:var(--blu)}
 .posizione::before{background:var(--blu)}
-.posizione{font-family:var(--f-body); font-weight:600}
 /* testata solo testo */
 .pagina{padding-top:calc(var(--barra) + 40px)}
 .testata .occhiello{margin:0; font-size:.75rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3)}
@@ -595,7 +586,7 @@ footer a:hover,.firma:hover{color:var(--marchio)}
   function aggiornaBarra() {
     inCoda = false;
     var y = scrollY, hb = barra.offsetHeight, max = document.documentElement.scrollHeight - innerHeight, cap = null;
-    barra.classList.add("compatta");  // sempre piena: niente più banner sotto
+    barra.classList.toggle("compatta", y > 40);  // trasparente in cima, sfocata quando scorri (come nelle pagine)
     var vis = capitoli.filter(function (c) { return c.getClientRects().length; });
     vis.forEach(function (c) { if (c.getBoundingClientRect().top <= hb + 40) cap = c; });
     if (y >= max - 2) cap = vis[vis.length - 1];   // in fondo l'ultimo non arriva in cima
